@@ -7,7 +7,7 @@ BEGIN
    COUNT(*)
    INTO int_count
    FROM
-   user_tables
+   user_tables a
    WHERE 
    a.table_name IN (
       SELECT * FROM TABLE(dz_swagger_setup.dz_swagger_table_list())
