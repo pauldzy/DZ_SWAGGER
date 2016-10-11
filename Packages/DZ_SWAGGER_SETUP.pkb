@@ -4,8 +4,8 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    PROCEDURE create_storage_tables(
-       p_table_tablespace VARCHAR2 DEFAULT NULL
-      ,p_index_tablespace VARCHAR2 DEFAULT NULL
+       p_table_tablespace VARCHAR2 DEFAULT dz_swagger_constants.c_table_tablespace
+      ,p_index_tablespace VARCHAR2 DEFAULT dz_swagger_constants.c_index_tablespace
    )
    AS
       str_sql VARCHAR2(4000 Char);
@@ -636,6 +636,31 @@ AS
       EXECUTE IMMEDIATE str_sql;
       
    END create_storage_tables;
+   
+   -----------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
+   FUNCTION dz_swagger_table_list
+   RETURN MDSYS.SDO_STRING2_ARRAY
+   AS
+   
+   BEGIN
+   
+      RETURN MDSYS.SDO_STRING2_ARRAY(
+          'DZ_SWAGGER_CONDENSE'
+         ,'DZ_SWAGGER_DEF'
+         ,'DZ_SWAGGER_DEF_ATTR'
+         ,'DZ_SWAGGER_DEF_PROPS'
+         ,'DZ_SWAGGER_HEAD'
+         ,'DZ_SWAGGER_PARM'
+         ,'DZ_SWAGGER_PARM_ENUM'
+         ,'DZ_SWAGGER_PATH'
+         ,'DZ_SWAGGER_PATH_PARM'
+         ,'DZ_SWAGGER_PATH_RESP'
+         ,'DZ_SWAGGER_PATH_TAGS'
+         ,'DZ_SWAGGER_VERS'
+      );
+   
+   END dz_swagger_table_list;
 
 END dz_swagger_setup;
 /
