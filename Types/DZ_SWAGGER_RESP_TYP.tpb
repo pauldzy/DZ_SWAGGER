@@ -98,10 +98,62 @@ AS
       -- Step 40
       -- Build schema object
       --------------------------------------------------------------------------
-      IF self.response_schema_obj IS NOT NULL
-      AND self.response_schema_obj.inline_def = 'FALSE'
+      IF  self.response_schema_type = 'object'
+      AND self.response_schema_obj IS NOT NULL
       THEN
-      
+         IF self.response_schema_obj.inline_def = 'FALSE'
+         THEN
+         
+            IF num_pretty_print IS NULL
+            THEN
+               str_schema := dz_json_util.pretty('{',NULL);
+               
+            ELSE
+               str_schema := dz_json_util.pretty('{',-1);
+               
+            END IF;
+            
+            str_schema := str_schema || dz_json_util.pretty(
+                ' ' || dz_json_main.value2json(
+                   '$ref'
+                  ,'#/definitions/' || dz_swagger_util.dzcondense(
+                      self.versionid
+                     ,self.response_schema_obj.swagger_def
+                   )
+                  ,num_pretty_print + 2
+               )
+               ,num_pretty_print + 2
+            ) || dz_json_util.pretty(
+                '}'
+               ,num_pretty_print + 1,NULL,NULL
+            );
+            
+            clb_output := clb_output || dz_json_util.pretty(
+                str_pad || dz_json_main.formatted2json(
+                    'schema'
+                   ,str_schema
+                   ,num_pretty_print + 1
+                )
+               ,num_pretty_print + 1
+            );
+            
+            str_pad := ',';
+            
+         ELSIF self.response_schema_obj.inline_def = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty(
+               str_pad || '"schema": ' || self.response_schema_obj.toJSON(
+                  p_pretty_print => num_pretty_print + 1
+               )
+               ,num_pretty_print + 1
+            );   
+            
+            str_pad := ',';
+         
+         END IF;
+         
+      ELSIF self.response_schema_type = 'file'
+      THEN
          IF num_pretty_print IS NULL
          THEN
             str_schema := dz_json_util.pretty('{',NULL);
@@ -112,11 +164,7 @@ AS
          END IF;
          
          str_schema := str_schema || dz_json_util.pretty(
-             ' ' || dz_json_main.value2json(
-                '$ref'
-               ,'#/definitions/' || self.response_schema_obj.swagger_def
-               ,num_pretty_print + 2
-            )
+             ' "type": "file"'
             ,num_pretty_print + 2
          ) || dz_json_util.pretty(
              '}'
@@ -133,25 +181,7 @@ AS
          );
          
          str_pad := ',';
-         
-      ELSIF self.response_schema_obj IS NOT NULL
-      AND self.response_schema_obj.inline_def = 'TRUE'
-      THEN
-         clb_output := clb_output || dz_json_util.pretty(
-            str_pad || '"schema": ' || self.response_schema_obj.toJSON(
-               p_pretty_print => num_pretty_print + 1
-            )
-            ,num_pretty_print + 1
-         );   
-      
-      ELSE
-         clb_output := clb_output || dz_json_util.pretty(
-             str_pad || dz_json_main.fastname('schema',num_pretty_print) || 'null'
-            ,num_pretty_print + 1
-         );
-         
-         str_pad := ',';
-         
+            
       END IF;
 
       --------------------------------------------------------------------------
@@ -216,22 +246,36 @@ AS
          ,'  '
       );
       
-      IF self.response_schema_obj IS NOT NULL
-      AND self.response_schema_obj.inline_def = 'FALSE'
+      IF  self.response_schema_type = 'object'
+      AND self.response_schema_obj IS NOT NULL
+      THEN
+         IF self.response_schema_obj.inline_def = 'FALSE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '"$ref": "#/definitions/' || dz_swagger_util.dzcondense(
+                   self.versionid
+                  ,self.response_schema_obj.swagger_def
+                )
+               ,num_pretty_print + 1
+               ,'  '
+            );
+            
+         ELSIF self.response_schema_obj.inline_def = 'TRUE'
+         THEN
+            clb_output := clb_output || self.response_schema_obj.toYAML(
+               p_pretty_print => num_pretty_print + 1
+            );
+            
+         END IF;
+            
+      ELSIF self.response_schema_type = 'file'
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
-             '"$ref": "#/definitions/' || self.response_schema_obj.swagger_def
+             'type: file'
             ,num_pretty_print + 1
             ,'  '
          );
             
-      ELSIF self.response_schema_obj IS NOT NULL
-      AND self.response_schema_obj.inline_def = 'TRUE'
-      THEN
-         clb_output := clb_output || self.response_schema_obj.toYAML(
-            p_pretty_print => num_pretty_print + 1
-         );   
-      
       END IF;
           
       --------------------------------------------------------------------------

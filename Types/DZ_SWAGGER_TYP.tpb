@@ -120,6 +120,7 @@ AS
    AS
       ary_groups MDSYS.SDO_STRING2_ARRAY;
       parm_pool  dz_swagger_parm_list;
+      def_pool   dz_swagger_def_list;
       
    BEGIN
    
@@ -432,7 +433,7 @@ AS
          ,p_inline_def           => NULL
          ,p_versionid            => a.versionid
       )
-      BULK COLLECT INTO self.swagger_defs
+      BULK COLLECT INTO def_pool
       FROM (
          SELECT
           aa.swagger_def
@@ -491,10 +492,11 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 120
-      -- ADd the properties to the definitions
+      -- Add the properties to the definitions
       --------------------------------------------------------------------------
-      FOR i IN 1 .. self.swagger_defs.COUNT
-      LOOP      
+      FOR i IN 1 .. def_pool.COUNT
+      LOOP   
+      
          SELECT dz_swagger_def_prop_typ(
              p_def_property_id    => a.def_property_id
             ,p_def_property       => b.def_property
@@ -507,7 +509,7 @@ AS
             ,p_def_reference      => b.def_reference
             ,p_versionid          => a.versionid
          )
-         BULK COLLECT INTO self.swagger_defs(i).swagger_def_props
+         BULK COLLECT INTO def_pool(i).swagger_def_props
          FROM
          dz_swagger_def a
          LEFT JOIN
@@ -515,25 +517,23 @@ AS
          ON
          a.def_property_id = b.def_property_id
          WHERE
-             a.versionid        = self.swagger_defs(i).versionid
-         AND b.versionid        = self.swagger_defs(i).versionid
-         AND a.swagger_def      = self.swagger_defs(i).swagger_def
-         AND a.swagger_def_type = self.swagger_defs(i).swagger_def_type
+             a.versionid        = def_pool(i).versionid
+         AND b.versionid        = def_pool(i).versionid
+         AND a.swagger_def      = def_pool(i).swagger_def
+         AND a.swagger_def_type = def_pool(i).swagger_def_type
          ORDER BY
          a.def_property_order;
          
-         IF  self.swagger_defs(i).swagger_def_props IS NOT NULL
-         AND self.swagger_defs(i).swagger_def_props.COUNT = 1
-         AND self.swagger_defs(i).swagger_def_props(1).def_type = 'reference'
+         IF  def_pool(i).swagger_def_props IS NOT NULL
+         AND def_pool(i).swagger_def_props.COUNT = 1
+         AND def_pool(i).swagger_def_props(1).def_type = 'reference'
          THEN
-            self.swagger_defs(i).inline_def := 'TRUE';
+            def_pool(i).inline_def := 'TRUE';
          
          ELSE
-            self.swagger_defs(i).inline_def := 'FALSE';
+            def_pool(i).inline_def := 'FALSE';
             
          END IF;
-         
-         --self.swagger_defs(i).short_def_name := 'd' || TO_CHAR(i);
          
       END LOOP;
 
@@ -559,7 +559,7 @@ AS
                   INTO 
                   self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_obj
                   FROM
-                  TABLE(self.swagger_defs) a
+                  TABLE(def_pool) a
                   WHERE
                       a.swagger_def      = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_def 
                   AND a.swagger_def_type = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_type;
@@ -576,6 +576,27 @@ AS
          END LOOP;
 
       END LOOP;
+      
+      --------------------------------------------------------------------------
+      -- Step 140
+      -- Filter the defs down to only objects
+      --------------------------------------------------------------------------
+      SELECT
+      dz_swagger_def_typ(
+          p_swagger_def          => a.swagger_def
+         ,p_swagger_def_type     => a.swagger_def_type
+         ,p_swagger_def_xml_name => a.swagger_def_xml_name
+         ,p_inline_def           => a.inline_def
+         ,p_versionid            => a.versionid
+         ,p_swagger_def_props    => a.swagger_def_props
+      )
+      BULK COLLECT INTO self.swagger_defs
+      FROM 
+      TABLE(def_pool) a
+      WHERE
+      a.swagger_def_type IN ('object');
+      
+      
 
       RETURN;       
        
@@ -877,10 +898,7 @@ AS
       IF self.swagger_parms IS NULL
       OR self.swagger_parms.COUNT = 0
       THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('parameters',num_pretty_print) || 'null'
-            ,num_pretty_print + 1
-         );
+         NULL;
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
@@ -922,10 +940,7 @@ AS
       IF self.swagger_paths IS NULL
       OR self.swagger_paths.COUNT = 0
       THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('paths',num_pretty_print) || 'null'
-            ,num_pretty_print + 1
-         );
+         NULL;
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
@@ -962,10 +977,7 @@ AS
       IF self.swagger_defs IS NULL
       OR self.swagger_defs.COUNT = 0
       THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('definitions',num_pretty_print) || 'null'
-            ,num_pretty_print + 1
-         );
+         NULL;
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
@@ -1028,6 +1040,7 @@ AS
       clb_output        CLOB;
       c_swagger_version VARCHAR2(4 Char) := '2.0';
       str_host          VARCHAR2(4000 Char);
+      int_counter       PLS_INTEGER;
       
    BEGIN
       
@@ -1175,26 +1188,31 @@ AS
       -- Step 80
       -- Do the parameters
       --------------------------------------------------------------------------
-      clb_output := clb_output || dz_json_util.pretty_str(
-          'parameters: '
-         ,0
-         ,'  '
-      ); 
-      
-      FOR i IN 1 .. self.swagger_parms.COUNT
-      LOOP
-         IF  self.swagger_parms(i).inline_parm = 'FALSE'
-         AND self.swagger_parms(i).parm_undocumented = 'FALSE'
-         THEN
-            clb_output := clb_output || dz_json_util.pretty(
-                self.swagger_parms(i).swagger_parm || ': '
-               ,1
-               ,'  '
-            ) || self.swagger_parms(i).toYAML(2);
-            
-         END IF;
+      IF self.swagger_parms IS NOT NULL
+      AND self.swagger_parms.COUNT > 0
+      THEN
+         clb_output := clb_output || dz_json_util.pretty_str(
+             'parameters: '
+            ,0
+            ,'  '
+         ); 
+         
+         FOR i IN 1 .. self.swagger_parms.COUNT
+         LOOP
+            IF  self.swagger_parms(i).inline_parm = 'FALSE'
+            AND self.swagger_parms(i).parm_undocumented = 'FALSE'
+            THEN
+               clb_output := clb_output || dz_json_util.pretty(
+                   self.swagger_parms(i).swagger_parm || ': '
+                  ,1
+                  ,'  '
+               ) || self.swagger_parms(i).toYAML(2);
+               
+            END IF;
 
-      END LOOP;
+         END LOOP;
+         
+      END IF;
       
       --------------------------------------------------------------------------
       -- Step 90
@@ -1220,34 +1238,46 @@ AS
       -- Step 100
       -- Do the definitions
       --------------------------------------------------------------------------
-      IF self.swagger_defs IS NULL
-      OR self.swagger_defs.COUNT = 0
+      IF self.swagger_defs IS NOT NULL
+      AND self.swagger_defs.COUNT > 0
       THEN
-         NULL;
-         
-      ELSE
-         clb_output := clb_output || dz_json_util.pretty_str(
-             'definitions: '
-            ,0
-            ,'  '
-         );
-         
+         int_counter := 0;
          FOR i IN 1 .. self.swagger_defs.COUNT
          LOOP
             IF self.swagger_defs(i).inline_def = 'FALSE'
             THEN
-               clb_output := clb_output || dz_json_util.pretty(
-                   dz_swagger_util.dzcondense(
-                      self.swagger_defs(i).versionid
-                     ,self.swagger_defs(i).swagger_def
-                  ) || ': '
-                  ,1
-                  ,'  '
-               ) || self.swagger_defs(i).toYAML(2);
+               int_counter := int_counter + 1;
                
             END IF;
-
+            
          END LOOP;
+         
+         IF int_counter > 0
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                'definitions: '
+               ,0
+               ,'  '
+            );
+            
+            FOR i IN 1 .. self.swagger_defs.COUNT
+            LOOP
+               IF self.swagger_defs(i).inline_def = 'FALSE'
+               THEN
+                  clb_output := clb_output || dz_json_util.pretty(
+                      dz_swagger_util.dzcondense(
+                         self.swagger_defs(i).versionid
+                        ,self.swagger_defs(i).swagger_def
+                     ) || ': '
+                     ,1
+                     ,'  '
+                  ) || self.swagger_defs(i).toYAML(2);
+                  
+               END IF;
+
+            END LOOP;
+            
+         END IF;
          
       END IF;
       
