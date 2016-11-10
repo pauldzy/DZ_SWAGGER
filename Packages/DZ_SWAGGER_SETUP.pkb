@@ -609,14 +609,28 @@ AS
       EXECUTE IMMEDIATE str_sql;
       
       str_sql := 'ALTER TABLE dz_swagger_condense '
-              || 'ADD CONSTRAINT dz_swagger_condense_pk '
-              || 'PRIMARY KEY(versionid,condense_key,condense_value) ';
+              || 'ADD ( '
+              || '    CONSTRAINT dz_swagger_condense_pk '
+              || '    PRIMARY KEY(versionid,condense_key,condense_value) ';
+              
               
       IF p_index_tablespace IS NOT NULL
       THEN
-         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
+         str_sql := str_sql || '    USING INDEX TABLESPACE ' || p_index_tablespace;
       
       END IF;
+      
+      str_sql := str_sql 
+              || '   ,CONSTRAINT dz_swagger_condense_u01 '
+              || '    UNIQUE(versionid,condense_value) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || '    USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+       
+      str_sql := str_sql || ') ';
       
       EXECUTE IMMEDIATE str_sql;
       

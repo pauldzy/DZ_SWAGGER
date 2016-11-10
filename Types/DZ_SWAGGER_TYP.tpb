@@ -479,7 +479,7 @@ AS
                   FROM 
                   TABLE(self.all_responses()) cccc
                   WHERE
-                  ccc.swagger_def_type = 'object'
+                  cccc.response_schema_type = 'object'
                )
                CONNECT BY PRIOR 
                ddd.def_reference = ccc.swagger_def

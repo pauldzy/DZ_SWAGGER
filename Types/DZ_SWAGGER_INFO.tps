@@ -2,7 +2,7 @@ CREATE OR REPLACE TYPE dz_swagger_info FORCE
 AUTHID CURRENT_USER 
 AS OBJECT (
     info_title          VARCHAR2(255 Char)
-   ,info_description    VARCHAR2(255 Char)
+   ,info_description    VARCHAR2(4000 Char)
    ,info_termsofservice VARCHAR2(255 Char)
    ,info_contact        dz_swagger_info_contact
    ,info_license        dz_swagger_info_license
