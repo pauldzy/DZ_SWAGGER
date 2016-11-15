@@ -70,6 +70,7 @@ AS
               || '   ,swagger_def_type     VARCHAR2(255 Char) NOT NULL '
               || '   ,def_property_id      VARCHAR2(255 Char) NOT NULL '
               || '   ,def_property_order   NUMBER NOT NULL '
+              || '   ,column_name          VARCHAR2(30 Char) '
               || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
@@ -116,6 +117,9 @@ AS
               || '    swagger_def          VARCHAR2(255 Char) NOT NULL '
               || '   ,swagger_def_type     VARCHAR2(255 Char) NOT NULL '
               || '   ,swagger_def_xml_name VARCHAR2(255 Char) '
+              || '   ,table_owner          VARCHAR2(30 Char) '
+              || '   ,table_name           VARCHAR2(30 Char) '
+              || '   ,table_mapping        VARCHAR2(30 Char) '
               || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
