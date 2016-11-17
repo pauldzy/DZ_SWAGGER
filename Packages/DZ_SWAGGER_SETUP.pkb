@@ -172,6 +172,9 @@ AS
               || '   ,def_example_string VARCHAR2(255 Char) '
               || '   ,def_example_number NUMBER '
               || '   ,def_description    VARCHAR2(4000 Char) '
+              || '   ,def_desc_updated   DATE '
+              || '   ,def_desc_author    VARCHAR2(30 Char) '
+              || '   ,def_desc_notes     VARCHAR2(255 Char) '
               || '   ,versionid          VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
@@ -299,6 +302,9 @@ AS
               || '   ,parm_required       VARCHAR2(5 Char) NOT NULL '
               || '   ,parm_undocumented   VARCHAR2(5 Char) NOT NULL '
               || '   ,param_sort          INTEGER NOT NULL '
+              || '   ,parm_desc_updated   DATE '
+              || '   ,parm_desc_author    VARCHAR2(30 Char) '
+              || '   ,parm_desc_notes     VARCHAR2(255 Char) '
               || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
