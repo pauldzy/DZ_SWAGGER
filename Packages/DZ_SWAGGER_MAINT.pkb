@@ -859,6 +859,282 @@ $END
       END LOOP;   
       
    END validate_path_object_parms;
+   
+   -----------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
+   FUNCTION validate_def_tables(
+       p_versionid     IN  VARCHAR2 DEFAULT NULL
+   ) RETURN MDSYS.SDO_STRING2_ARRAY PIPELINED
+   AS
+      str_versionid           VARCHAR2(255 Char) := p_versionid;
+      ary_owners              MDSYS.SDO_STRING2_ARRAY;
+      ary_tables              MDSYS.SDO_STRING2_ARRAY;
+      ary_problems            MDSYS.SDO_STRING2_ARRAY;
+      ary_universe            dz_swagger_table_def_list;
+      ary_table_defs          dz_swagger_table_def_list;
+      str_last_def            VARCHAR2(255 Char);
+      str_last_owner          VARCHAR2(30 Char);
+      str_last_name           VARCHAR2(30 Char);
+      int_counter             PLS_INTEGER;
+      
+   BEGIN
+      
+      --------------------------------------------------------------------------
+      -- Step 10
+      -- Check over incoming parameters
+      --------------------------------------------------------------------------
+      IF str_versionid IS NULL
+      THEN
+         str_versionid := 'TRUNK';
+         
+      END IF;
+       
+      --------------------------------------------------------------------------
+      -- Step 20
+      -- Test whether each table is available
+      --------------------------------------------------------------------------
+      SELECT
+       a.table_owner
+      ,a.table_name
+      BULK COLLECT INTO
+       ary_owners
+      ,ary_tables
+      FROM
+      dz_swagger_def_attr a
+      LEFT JOIN (
+         SELECT
+          aa.owner AS table_owner
+         ,aa.table_name
+         FROM
+         all_tables aa
+         UNION ALL
+         SELECT
+          bb.owner
+         ,bb.view_name
+         FROM
+         all_views bb
+      ) b
+      ON
+          a.table_owner = b.table_owner
+      AND a.table_name = b.table_name
+      WHERE
+          a.versionid = str_versionid
+      AND a.table_owner IS NOT NULL
+      AND b.table_name IS NULL
+      GROUP BY
+       a.table_owner
+      ,a.table_name;
+      
+      FOR i IN 1 .. ary_owners.COUNT
+      LOOP
+         PIPE ROW('Cannot find def source table ' || ary_owners(i) || '.' || ary_tables(i) || '.');
+         
+      END LOOP;
+      
+      --------------------------------------------------------------------------
+      -- Step 30
+      -- Load the universe of swagger definitions to test
+      --------------------------------------------------------------------------
+      SELECT
+      dz_swagger_table_def(
+          p_swagger_def       => a.swagger_def
+         ,p_table_owner       => a.table_owner
+         ,p_table_name        => a.table_name
+         ,p_column_name       => c.column_name
+         ,p_json_name         => d.def_property
+         ,p_json_type         => d.def_type
+         ,p_relative_position => c.def_property_order
+      )
+      BULK COLLECT INTO
+      ary_universe
+      FROM
+      dz_swagger_def_attr a
+      JOIN (
+         SELECT
+          aa.owner AS table_owner
+         ,aa.table_name
+         FROM
+         all_tables aa
+         UNION ALL
+         SELECT
+          bb.owner
+         ,bb.view_name
+         FROM
+         all_views bb
+      ) b
+      ON
+          a.table_owner = b.table_owner
+      AND a.table_name  = b.table_name
+      JOIN
+      dz_swagger_def c
+      ON
+          c.versionid   = a.versionid
+      AND c.swagger_def = a.swagger_def 
+      JOIN
+      dz_swagger_def_props d
+      ON
+          d.versionid   = a.versionid
+      AND d.def_property_id = c.def_property_id 
+      WHERE
+          a.versionid = str_versionid
+      AND a.table_owner IS NOT NULL
+      GROUP BY
+       a.swagger_def
+      ,a.table_owner
+      ,a.table_name
+      ,c.column_name
+      ,d.def_property
+      ,d.def_type
+      ,c.def_property_order
+      ORDER BY
+       a.swagger_def
+      ,a.table_owner
+      ,a.table_name
+      ,c.def_property_order;
+      
+      --------------------------------------------------------------------------
+      -- Step 40
+      -- Determine actual position values
+      --------------------------------------------------------------------------
+      str_last_def   := NULL;
+      str_last_owner := NULL;
+      str_last_name  := NULL;
+      int_counter    := 0;
+      FOR i IN 1 .. ary_universe.COUNT
+      LOOP
+         IF ary_universe(i).swagger_def <> str_last_def
+         OR ary_universe(i).table_owner <> str_last_owner
+         OR ary_universe(i).table_name  <> str_last_name
+         THEN
+            int_counter := 0;  
+         
+         END IF;
+         
+         int_counter := int_counter + 1;
+         
+         ary_universe(i).position := int_counter;
+         
+         str_last_def   := ary_universe(i).swagger_def;
+         str_last_owner := ary_universe(i).table_owner;
+         str_last_name  := ary_universe(i).table_name;
+
+      END LOOP;
+      
+      --------------------------------------------------------------------------
+      -- Step 50
+      -- Load the universe of table definitions to test against
+      --------------------------------------------------------------------------
+      SELECT
+      dz_swagger_table_def(
+          p_table_owner       => a.table_owner
+         ,p_table_name        => a.table_name
+         ,p_column_name       => b.column_name
+         ,p_data_type         => b.data_type
+         ,p_position          => b.column_id
+      )
+      BULK COLLECT INTO
+      ary_table_defs
+      FROM (
+         SELECT
+          aa.owner AS table_owner
+         ,aa.table_name
+         FROM
+         all_tables aa
+         UNION ALL
+         SELECT
+          bb.owner
+         ,bb.view_name
+         FROM
+         all_views bb
+      ) a
+      JOIN
+      all_tab_columns b
+      ON
+          a.table_owner = b.owner
+      AND a.table_name  = b.table_name
+      WHERE
+      (a.table_owner,a.table_name) IN (
+         SELECT
+          c.table_owner
+         ,c.table_name
+         FROM
+         TABLE(ary_universe) c
+      )
+      ORDER BY
+       a.table_owner
+      ,a.table_name
+      ,b.column_id;
+      
+      --------------------------------------------------------------------------
+      -- Step 60
+      -- Join and look for problems
+      --------------------------------------------------------------------------
+      SELECT
+      a.swagger_def || ' ' || a.json_name || ' at ' || TO_CHAR(a.position) || ' <> ' || a.table_owner || '.' || a.table_name || '.' || a.column_common || '(' || a.column_name || ')'
+      BULK COLLECT INTO
+      ary_problems
+      FROM
+      TABLE(ary_universe) a
+      LEFT JOIN
+      TABLE(ary_table_defs) b
+      ON
+          a.table_owner   = b.table_owner
+      AND a.table_name    = b.table_name
+      AND a.column_common = b.column_common
+      AND a.position      = b.position
+      WHERE
+          b.table_owner IS NULL
+      ORDER BY
+       a.swagger_def
+      ,a.table_owner
+      ,a.table_name
+      ,a.position;
+      
+      FOR i IN 1 .. ary_problems.COUNT
+      LOOP
+         IF INSTR(ary_problems(i),'(__NA__)') > 0
+         THEN
+            NULL;
+            
+         ELSE
+            PIPE ROW(ary_problems(i));
+            
+         END IF;
+      
+      END LOOP;
+      
+      --------------------------------------------------------------------------
+      -- Step 70
+      -- Debugger
+      --------------------------------------------------------------------------
+      /*
+      FOR i IN 1 .. ary_universe.COUNT
+      LOOP
+         DBMS_OUTPUT.PUT_LINE(
+            ary_universe(i).swagger_def || ', ' || 
+            ary_universe(i).table_owner || ', ' ||
+            ary_universe(i).table_name || ', ' ||
+            ary_universe(i).column_common || ', ' ||
+            ary_universe(i).position
+         );
+         
+      END LOOP;
+      
+      DBMS_OUTPUT.PUT_LINE('-----------------');
+      
+      FOR i IN 1 .. ary_table_defs.COUNT
+      LOOP
+         DBMS_OUTPUT.PUT_LINE(
+            ary_table_defs(i).table_owner || ', ' ||
+            ary_table_defs(i).table_name || ', ' ||
+            ary_table_defs(i).column_common || ', ' ||
+            ary_table_defs(i).position
+         );
+         
+      END LOOP;
+      */
+      
+   END validate_def_tables;
 
 END dz_swagger_maint;
 /

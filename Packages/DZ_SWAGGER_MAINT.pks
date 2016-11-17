@@ -38,6 +38,12 @@ AS
        p_versionid     IN  VARCHAR2 DEFAULT NULL
       ,p_path_group_id IN  VARCHAR2 DEFAULT NULL
    ) RETURN MDSYS.SDO_STRING2_ARRAY PIPELINED;
+   
+   -----------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
+   FUNCTION validate_def_tables(
+       p_versionid     IN  VARCHAR2 DEFAULT NULL
+   ) RETURN MDSYS.SDO_STRING2_ARRAY PIPELINED;
 
 END dz_swagger_maint;
 /
