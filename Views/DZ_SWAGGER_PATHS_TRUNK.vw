@@ -30,5 +30,5 @@ FROM (
    ,aa.path_desc_notes
    ORDER BY
     aa.swagger_path
-) a
-   
+) a;
+

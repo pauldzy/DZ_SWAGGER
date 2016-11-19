@@ -24,5 +24,5 @@ FROM (
    aa.versionid = 'TRUNK'
    ORDER BY
    aa.swagger_path
-) a
-   
+) a;
+

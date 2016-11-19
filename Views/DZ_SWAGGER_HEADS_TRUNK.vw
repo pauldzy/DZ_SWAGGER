@@ -74,5 +74,5 @@ FROM (
    ORDER BY
     aa.sorter
    ,aa.swagger_path
-) a
-   
+) a;
+
