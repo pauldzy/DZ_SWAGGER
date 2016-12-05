@@ -870,6 +870,7 @@ $END
       ary_owners              MDSYS.SDO_STRING2_ARRAY;
       ary_tables              MDSYS.SDO_STRING2_ARRAY;
       ary_problems            MDSYS.SDO_STRING2_ARRAY;
+      ary_universe_tmp        dz_swagger_table_def_list;
       ary_universe            dz_swagger_table_def_list;
       ary_table_defs          dz_swagger_table_def_list;
       str_last_def            VARCHAR2(255 Char);
@@ -946,7 +947,7 @@ $END
          ,p_relative_position => c.def_property_order
       )
       BULK COLLECT INTO
-      ary_universe
+      ary_universe_tmp
       FROM
       dz_swagger_def_attr a
       JOIN (
@@ -992,6 +993,21 @@ $END
       ,a.table_name
       ,c.def_property_order;
       
+      int_counter  := 1;
+      ary_universe := dz_swagger_table_def_list();
+      FOR i IN 1 .. ary_universe_tmp.COUNT
+      LOOP
+         IF ary_universe_tmp(i).column_name IS NULL
+         OR ary_universe_tmp(i).column_name <> '__NA__'
+         THEN
+            ary_universe.EXTEND();
+            ary_universe(int_counter) := ary_universe_tmp(i);
+            int_counter := int_counter + 1;
+            
+         END IF;
+          
+      END LOOP;
+      
       --------------------------------------------------------------------------
       -- Step 40
       -- Determine actual position values
@@ -1002,6 +1018,7 @@ $END
       int_counter    := 0;
       FOR i IN 1 .. ary_universe.COUNT
       LOOP
+      
          IF ary_universe(i).swagger_def <> str_last_def
          OR ary_universe(i).table_owner <> str_last_owner
          OR ary_universe(i).table_name  <> str_last_name
@@ -1011,13 +1028,12 @@ $END
          END IF;
          
          int_counter := int_counter + 1;
-         
          ary_universe(i).position := int_counter;
          
          str_last_def   := ary_universe(i).swagger_def;
          str_last_owner := ary_universe(i).table_owner;
          str_last_name  := ary_universe(i).table_name;
-
+            
       END LOOP;
       
       --------------------------------------------------------------------------
