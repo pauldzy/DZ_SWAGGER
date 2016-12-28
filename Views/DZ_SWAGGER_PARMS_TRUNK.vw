@@ -10,7 +10,7 @@ UNION ALL
 SELECT
 '"' || a.swagger_path || '","' || a.swagger_parm || '","' || a.parm_description || '","' 
 || a.parm_type || '","' || a.parm_default || '","' || a.parameter_enum_values || '","' || a.parm_required || '","' 
-|| a.parm_description || '","' || a.parm_desc_updated || '","' || a.parm_desc_author || '","' || a.parm_desc_notes|| '","' || a.swagger_parm_id || '"'
+|| a.parm_desc_updated || '","' || a.parm_desc_author || '","' || a.parm_desc_notes|| '","' || a.swagger_parm_id || '"'
 FROM (
    SELECT
     aa.swagger_path || '2' AS sorter
