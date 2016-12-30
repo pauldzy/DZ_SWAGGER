@@ -50,8 +50,16 @@ FROM (
    ,cc.parm_desc_author
    ,cc.parm_desc_notes
    ,cc.swagger_parm_id
-   FROM
-   dz_swagger_path aa
+   FROM (
+      SELECT
+       aaa.versionid
+      ,aaa.swagger_path
+      FROM
+      dz_swagger_path aaa
+      GROUP BY
+       aaa.versionid
+      ,aaa.swagger_path
+   ) aa
    JOIN
    dz_swagger_path_parm bb
    ON
@@ -84,6 +92,9 @@ FROM (
    dz_swagger_path aa
    WHERE
    aa.versionid = 'TRUNK'
+   GROUP BY
+    aa.versionid
+   ,aa.swagger_path
    ORDER BY
     1
    ,2
