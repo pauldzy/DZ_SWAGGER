@@ -47,6 +47,7 @@ AS
       clb_output       CLOB;
       str_schema       VARCHAR2(4000 Char);
       str_pad          VARCHAR2(1 Char);
+      str_description  VARCHAR2(4000);
       
    BEGIN
       
@@ -73,26 +74,30 @@ AS
          );
          
       END IF;
+      str_pad := ' ';
       
       --------------------------------------------------------------------------
       -- Step 30
       -- Add base attributes
       --------------------------------------------------------------------------
-      str_pad := ' ';
-      IF self.response_description IS NOT NULL
+      IF self.response_description IS NULL
       THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             str_pad || dz_json_main.value2json(
-                'description'
-               ,self.response_description
-               ,num_pretty_print + 1
-            )
-            ,num_pretty_print + 1
-         );
+         str_description := 'Results';
          
-         str_pad := ',';
-      
+      ELSE
+         str_description := self.response_description;
+
       END IF;
+      
+      clb_output := clb_output || dz_json_util.pretty(
+          str_pad || dz_json_main.value2json(
+             'description'
+            ,str_description
+            ,num_pretty_print + 1
+         )
+         ,num_pretty_print + 1
+      ); 
+      str_pad := ',';
       
       --------------------------------------------------------------------------
       -- Step 40
@@ -207,8 +212,9 @@ AS
       p_pretty_print      IN  NUMBER   DEFAULT 0
    ) RETURN CLOB
    AS
-      clb_output        CLOB;
-      num_pretty_print  NUMBER := p_pretty_print;
+      clb_output       CLOB;
+      num_pretty_print NUMBER := p_pretty_print;
+      str_description  VARCHAR2(4000);
       
    BEGIN
       
@@ -225,16 +231,21 @@ AS
       
       IF self.response_description IS NOT NULL
       THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             'description: ' || dz_swagger_util.yaml_text(
-                 self.response_description
-                ,num_pretty_print
-             )
-            ,num_pretty_print
-            ,'  '
-         );
+         str_description := 'Results';
+         
+      ELSE
+         str_description := self.response_description;
          
       END IF;
+      
+      clb_output := clb_output || dz_json_util.pretty(
+          'description: ' || dz_swagger_util.yaml_text(
+              str_description
+             ,num_pretty_print
+          )
+         ,num_pretty_print
+         ,'  '
+      );
       
       --------------------------------------------------------------------------
       -- Step 30
