@@ -266,7 +266,7 @@ AS
                 '"$ref": "#/definitions/' || dz_swagger_util.dzcondense(
                    self.versionid
                   ,self.response_schema_obj.definition
-                )
+                ) || '"'
                ,num_pretty_print + 1
                ,'  '
             );

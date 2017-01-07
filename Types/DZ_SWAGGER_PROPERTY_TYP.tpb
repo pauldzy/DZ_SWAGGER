@@ -208,17 +208,31 @@ AS
          
             FOR i IN 1 .. ary_items.COUNT
             LOOP
-               clb_output := clb_output || dz_json_util.pretty(
-                  str_pad || dz_json_main.value2json(
-                      '$ref'
-                     ,'#/definitions/' || dz_swagger_util.dzcondense(
-                         self.versionid
-                        ,ary_items(i)
-                      )
+               IF LOWER(ary_items(i)) IN ('string','number','integer','boolean')
+               THEN
+                  clb_output := clb_output || dz_json_util.pretty(
+                     str_pad || dz_json_main.value2json(
+                         'type'
+                        ,LOWER(ary_items(i))
+                        ,num_pretty_print + 2
+                     )
                      ,num_pretty_print + 2
-                  )
-                  ,num_pretty_print + 2
-               );
+                  );
+               
+               ELSE
+                  clb_output := clb_output || dz_json_util.pretty(
+                     str_pad || dz_json_main.value2json(
+                         '$ref'
+                        ,'#/definitions/' || dz_swagger_util.dzcondense(
+                            self.versionid
+                           ,ary_items(i)
+                         )
+                        ,num_pretty_print + 2
+                     )
+                     ,num_pretty_print + 2
+                  );
+                  
+               END IF;
                
                str_pad := ',';
      
@@ -374,14 +388,25 @@ AS
             
             FOR i IN 1 .. ary_items.COUNT
             LOOP
-               clb_output := clb_output || dz_json_util.pretty_str(
-                   '"$ref": "#/definitions/' || dz_swagger_util.dzcondense(
-                       self.versionid
-                      ,ary_items(i)
-                   ) || '" '
-                  ,num_pretty_print + 2
-                  ,'  '
-               );
+               IF LOWER(ary_items(i)) IN ('string','number','integer','boolean')
+               THEN
+                  clb_output := clb_output || dz_json_util.pretty_str(
+                      'type: ' || LOWER(ary_items(i)) || ' '
+                     ,num_pretty_print + 2
+                     ,'  '
+                  );
+               
+               ELSE
+                  clb_output := clb_output || dz_json_util.pretty_str(
+                      '"$ref": "#/definitions/' || dz_swagger_util.dzcondense(
+                          self.versionid
+                         ,ary_items(i)
+                      ) || '" '
+                     ,num_pretty_print + 2
+                     ,'  '
+                  );
+               
+               END IF;
                  
             END LOOP;
          
