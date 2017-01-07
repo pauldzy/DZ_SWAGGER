@@ -13,7 +13,7 @@ AS OBJECT (
    ,produces_xml        VARCHAR2(5 Char)
    ,swagger_paths       dz_swagger_path_list
    ,swagger_parms       dz_swagger_parm_list
-   ,swagger_defs        dz_swagger_def_list
+   ,swagger_defs        dz_swagger_definition_list
    
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,MEMBER FUNCTION all_responses
-    RETURN dz_swagger_resp_list
+    RETURN dz_swagger_response_list
     
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------

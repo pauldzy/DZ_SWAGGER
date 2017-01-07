@@ -120,7 +120,7 @@ AS
    AS
       ary_groups MDSYS.SDO_STRING2_ARRAY;
       parm_pool  dz_swagger_parm_list;
-      def_pool   dz_swagger_def_list;
+      def_pool   dz_swagger_definition_list;
       
    BEGIN
    
@@ -367,7 +367,7 @@ AS
             AND a.swagger_path        = self.swagger_paths(i).swagger_methods(j).swagger_path
             AND a.swagger_http_method = self.swagger_paths(i).swagger_methods(j).swagger_http_method;
             
-            SELECT dz_swagger_resp_typ(
+            SELECT dz_swagger_response_typ(
                 p_swagger_path         => a.swagger_path
                ,p_swagger_http_method  => a.swagger_http_method
                ,p_swagger_response     => a.swagger_response
@@ -426,30 +426,33 @@ AS
       -- Step 110
       -- Get the universe of definitions
       --------------------------------------------------------------------------    
-      SELECT dz_swagger_def_typ(
-          p_swagger_def          => a.swagger_def
-         ,p_swagger_def_type     => a.swagger_def_type
-         ,p_swagger_def_xml_name => a.swagger_def_xml_name
-         ,p_inline_def           => NULL
-         ,p_versionid            => a.versionid
+      SELECT dz_swagger_definition_typ(
+          p_definition          => a.definition
+         ,p_definition_type     => a.definition_type
+         ,p_definition_xml_name => a.definition_xml_name
+         ,p_definition_desc     => a.definition_desc
+         ,p_inline_def          => NULL
+         ,p_versionid           => a.versionid
       )
       BULK COLLECT INTO def_pool
       FROM (
          SELECT
-          aa.swagger_def
-         ,aa.swagger_def_type
-         ,aa.swagger_def_xml_name
+          aa.definition
+         ,aa.definition_type
+         ,aa.definition_xml_name
+         ,aa.definition_desc
          ,aa.versionid
          FROM (
             SELECT
-             aaa.swagger_def
-            ,aaa.swagger_def_type
-            ,aaa.swagger_def_xml_name
+             aaa.definition
+            ,aaa.definition_type
+            ,aaa.definition_xml_name
+            ,aaa.definition_desc
             ,aaa.versionid
             FROM
-            dz_swagger_def_attr aaa
+            dz_swagger_definition aaa
             WHERE
-            (aaa.versionid,aaa.swagger_def,aaa.swagger_def_type) IN (
+            (aaa.versionid,aaa.definition,aaa.definition_type) IN (
                SELECT 
                 bbb.versionid
                ,bbb.response_schema_def
@@ -457,21 +460,21 @@ AS
                FROM 
                TABLE(self.all_responses()) bbb
             )
-            OR (aaa.versionid,aaa.swagger_def) IN (
+            OR (aaa.versionid,aaa.definition) IN (
                SELECT
                 ddd.versionid
-               ,ddd.def_reference 
+               ,ddd.property_reference 
                FROM 
-               dz_swagger_def ccc
+               dz_swagger_def_prop ccc
                JOIN
-               dz_swagger_def_props ddd
+               dz_swagger_property ddd
                ON
-               ccc.def_property_id = ddd.def_property_id
+               ccc.property_id = ddd.property_id
                WHERE 
                    ccc.versionid = self.versionid
                AND ddd.versionid = self.versionid
-               AND ddd.def_reference IS NOT NULL
-               START WITH (ccc.versionid,ccc.swagger_def,ccc.swagger_def_type) IN (
+               AND ddd.property_reference IS NOT NULL
+               START WITH (ccc.versionid,ccc.definition,ccc.definition_type) IN (
                   SELECT 
                    cccc.versionid
                   ,cccc.response_schema_def
@@ -482,10 +485,10 @@ AS
                   cccc.response_schema_type = 'object'
                )
                CONNECT BY PRIOR 
-               ddd.def_reference = ccc.swagger_def
+               ddd.property_reference = ccc.definition
                GROUP BY 
                 ddd.versionid
-               ,ddd.def_reference
+               ,ddd.property_reference
             )
          ) aa      
       ) a;
@@ -497,36 +500,36 @@ AS
       FOR i IN 1 .. def_pool.COUNT
       LOOP   
       
-         SELECT dz_swagger_def_prop_typ(
-             p_def_property_id    => a.def_property_id
-            ,p_def_property       => b.def_property
-            ,p_def_type	          => b.def_type
-            ,p_def_format         => b.def_format
-            ,p_def_title          => b.def_title
-            ,p_def_example_string => b.def_example_string
-            ,p_def_example_number => b.def_example_number
-            ,p_def_description    => b.def_description
-            ,p_def_reference      => b.def_reference
-            ,p_versionid          => a.versionid
+         SELECT dz_swagger_property_typ(
+             p_property_id          => a.property_id
+            ,p_property             => b.property
+            ,p_property_type	      => b.property_type
+            ,p_property_format      => b.property_format
+            ,p_property_title       => b.property_title
+            ,p_property_exp_string  => b.property_exp_string
+            ,p_property_exp_number  => b.property_exp_number
+            ,p_property_description => b.property_description
+            ,p_property_reference   => b.property_reference
+            ,p_versionid            => a.versionid
          )
-         BULK COLLECT INTO def_pool(i).swagger_def_props
+         BULK COLLECT INTO def_pool(i).swagger_properties
          FROM
-         dz_swagger_def a
+         dz_swagger_def_prop a
          LEFT JOIN
-         dz_swagger_def_props b
+         dz_swagger_property b
          ON
-         a.def_property_id = b.def_property_id
+         a.property_id = b.property_id
          WHERE
              a.versionid        = def_pool(i).versionid
          AND b.versionid        = def_pool(i).versionid
-         AND a.swagger_def      = def_pool(i).swagger_def
-         AND a.swagger_def_type = def_pool(i).swagger_def_type
+         AND a.definition      = def_pool(i).definition
+         AND a.definition_type = def_pool(i).definition_type
          ORDER BY
-         a.def_property_order;
+         a.property_order;
          
-         IF  def_pool(i).swagger_def_props IS NOT NULL
-         AND def_pool(i).swagger_def_props.COUNT = 1
-         AND def_pool(i).swagger_def_props(1).def_type = 'reference'
+         IF  def_pool(i).swagger_properties IS NOT NULL
+         AND def_pool(i).swagger_properties.COUNT = 1
+         AND def_pool(i).swagger_properties(1).property_type = 'reference'
          THEN
             def_pool(i).inline_def := 'TRUE';
          
@@ -548,21 +551,22 @@ AS
             FOR k IN 1 .. self.swagger_paths(i).swagger_methods(j).method_responses.COUNT
             LOOP
                BEGIN
-                  SELECT dz_swagger_def_typ(
-                      p_swagger_def          => a.swagger_def
-                     ,p_swagger_def_type     => a.swagger_def_type
-                     ,p_swagger_def_xml_name => a.swagger_def_xml_name
-                     ,p_inline_def           => a.inline_def
-                     ,p_versionid            => a.versionid
-                     ,p_swagger_def_props    => a.swagger_def_props
+                  SELECT dz_swagger_definition_typ(
+                      p_definition          => a.definition
+                     ,p_definition_type     => a.definition_type
+                     ,p_definition_xml_name => a.definition_xml_name
+                     ,p_definition_desc     => a.definition_desc
+                     ,p_inline_def          => a.inline_def
+                     ,p_versionid           => a.versionid
+                     ,p_swagger_properties  => a.swagger_properties
                   )
                   INTO 
                   self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_obj
                   FROM
                   TABLE(def_pool) a
                   WHERE
-                      a.swagger_def      = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_def 
-                  AND a.swagger_def_type = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_type;
+                      a.definition      = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_def 
+                  AND a.definition_type = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_type;
 
                EXCEPTION
                   WHEN NO_DATA_FOUND
@@ -582,22 +586,21 @@ AS
       -- Filter the defs down to only objects
       --------------------------------------------------------------------------
       SELECT
-      dz_swagger_def_typ(
-          p_swagger_def          => a.swagger_def
-         ,p_swagger_def_type     => a.swagger_def_type
-         ,p_swagger_def_xml_name => a.swagger_def_xml_name
-         ,p_inline_def           => a.inline_def
-         ,p_versionid            => a.versionid
-         ,p_swagger_def_props    => a.swagger_def_props
+      dz_swagger_definition_typ(
+          p_definition          => a.definition
+         ,p_definition_type     => a.definition_type
+         ,p_definition_xml_name => a.definition_xml_name
+         ,p_definition_desc     => a.definition_desc
+         ,p_inline_def          => a.inline_def
+         ,p_versionid           => a.versionid
+         ,p_swagger_properties  => a.swagger_properties
       )
       BULK COLLECT INTO self.swagger_defs
       FROM 
       TABLE(def_pool) a
       WHERE
-      a.swagger_def_type IN ('object');
+      a.definition_type IN ('object');
       
-      
-
       RETURN;       
        
    END dz_swagger_typ;
@@ -645,9 +648,9 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION all_responses
-   RETURN dz_swagger_resp_list
+   RETURN dz_swagger_response_list
    AS
-      list_output dz_swagger_resp_list;
+      list_output dz_swagger_response_list;
       int_index   PLS_INTEGER;
       
    BEGIN
@@ -659,7 +662,7 @@ AS
       END IF;
       
       int_index   := 0;
-      list_output := dz_swagger_resp_list();
+      list_output := dz_swagger_response_list();
       
       FOR i IN 1 .. self.swagger_paths.COUNT
       LOOP
@@ -994,7 +997,7 @@ AS
                clb_output := clb_output || dz_json_util.pretty(
                    str_pad || '"' || dz_swagger_util.dzcondense(
                       self.swagger_defs(i).versionid
-                     ,self.swagger_defs(i).swagger_def
+                     ,self.swagger_defs(i).definition
                    ) || '": ' || self.swagger_defs(i).toJSON(
                       p_pretty_print => num_pretty_print + 2
                    )
@@ -1267,7 +1270,7 @@ AS
                   clb_output := clb_output || dz_json_util.pretty(
                       dz_swagger_util.dzcondense(
                          self.swagger_defs(i).versionid
-                        ,self.swagger_defs(i).swagger_def
+                        ,self.swagger_defs(i).definition
                      ) || ': '
                      ,1
                      ,'  '

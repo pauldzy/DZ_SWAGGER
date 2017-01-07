@@ -8,7 +8,7 @@ AS OBJECT (
    ,path_description    VARCHAR2(4000 Char)
    ,method_path_parms   dz_swagger_parm_list
    ,method_tags         MDSYS.SDO_STRING2_ARRAY
-   ,method_responses    dz_swagger_resp_list
+   ,method_responses    dz_swagger_response_list
   
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------

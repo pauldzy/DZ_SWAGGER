@@ -1,38 +1,41 @@
-CREATE OR REPLACE TYPE dz_swagger_def_typ FORCE
+CREATE OR REPLACE TYPE dz_swagger_definition_typ FORCE
 AUTHID CURRENT_USER 
 AS OBJECT (
     versionid            VARCHAR2(40 Char)
-   ,swagger_def          VARCHAR2(255 Char)
-   ,swagger_def_type     VARCHAR2(255 Char)
-   ,swagger_def_xml_name VARCHAR2(255 Char)
+   ,definition           VARCHAR2(255 Char)
+   ,definition_type      VARCHAR2(255 Char)
+   ,definition_xml_name  VARCHAR2(255 Char)
+   ,definition_desc      VARCHAR2(4000 Char)
    ,inline_def           VARCHAR2(5 Char)
-   ,swagger_def_props    dz_swagger_def_prop_list
+   ,swagger_properties   dz_swagger_property_list
    ,dummy                INTEGER
 
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
-   ,CONSTRUCTOR FUNCTION dz_swagger_def_typ
+   ,CONSTRUCTOR FUNCTION dz_swagger_definition_typ
     RETURN SELF AS RESULT
     
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
-   ,CONSTRUCTOR FUNCTION dz_swagger_def_typ(
-       p_swagger_def          IN  VARCHAR2
-      ,p_swagger_def_type     IN  VARCHAR2
-      ,p_swagger_def_xml_name IN  VARCHAR2
+   ,CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
+       p_definition           IN  VARCHAR2
+      ,p_definition_type      IN  VARCHAR2
+      ,p_definition_xml_name  IN  VARCHAR2
+      ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT
    
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
-   ,CONSTRUCTOR FUNCTION dz_swagger_def_typ(
-       p_swagger_def          IN  VARCHAR2
-      ,p_swagger_def_type     IN  VARCHAR2
-      ,p_swagger_def_xml_name IN  VARCHAR2
+   ,CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
+       p_definition           IN  VARCHAR2
+      ,p_definition_type      IN  VARCHAR2
+      ,p_definition_xml_name  IN  VARCHAR2
+      ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
-      ,p_swagger_def_props    IN  dz_swagger_def_prop_list
+      ,p_swagger_properties   IN  dz_swagger_property_list
    ) RETURN SELF AS RESULT
     
    -----------------------------------------------------------------------------
@@ -50,5 +53,5 @@ AS OBJECT (
 );
 /
 
-GRANT EXECUTE ON dz_swagger_def_typ TO public;
+GRANT EXECUTE ON dz_swagger_definition_typ TO public;
 

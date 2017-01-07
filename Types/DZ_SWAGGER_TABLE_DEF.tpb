@@ -14,7 +14,7 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    CONSTRUCTOR FUNCTION dz_swagger_table_def(
-       p_swagger_def          IN  VARCHAR2
+       p_definition           IN  VARCHAR2
       ,p_table_owner          IN  VARCHAR2
       ,p_table_name           IN  VARCHAR2
       ,p_column_name          IN  VARCHAR2
@@ -28,7 +28,7 @@ AS
    AS 
    BEGIN 
    
-      self.swagger_def          := p_swagger_def;
+      self.definition           := p_definition;
       self.table_owner          := p_table_owner;
       self.table_name           := p_table_name;
       self.column_name          := p_column_name;
@@ -46,7 +46,7 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    CONSTRUCTOR FUNCTION dz_swagger_table_def(
-       p_swagger_def          IN  VARCHAR2
+       p_definition           IN  VARCHAR2
       ,p_table_owner          IN  VARCHAR2
       ,p_table_name           IN  VARCHAR2
       ,p_column_name          IN  VARCHAR2
@@ -57,7 +57,7 @@ AS
    AS
    BEGIN
    
-      self.swagger_def          := p_swagger_def;
+      self.definition           := p_definition;
       self.table_owner          := p_table_owner;
       self.table_name           := p_table_name;
       self.column_name          := p_column_name;

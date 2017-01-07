@@ -1,7 +1,7 @@
 CREATE OR REPLACE TYPE dz_swagger_table_def FORCE
 AUTHID CURRENT_USER 
 AS OBJECT (
-    swagger_def         VARCHAR2(255 Char)
+    definition          VARCHAR2(255 Char)
    ,table_owner         VARCHAR2(30 Char)
    ,table_name	         VARCHAR2(30 Char)
    ,column_name         VARCHAR2(30 Char)
@@ -21,7 +21,7 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,CONSTRUCTOR FUNCTION dz_swagger_table_def(
-       p_swagger_def          IN  VARCHAR2
+       p_definition           IN  VARCHAR2
       ,p_table_owner          IN  VARCHAR2
       ,p_table_name           IN  VARCHAR2
       ,p_column_name          IN  VARCHAR2
@@ -36,7 +36,7 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,CONSTRUCTOR FUNCTION dz_swagger_table_def(
-       p_swagger_def          IN  VARCHAR2
+       p_definition           IN  VARCHAR2
       ,p_table_owner          IN  VARCHAR2
       ,p_table_name           IN  VARCHAR2
       ,p_column_name          IN  VARCHAR2

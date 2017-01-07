@@ -65,13 +65,13 @@ AS
       -- Step 30
       -- Build DEF table
       --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_def('
-              || '    swagger_def          VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_def_type     VARCHAR2(255 Char) NOT NULL '
-              || '   ,def_property_id      VARCHAR2(255 Char) NOT NULL '
-              || '   ,def_property_order   NUMBER NOT NULL '
-              || '   ,column_name          VARCHAR2(30 Char) '
-              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
+      str_sql := 'CREATE TABLE dz_swagger_def_prop('
+              || '    definition          VARCHAR2(255 Char) NOT NULL '
+              || '   ,definition_type     VARCHAR2(255 Char) NOT NULL '
+              || '   ,property_id         VARCHAR2(255 Char) NOT NULL '
+              || '   ,property_order      NUMBER NOT NULL '
+              || '   ,column_name         VARCHAR2(30 Char) '
+              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
       IF p_table_tablespace IS NOT NULL
@@ -82,9 +82,9 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_def '
-              || 'ADD CONSTRAINT dz_swagger_def_pk '
-              || 'PRIMARY KEY(versionid,swagger_def,def_property_id) ';
+      str_sql := 'ALTER TABLE dz_swagger_def_prop '
+              || 'ADD CONSTRAINT dz_swagger_def_prop_pk '
+              || 'PRIMARY KEY(versionid,definition,property_id) ';
               
       IF p_index_tablespace IS NOT NULL
       THEN
@@ -94,15 +94,15 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_def '
+      str_sql := 'ALTER TABLE dz_swagger_def_prop '
               || 'ADD( '
-              || '    CONSTRAINT dz_swagger_def_c01 '
-              || '    CHECK (swagger_def = TRIM(swagger_def)) '
+              || '    CONSTRAINT dz_swagger_def_prop_c01 '
+              || '    CHECK (definition = TRIM(definition)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_def_c02 '
-              || '    CHECK (def_property_id = TRIM(def_property_id)) '
+              || '   ,CONSTRAINT dz_swagger_def_prop_c02 '
+              || '    CHECK (property_id = TRIM(property_id)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_def_c03 '
+              || '   ,CONSTRAINT dz_swagger_def_prop_c03 '
               || '    CHECK (versionid = TRIM(versionid)) '
               || '    ENABLE VALIDATE '
               || ') ';
@@ -113,14 +113,18 @@ AS
       -- Step 40
       -- Build DEF ATTR table
       --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_def_attr('
-              || '    swagger_def          VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_def_type     VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_def_xml_name VARCHAR2(255 Char) '
-              || '   ,table_owner          VARCHAR2(30 Char) '
-              || '   ,table_name           VARCHAR2(30 Char) '
-              || '   ,table_mapping        VARCHAR2(30 Char) '
-              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
+      str_sql := 'CREATE TABLE dz_swagger_definition('
+              || '    definition              VARCHAR2(255 Char) NOT NULL '
+              || '   ,definition_type         VARCHAR2(255 Char) NOT NULL '
+              || '   ,definition_xml_name     VARCHAR2(255 Char) '
+              || '   ,definition_desc         VARCHAR2(4000 Char) '
+              || '   ,definition_desc_updated DATE '
+              || '   ,definition_desc_author  VARCHAR2(30 Char) '
+              || '   ,definition_desc_notes   VARCHAR2(255 Char) '
+              || '   ,table_owner             VARCHAR2(30 Char) '
+              || '   ,table_name              VARCHAR2(30 Char) '
+              || '   ,table_mapping           VARCHAR2(30 Char) '
+              || '   ,versionid               VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
       IF p_table_tablespace IS NOT NULL
@@ -131,9 +135,9 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_def_attr '
-              || 'ADD CONSTRAINT dz_swagger_def_attr_pk '
-              || 'PRIMARY KEY(versionid,swagger_def,swagger_def_type) ';
+      str_sql := 'ALTER TABLE dz_swagger_definition '
+              || 'ADD CONSTRAINT dz_swagger_definition_pk '
+              || 'PRIMARY KEY(versionid,definition,definition_type) ';
               
       IF p_index_tablespace IS NOT NULL
       THEN
@@ -143,15 +147,15 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_def_attr '
+      str_sql := 'ALTER TABLE dz_swagger_definition '
               || 'ADD( '
-              || '    CONSTRAINT dz_swagger_def_attr_c01 '
-              || '    CHECK (swagger_def = TRIM(swagger_def)) '
+              || '    CONSTRAINT dz_swagger_definition_c01 '
+              || '    CHECK (definition = TRIM(definition)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_def_attr_c02 '
-              || '    CHECK (swagger_def_xml_name = TRIM(swagger_def_xml_name)) '
+              || '   ,CONSTRAINT dz_swagger_definition_c02 '
+              || '    CHECK (definition_xml_name = TRIM(definition_xml_name)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_def_attr_c03 '
+              || '   ,CONSTRAINT dz_swagger_definition_c03 '
               || '    CHECK (versionid = TRIM(versionid)) '
               || '    ENABLE VALIDATE '
               || ') ';
@@ -160,22 +164,22 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 50
-      -- Build DEF PROPS table
+      -- Build PROPERTIES table
       --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_def_props('
-              || '    def_property_id    VARCHAR2(255 Char) NOT NULL '
-              || '   ,def_property       VARCHAR2(255 Char) NOT NULL '
-              || '   ,def_type           VARCHAR2(255 Char) NOT NULL '
-              || '   ,def_reference      VARCHAR2(255 Char) '
-              || '   ,def_format         VARCHAR2(255 Char) '
-              || '   ,def_title          VARCHAR2(255 Char) '
-              || '   ,def_example_string VARCHAR2(255 Char) '
-              || '   ,def_example_number NUMBER '
-              || '   ,def_description    VARCHAR2(4000 Char) '
-              || '   ,def_desc_updated   DATE '
-              || '   ,def_desc_author    VARCHAR2(30 Char) '
-              || '   ,def_desc_notes     VARCHAR2(255 Char) '
-              || '   ,versionid          VARCHAR2(40 Char) NOT NULL '
+      str_sql := 'CREATE TABLE dz_swagger_property('
+              || '    property_id           VARCHAR2(255 Char) NOT NULL '
+              || '   ,property              VARCHAR2(255 Char) NOT NULL '
+              || '   ,property_type         VARCHAR2(255 Char) NOT NULL '
+              || '   ,property_reference    VARCHAR2(255 Char) '
+              || '   ,property_format       VARCHAR2(255 Char) '
+              || '   ,property_title        VARCHAR2(255 Char) '
+              || '   ,property_exp_string   VARCHAR2(255 Char) '
+              || '   ,property_exp_number   NUMBER '
+              || '   ,property_description  VARCHAR2(4000 Char) '
+              || '   ,property_desc_updated DATE '
+              || '   ,property_desc_author  VARCHAR2(30 Char) '
+              || '   ,property_desc_notes   VARCHAR2(255 Char) '
+              || '   ,versionid             VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
       IF p_table_tablespace IS NOT NULL
@@ -186,9 +190,9 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_def_props '
-              || 'ADD CONSTRAINT dz_swagger_def_props_pk '
-              || 'PRIMARY KEY(versionid,def_property_id) ';
+      str_sql := 'ALTER TABLE dz_swagger_property '
+              || 'ADD CONSTRAINT dz_swagger_property_pk '
+              || 'PRIMARY KEY(versionid,property_id) ';
               
       IF p_index_tablespace IS NOT NULL
       THEN
@@ -198,18 +202,18 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_def_props '
+      str_sql := 'ALTER TABLE dz_swagger_property '
               || 'ADD( '
-              || '    CONSTRAINT dz_swagger_def_props_c01 '
-              || '    CHECK (def_property_id = TRIM(def_property_id)) '
+              || '    CONSTRAINT dz_swagger_property_c01 '
+              || '    CHECK (property_id = TRIM(property_id)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_def_props_c02 '
-              || '    CHECK (def_property = TRIM(def_property)) '
+              || '   ,CONSTRAINT dz_swagger_property_c02 '
+              || '    CHECK (property = TRIM(property)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_def_props_c03 '
-              || '    CHECK (def_reference = TRIM(def_reference)) '
+              || '   ,CONSTRAINT dz_swagger_property_c03 '
+              || '    CHECK (property_reference = TRIM(property_reference)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_def_props_c04 '
+              || '   ,CONSTRAINT dz_swagger_property_c04 '
               || '    CHECK (versionid = TRIM(versionid)) '
               || '    ENABLE VALIDATE '
               || ') ';
@@ -238,6 +242,9 @@ AS
               || '   ,consumes_xml        VARCHAR2(5 Char) NOT NULL '
               || '   ,produces_json       VARCHAR2(5 Char) NOT NULL '
               || '   ,produces_xml        VARCHAR2(5 Char) NOT NULL '
+              || '   ,info_desc_updated   DATE '
+              || '   ,info_desc_author    VARCHAR2(30 Char) '
+              || '   ,info_desc_notes     VARCHAR2(255 Char) '
               || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
@@ -411,6 +418,9 @@ AS
               || '   ,object_name         VARCHAR2(30 Char) '
               || '   ,procedure_name      VARCHAR2(30 Char) '
               || '   ,object_overload     INTEGER '
+              || '   ,path_desc_updated   DATE '
+              || '   ,path_desc_author    VARCHAR2(30 Char) '
+              || '   ,path_desc_notes     VARCHAR2(255 Char) '
               || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
@@ -507,13 +517,16 @@ AS
       -- Build PATH RESP table
       --------------------------------------------------------------------------
       str_sql := 'CREATE TABLE dz_swagger_path_resp('
-              || '    swagger_path         VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_http_method  VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_response     VARCHAR2(255 Char) NOT NULL '
-              || '   ,response_schema_def  VARCHAR2(255 Char) NOT NULL '
-              || '   ,response_schema_type VARCHAR2(255 Char) NOT NULL '
-              || '   ,response_description VARCHAR2(4000 Char) '
-              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
+              || '    swagger_path          VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_http_method   VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_response      VARCHAR2(255 Char) NOT NULL '
+              || '   ,response_schema_def   VARCHAR2(255 Char) NOT NULL '
+              || '   ,response_schema_type  VARCHAR2(255 Char) NOT NULL '
+              || '   ,response_description  VARCHAR2(4000 Char) '
+              || '   ,response_desc_updated DATE '
+              || '   ,response_desc_author  VARCHAR2(30 Char) '
+              || '   ,response_desc_notes   VARCHAR2(255 Char) '
+              || '   ,versionid             VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
       IF p_table_tablespace IS NOT NULL
@@ -673,7 +686,7 @@ AS
           'DZ_SWAGGER_CONDENSE'
          ,'DZ_SWAGGER_DEF'
          ,'DZ_SWAGGER_DEF_ATTR'
-         ,'DZ_SWAGGER_DEF_PROPS'
+         ,'DZ_SWAGGER_PROPERTIES'
          ,'DZ_SWAGGER_HEAD'
          ,'DZ_SWAGGER_PARM'
          ,'DZ_SWAGGER_PARM_ENUM'

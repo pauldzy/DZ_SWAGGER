@@ -1,61 +1,65 @@
-CREATE OR REPLACE TYPE BODY dz_swagger_def_typ
+CREATE OR REPLACE TYPE BODY dz_swagger_definition_typ
 AS 
 
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
-   CONSTRUCTOR FUNCTION dz_swagger_def_typ
+   CONSTRUCTOR FUNCTION dz_swagger_definition_typ
    RETURN SELF AS RESULT 
    AS 
    BEGIN 
       RETURN; 
       
-   END dz_swagger_def_typ;
+   END dz_swagger_definition_typ;
 
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
-   CONSTRUCTOR FUNCTION dz_swagger_def_typ(
-       p_swagger_def          IN  VARCHAR2
-      ,p_swagger_def_type     IN  VARCHAR2
-      ,p_swagger_def_xml_name IN  VARCHAR2
+   CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
+       p_definition           IN  VARCHAR2
+      ,p_definition_type      IN  VARCHAR2
+      ,p_definition_xml_name  IN  VARCHAR2
+      ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT 
    AS 
    BEGIN 
    
-      self.swagger_def          := p_swagger_def;
-      self.swagger_def_type     := p_swagger_def_type;
-      self.swagger_def_xml_name := p_swagger_def_xml_name;
+      self.definition           := p_definition;
+      self.definition_type      := p_definition_type;
+      self.definition_xml_name  := p_definition_xml_name;
+      self.definition_desc      := p_definition_desc;
       self.inline_def           := p_inline_def;
       self.versionid            := p_versionid;
       
       RETURN; 
       
-   END dz_swagger_def_typ;
+   END dz_swagger_definition_typ;
    
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
-   CONSTRUCTOR FUNCTION dz_swagger_def_typ(
-       p_swagger_def          IN  VARCHAR2
-      ,p_swagger_def_type     IN  VARCHAR2
-      ,p_swagger_def_xml_name IN  VARCHAR2
+   CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
+       p_definition           IN  VARCHAR2
+      ,p_definition_type      IN  VARCHAR2
+      ,p_definition_xml_name  IN  VARCHAR2
+      ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
-      ,p_swagger_def_props    IN  dz_swagger_def_prop_list
+      ,p_swagger_properties   IN  dz_swagger_property_list
    ) RETURN SELF AS RESULT 
    AS
    BEGIN 
    
-      self.swagger_def          := p_swagger_def;
-      self.swagger_def_type     := p_swagger_def_type;
-      self.swagger_def_xml_name := p_swagger_def_xml_name;
+      self.definition           := p_definition;
+      self.definition_type      := p_definition_type;
+      self.definition_xml_name  := p_definition_xml_name;
+      self.definition_desc      := p_definition_desc;
       self.inline_def           := p_inline_def;
       self.versionid            := p_versionid;
-      self.swagger_def_props    := p_swagger_def_props;
+      self.swagger_properties   := p_swagger_properties;
       
       RETURN; 
       
-   END dz_swagger_def_typ;
+   END dz_swagger_definition_typ;
    
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
@@ -66,6 +70,7 @@ AS
       num_pretty_print NUMBER := p_pretty_print;
       clb_output       CLOB;
       str_pad          VARCHAR2(1 Char);
+      str_pad2         VARCHAR2(1 Char);
       str_xml          VARCHAR2(32000 Char);
       
    BEGIN
@@ -87,25 +92,45 @@ AS
          clb_output  := dz_json_util.pretty('{',-1);
          
       END IF;
+      str_pad := ' ';
       
       --------------------------------------------------------------------------
       -- Step 30
       -- Add base attributes
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
-          ' ' || dz_json_main.value2json(
+          str_pad || dz_json_main.value2json(
              'type'
-            ,self.swagger_def_type
+            ,self.definition_type
             ,num_pretty_print + 1
          )
          ,num_pretty_print + 1
       );
+      str_pad := ',';
       
       --------------------------------------------------------------------------
-      -- Step 40
+      -- Step 50
+      -- Add optional description object
+      --------------------------------------------------------------------------
+      IF self.definition_desc IS NOT NULL
+      THEN
+         clb_output := clb_output || dz_json_util.pretty(
+             str_pad || dz_json_main.value2json(
+                'description'
+               ,self.definition_desc
+               ,num_pretty_print + 1
+            )
+            ,num_pretty_print + 1
+         );
+         str_pad := ',';
+      
+      END IF;
+      
+      --------------------------------------------------------------------------
+      -- Step 50
       -- Add optional xml object
       --------------------------------------------------------------------------
-      IF self.swagger_def_xml_name IS NOT NULL
+      IF self.definition_xml_name IS NOT NULL
       THEN
          IF num_pretty_print IS NULL
          THEN
@@ -119,7 +144,7 @@ AS
          str_xml := str_xml || dz_json_util.pretty(
              ' ' || dz_json_main.value2json(
                 'name'
-               ,self.swagger_def_xml_name
+               ,self.definition_xml_name
                ,num_pretty_print + 2
             )
             ,num_pretty_print + 2
@@ -129,7 +154,7 @@ AS
          );   
       
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.formatted2json(
+             str_pad || dz_json_main.formatted2json(
                  'xml'
                 ,str_xml
                 ,num_pretty_print + 1
@@ -140,11 +165,11 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 60
       -- Add properties
       --------------------------------------------------------------------------
-      IF self.swagger_def_props IS NULL
-      OR self.swagger_def_props.COUNT = 0
+      IF self.swagger_properties IS NULL
+      OR self.swagger_properties.COUNT = 0
       THEN
          NULL;
 
@@ -154,18 +179,18 @@ AS
             ,num_pretty_print + 1
          );
          
-         str_pad := ' ';
+         str_pad2 := ' ';
 
-         FOR i IN 1 .. self.swagger_def_props.COUNT
+         FOR i IN 1 .. self.swagger_properties.COUNT
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
-                str_pad || self.swagger_def_props(i).toJSON(
+                str_pad2 || self.swagger_properties(i).toJSON(
                    p_pretty_print => num_pretty_print + 2
                 )
                ,num_pretty_print + 2
             );
             
-            str_pad := ',';
+            str_pad2 := ',';
 
          END LOOP;
 
@@ -178,7 +203,7 @@ AS
       
 
       --------------------------------------------------------------------------
-      -- Step 100
+      -- Step 70
       -- Add the left bracket
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
@@ -215,7 +240,7 @@ AS
       -- Do the type element
       --------------------------------------------------------------------------
       clb_output := dz_json_util.pretty_str(
-          'type: ' || self.swagger_def_type
+          'type: ' || self.definition_type
          ,num_pretty_print
          ,'  '
       );
@@ -224,7 +249,7 @@ AS
       -- Step 30
       -- Add optional xml object
       --------------------------------------------------------------------------
-      IF self.swagger_def_xml_name IS NOT NULL
+      IF self.definition_xml_name IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'xml: '
@@ -232,7 +257,7 @@ AS
             ,'  '
          ) || dz_json_util.pretty(
              'name: ' || dz_swagger_util.yaml_text(
-                 self.swagger_def_xml_name
+                 self.definition_xml_name
                 ,num_pretty_print + 1
              )
             ,num_pretty_print + 1
@@ -251,13 +276,13 @@ AS
          ,'  '
       );
        
-      FOR i IN 1 .. self.swagger_def_props.COUNT
+      FOR i IN 1 .. self.swagger_properties.COUNT
       LOOP
          clb_output := clb_output || dz_json_util.pretty_str(
-             self.swagger_def_props(i).def_property || ': '
+             self.swagger_properties(i).property || ': '
             ,num_pretty_print + 1
             ,'  '
-         ) || self.swagger_def_props(i).toYAML(num_pretty_print + 1);
+         ) || self.swagger_properties(i).toYAML(num_pretty_print + 1);
  
       END LOOP;
       

@@ -1,19 +1,19 @@
-CREATE OR REPLACE TYPE BODY dz_swagger_resp_typ
+CREATE OR REPLACE TYPE BODY dz_swagger_response_typ
 AS 
 
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
-   CONSTRUCTOR FUNCTION dz_swagger_resp_typ
+   CONSTRUCTOR FUNCTION dz_swagger_response_typ
    RETURN SELF AS RESULT 
    AS 
    BEGIN 
       RETURN;
       
-   END dz_swagger_resp_typ;
+   END dz_swagger_response_typ;
 
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
-   CONSTRUCTOR FUNCTION dz_swagger_resp_typ(
+   CONSTRUCTOR FUNCTION dz_swagger_response_typ(
        p_swagger_path         IN  VARCHAR2
       ,p_swagger_http_method  IN  VARCHAR2
       ,p_swagger_response     IN  VARCHAR2
@@ -35,7 +35,7 @@ AS
       
       RETURN;
           
-   END dz_swagger_resp_typ;
+   END dz_swagger_response_typ;
    
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
@@ -123,7 +123,7 @@ AS
                    '$ref'
                   ,'#/definitions/' || dz_swagger_util.dzcondense(
                       self.versionid
-                     ,self.response_schema_obj.swagger_def
+                     ,self.response_schema_obj.definition
                    )
                   ,num_pretty_print + 2
                )
@@ -229,7 +229,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := '';
       
-      IF self.response_description IS NOT NULL
+      IF self.response_description IS NULL
       THEN
          str_description := 'Results';
          
@@ -265,7 +265,7 @@ AS
             clb_output := clb_output || dz_json_util.pretty_str(
                 '"$ref": "#/definitions/' || dz_swagger_util.dzcondense(
                    self.versionid
-                  ,self.response_schema_obj.swagger_def
+                  ,self.response_schema_obj.definition
                 )
                ,num_pretty_print + 1
                ,'  '

@@ -901,7 +901,7 @@ $END
        ary_owners
       ,ary_tables
       FROM
-      dz_swagger_def_attr a
+      dz_swagger_definition a
       LEFT JOIN (
          SELECT
           aa.owner AS table_owner
@@ -938,18 +938,18 @@ $END
       --------------------------------------------------------------------------
       SELECT
       dz_swagger_table_def(
-          p_swagger_def       => a.swagger_def
+          p_definition        => a.definition
          ,p_table_owner       => a.table_owner
          ,p_table_name        => a.table_name
          ,p_column_name       => c.column_name
-         ,p_json_name         => d.def_property
-         ,p_json_type         => d.def_type
-         ,p_relative_position => c.def_property_order
+         ,p_json_name         => d.property
+         ,p_json_type         => d.property_type
+         ,p_relative_position => c.property_order
       )
       BULK COLLECT INTO
       ary_universe_tmp
       FROM
-      dz_swagger_def_attr a
+      dz_swagger_definition a
       JOIN (
          SELECT
           aa.owner AS table_owner
@@ -967,31 +967,31 @@ $END
           a.table_owner = b.table_owner
       AND a.table_name  = b.table_name
       JOIN
-      dz_swagger_def c
+      dz_swagger_def_prop c
       ON
           c.versionid   = a.versionid
-      AND c.swagger_def = a.swagger_def 
+      AND c.definition = a.definition 
       JOIN
-      dz_swagger_def_props d
+      dz_swagger_property d
       ON
           d.versionid   = a.versionid
-      AND d.def_property_id = c.def_property_id 
+      AND d.property_id = c.property_id 
       WHERE
           a.versionid = str_versionid
       AND a.table_owner IS NOT NULL
       GROUP BY
-       a.swagger_def
+       a.definition
       ,a.table_owner
       ,a.table_name
       ,c.column_name
-      ,d.def_property
-      ,d.def_type
-      ,c.def_property_order
+      ,d.property
+      ,d.property_type
+      ,c.property_order
       ORDER BY
-       a.swagger_def
+       a.definition
       ,a.table_owner
       ,a.table_name
-      ,c.def_property_order;
+      ,c.property_order;
       
       int_counter  := 1;
       ary_universe := dz_swagger_table_def_list();
@@ -1019,7 +1019,7 @@ $END
       FOR i IN 1 .. ary_universe.COUNT
       LOOP
       
-         IF ary_universe(i).swagger_def <> str_last_def
+         IF ary_universe(i).definition  <> str_last_def
          OR ary_universe(i).table_owner <> str_last_owner
          OR ary_universe(i).table_name  <> str_last_name
          THEN
@@ -1030,7 +1030,7 @@ $END
          int_counter := int_counter + 1;
          ary_universe(i).position := int_counter;
          
-         str_last_def   := ary_universe(i).swagger_def;
+         str_last_def   := ary_universe(i).definition;
          str_last_owner := ary_universe(i).table_owner;
          str_last_name  := ary_universe(i).table_name;
             
@@ -1086,7 +1086,7 @@ $END
       -- Join and look for problems
       --------------------------------------------------------------------------
       SELECT
-      a.swagger_def || ' ' || a.json_name || ' at ' || TO_CHAR(a.position) || ' <> ' || a.table_owner || '.' || a.table_name || '.' || a.column_common || '(' || a.column_name || ')'
+      a.definition || ' ' || a.json_name || ' at ' || TO_CHAR(a.position) || ' <> ' || a.table_owner || '.' || a.table_name || '.' || a.column_common || '(' || a.column_name || ')'
       BULK COLLECT INTO
       ary_problems
       FROM
@@ -1101,7 +1101,7 @@ $END
       WHERE
           b.table_owner IS NULL
       ORDER BY
-       a.swagger_def
+       a.definition
       ,a.table_owner
       ,a.table_name
       ,a.position;
