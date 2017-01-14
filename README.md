@@ -9,6 +9,9 @@ Furthermore as mod_plsql derives from Oracle procedures and Oracle tables, ideal
 
 DZ_SWAGGER is thus a set of tabular resources to store Swagger elements and a set of logic to generate Swagger specifications from the table.  The one item missing is the logic to take an existing Swagger specification and unload it into the tables.  You can see a partial implementation in the main package.  Essentially the new JSON parsing features of 12cR1 are fairly worthless.  Perhaps 12cR2 will fix these issues.
 
+##Data Model
+![Entity Relationship](ERD.png)
+
 ##Installation
 Simply execute the deployment script into the schema of your choice.  Then execute the code using either the same or a different schema.  All procedures and functions are publically executable and utilize AUTHID CURRENT_USER for permissions handling.
 
