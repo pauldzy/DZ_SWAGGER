@@ -9,7 +9,9 @@ AS
    - Build ID: DZBUILDIDDZ
    - Change Set: DZCHANGESETDZ
    
-   Blurbage.
+   PLSQL module for the creation, storage and production of Open API service 
+   definitions.   Support for the unloading of Swagger JSON specifications into
+   the storage tables is not currently supported.   
    
    */
    

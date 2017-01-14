@@ -407,9 +407,8 @@ $END
       --------------------------------------------------------------------------
       ary_tables := MDSYS.SDO_STRING2_ARRAY(
           'DZ_SWAGGER_CONDENSE'
-         ,'DZ_SWAGGER_DEF'
-         ,'DZ_SWAGGER_DEF_ATTR'
-         ,'DZ_SWAGGER_DEF_PROPS'
+         ,'DZ_SWAGGER_DEFINITION'
+         ,'DZ_SWAGGER_DEF_PROP'
          ,'DZ_SWAGGER_HEAD'
          ,'DZ_SWAGGER_PARM'
          ,'DZ_SWAGGER_PARM_ENUM'
@@ -417,6 +416,7 @@ $END
          ,'DZ_SWAGGER_PATH_PARM'
          ,'DZ_SWAGGER_PATH_RESP'
          ,'DZ_SWAGGER_PATH_TAGS'
+         ,'DZ_SWAGGER_PROPERTY'
          ,'DZ_SWAGGER_VERS'
       );
       
