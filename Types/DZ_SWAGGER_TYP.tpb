@@ -840,7 +840,7 @@ AS
       THEN
          int_index := int_index + 1;
          ary_consumes.EXTEND();
-         ary_consumes(int_index) := 'text/xml';
+         ary_consumes(int_index) := 'application/xml';
          
       END IF;
       
@@ -876,7 +876,7 @@ AS
       THEN
          int_index := int_index + 1;
          ary_produces.EXTEND();
-         ary_produces(int_index) := 'text/xml';
+         ary_produces(int_index) := 'application/xml';
          
       END IF;
       
@@ -1150,7 +1150,7 @@ AS
       IF self.consumes_xml = 'TRUE'
       THEN      
          clb_output := clb_output || dz_json_util.pretty_str(
-             '- text/xml'
+             '- application/xml'
             ,0
             ,'  '
          );
@@ -1180,7 +1180,7 @@ AS
       IF self.produces_xml = 'TRUE'
       THEN      
          clb_output := clb_output || dz_json_util.pretty_str(
-             '- text/xml'
+             '- application/xml'
             ,0
             ,'  '
          );
