@@ -17,8 +17,8 @@ AS
    /*
    Header: DZ_SWAGGER
      
-   - Build ID: 1
-   - Change Set: db4f6cb73c750680e55362bacd392444a35c4d09
+   - Build ID: 2
+   - Change Set: b12d4f3f4bc8a6eec4eaf0bcf99df2e7f08123b3
    
    PLSQL module for the creation, storage and production of Open API service 
    definitions.   Support for the unloading of Swagger JSON specifications into
@@ -5613,7 +5613,7 @@ AS
       THEN
          int_index := int_index + 1;
          ary_consumes.EXTEND();
-         ary_consumes(int_index) := 'text/xml';
+         ary_consumes(int_index) := 'application/xml';
          
       END IF;
       
@@ -5649,7 +5649,7 @@ AS
       THEN
          int_index := int_index + 1;
          ary_produces.EXTEND();
-         ary_produces(int_index) := 'text/xml';
+         ary_produces(int_index) := 'application/xml';
          
       END IF;
       
@@ -5923,7 +5923,7 @@ AS
       IF self.consumes_xml = 'TRUE'
       THEN      
          clb_output := clb_output || dz_json_util.pretty_str(
-             '- text/xml'
+             '- application/xml'
             ,0
             ,'  '
          );
@@ -5953,7 +5953,7 @@ AS
       IF self.produces_xml = 'TRUE'
       THEN      
          clb_output := clb_output || dz_json_util.pretty_str(
-             '- text/xml'
+             '- application/xml'
             ,0
             ,'  '
          );
@@ -7295,10 +7295,10 @@ CREATE OR REPLACE PACKAGE dz_swagger_test
 AUTHID DEFINER
 AS
 
-   C_CHANGESET CONSTANT VARCHAR2(255 Char) := 'db4f6cb73c750680e55362bacd392444a35c4d09';
+   C_CHANGESET CONSTANT VARCHAR2(255 Char) := 'b12d4f3f4bc8a6eec4eaf0bcf99df2e7f08123b3';
    C_JENKINS_JOBNM CONSTANT VARCHAR2(255 Char) := 'DZ_SWAGGER';
-   C_JENKINS_BUILD CONSTANT NUMBER := 1;
-   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '1';
+   C_JENKINS_BUILD CONSTANT NUMBER := 2;
+   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '2';
    
    C_PREREQUISITES CONSTANT MDSYS.SDO_STRING2_ARRAY := MDSYS.SDO_STRING2_ARRAY(
       'DZ_JSON'
