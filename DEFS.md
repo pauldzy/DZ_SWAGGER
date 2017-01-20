@@ -31,9 +31,9 @@ The head table contains all the information defining a swagger specification hea
 |CONSUMES_XML|TRUE/FALSE flag  whether to provide "text/xml" in the consumes element|
 |PRODUCES_JSON|TRUE/FALSE flag  whether to provide "application/json" in the produces element|
 |PRODUCES_XML|TRUE/FALSE flag  whether to provide "text/xml" in the produces element|
-|INFO_DESC_UPDATED|Free date for data management purposes, not used by the logic.|
-|INFO_DESC_AUTHOR|Free text for data management purposes, not used by the logic.|
-|INFO_DESC_NOTES|Free text for data management purposes, not used by the logic.|
+|INFO_DESC_UPDATED|Free date for specification management purposes, not used by the logic.|
+|INFO_DESC_AUTHOR|Free text for specification management purposes, not used by the logic.|
+|INFO_DESC_NOTES|Free text for specification management purposes, not used by the logic.|
 |VERSIONID||
 
 ##DZ_SWAGGER_PATH
@@ -50,9 +50,9 @@ The head table contains all the information defining a swagger specification hea
 |OBJECT_NAME||
 |PROCEDURE_NAME||
 |OBJECT_OVERLORD||
-|PATH_DESC_UPDATED||
-|PATH_DESC_AUTHOR||
-|PATH_DESC_NOTES||
+|PATH_DESC_UPDATED|Free date for specification management purposes, not used by the logic.|
+|PATH_DESC_AUTHOR|Free text for specification management purposes, not used by the logic.|
+|PATH_DESC_NOTES|Free text for specification management purposes, not used by the logic.|
 |VERSIONID||
 
 ##DZ_SWAGGER_PATH_TAGS
@@ -84,12 +84,12 @@ The head table contains all the information defining a swagger specification hea
 |PARM_TYPE||
 |PARM_DEFAULT_STRING||
 |PARM_DEFAULT_NUMBER||
-|PARM_REQUIRED||
-|PARM_UNDOCUMENTED||
-|PARAM_SORT||
-|PARM_DESC_UPDATED||
-|PARM_DESC_AUTHOR||
-|PARM_DESC_NOTES||
+|PARM_REQUIRED|TRUE/FALSE flag to mark a [Swagger parameter](http://swagger.io/specification/#parameterObject) as required or not.|
+|PARM_UNDOCUMENTED|TRUE/FALSE flag to mark a parameter as hidden from the specification output.  You may wish to leave some parameters undocumented or temporarily hidden for an amount of time.|
+|PARAM_SORT|Unused at this time.|
+|PARM_DESC_UPDATED|Free date for specification management purposes, not used by the logic.|
+|PARM_DESC_AUTHOR|Free text for specification management purposes, not used by the logic.|
+|PARM_DESC_NOTES|Free text for specification management purposes, not used by the logic.|
 |VERSIONID||
 
 ##DZ_SWAGGER_PARM_ENUM
@@ -112,9 +112,9 @@ The head table contains all the information defining a swagger specification hea
 |RESPONSE_SCHEMA_DEF||
 |RESPONSE_SCHEMA_TYPE||
 |RESPONSE_DESCRIPTION||
-|RESPONSE_DESC_UPDATED||
-|RESPONSE_DESC_AUTHOR||
-|RESPONSE_DESC_NOTES||
+|RESPONSE_DESC_UPDATED|Free date for specification management purposes, not used by the logic.|
+|RESPONSE_DESC_AUTHOR|Free text for specification management purposes, not used by the logic.|
+|RESPONSE_DESC_NOTES|Free text for specification management purposes, not used by the logic.|
 |VERSIONID||
 
 ##DZ_SWAGGER_DEFINITION
@@ -157,16 +157,17 @@ The head table contains all the information defining a swagger specification hea
 |PROPERTY_EXP_STRING||
 |PROPERTY_EXP_NUMBER||
 |PROPERTY_DESCRIPTION||
-|PROPERTY_DESC_UPDATED||
-|PROPERTY_DESC_AUTHOR||
-|PROPERTY_DESC_NOTES||
+|PROPERTY_DESC_UPDATED|Free date for specification management purposes, not used by the logic.|
+|PROPERTY_DESC_AUTHOR|Free text for specification management purposes, not used by the logic.|
+|PROPERTY_DESC_NOTES|Free text for specification management purposes, not used by the logic.|
 |VERSIONID||
 
 ##DZ_SWAGGER_CONDENSE
+The condense table is provided to optionally allow definition identifiers to be altered in the output specification.  Essentially its quite difficult with complex specifications to name all your definitions as short UUIDs or obscure small keywords.  You almost always want to tag your objects with indications of the depth and heredity of the object.  E.g. this one is root.grandparent.mom.son.type and that one is root.grandparent.uncle.type.  Otherwise keeping track of things is rather difficult.  However you may not want this detail in the specification (though you might).  You can optionally add regex replaces in this table to condense or alter your key names however you like.   
 
 |||
 |----------|------------------------------------------------------------------------------------------------------|
-|CONDENSE_KEY||
-|CONDENSE_VALUE||
+|CONDENSE_KEY|regex expression to find in definition output|
+|CONDENSE_VALUE|value to use in place of the regex match|
 |VERSIONID||
 
