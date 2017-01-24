@@ -429,7 +429,6 @@ AS
       SELECT dz_swagger_definition_typ(
           p_definition          => a.definition
          ,p_definition_type     => a.definition_type
-         ,p_definition_xml_name => a.definition_xml_name
          ,p_definition_desc     => a.definition_desc
          ,p_inline_def          => NULL
          ,p_versionid           => a.versionid
@@ -439,14 +438,12 @@ AS
          SELECT
           aa.definition
          ,aa.definition_type
-         ,aa.definition_xml_name
          ,aa.definition_desc
          ,aa.versionid
          FROM (
             SELECT
              aaa.definition
             ,aaa.definition_type
-            ,aaa.definition_xml_name
             ,aaa.definition_desc
             ,aaa.versionid
             FROM
@@ -463,7 +460,7 @@ AS
             OR (aaa.versionid,aaa.definition) IN (
                SELECT
                 ddd.versionid
-               ,ddd.property_reference 
+               ,ddd.property_target 
                FROM 
                dz_swagger_def_prop ccc
                JOIN
@@ -473,7 +470,7 @@ AS
                WHERE 
                    ccc.versionid = self.versionid
                AND ddd.versionid = self.versionid
-               AND ddd.property_reference IS NOT NULL
+               AND ddd.property_target IS NOT NULL
                START WITH (ccc.versionid,ccc.definition,ccc.definition_type) IN (
                   SELECT 
                    cccc.versionid
@@ -485,10 +482,10 @@ AS
                   cccc.response_schema_type = 'object'
                )
                CONNECT BY PRIOR 
-               ddd.property_reference = ccc.definition
+               ddd.property_target = ccc.definition
                GROUP BY 
                 ddd.versionid
-               ,ddd.property_reference
+               ,ddd.property_target
             )
          ) aa      
       ) a;
@@ -509,7 +506,13 @@ AS
             ,p_property_exp_string  => b.property_exp_string
             ,p_property_exp_number  => b.property_exp_number
             ,p_property_description => b.property_description
-            ,p_property_reference   => b.property_reference
+            ,p_property_target      => b.property_target
+            ,p_xml_name             => b.xml_name
+            ,p_xml_namespace        => b.xml_namespace
+            ,p_xml_prefix           => b.xml_prefix 
+            ,p_xml_attribute        => b.xml_attribute 
+            ,p_xml_wrapped          => b.xml_wrapped
+            ,p_xml_array_name       => b.xml_array_name
             ,p_versionid            => a.versionid
          )
          BULK COLLECT INTO def_pool(i).swagger_properties
@@ -554,7 +557,6 @@ AS
                   SELECT dz_swagger_definition_typ(
                       p_definition          => a.definition
                      ,p_definition_type     => a.definition_type
-                     ,p_definition_xml_name => a.definition_xml_name
                      ,p_definition_desc     => a.definition_desc
                      ,p_inline_def          => a.inline_def
                      ,p_versionid           => a.versionid
@@ -589,7 +591,6 @@ AS
       dz_swagger_definition_typ(
           p_definition          => a.definition
          ,p_definition_type     => a.definition_type
-         ,p_definition_xml_name => a.definition_xml_name
          ,p_definition_desc     => a.definition_desc
          ,p_inline_def          => a.inline_def
          ,p_versionid           => a.versionid

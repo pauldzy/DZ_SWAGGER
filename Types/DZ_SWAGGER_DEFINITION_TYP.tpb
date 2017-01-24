@@ -16,7 +16,6 @@ AS
    CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
-      ,p_definition_xml_name  IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
@@ -26,7 +25,6 @@ AS
    
       self.definition           := p_definition;
       self.definition_type      := p_definition_type;
-      self.definition_xml_name  := p_definition_xml_name;
       self.definition_desc      := p_definition_desc;
       self.inline_def           := p_inline_def;
       self.versionid            := p_versionid;
@@ -40,7 +38,6 @@ AS
    CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
-      ,p_definition_xml_name  IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
@@ -51,7 +48,6 @@ AS
    
       self.definition           := p_definition;
       self.definition_type      := p_definition_type;
-      self.definition_xml_name  := p_definition_xml_name;
       self.definition_desc      := p_definition_desc;
       self.inline_def           := p_inline_def;
       self.versionid            := p_versionid;
@@ -109,7 +105,7 @@ AS
       str_pad := ',';
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 40
       -- Add optional description object
       --------------------------------------------------------------------------
       IF self.definition_desc IS NOT NULL
@@ -125,47 +121,9 @@ AS
          str_pad := ',';
       
       END IF;
-      
+  
       --------------------------------------------------------------------------
       -- Step 50
-      -- Add optional xml object
-      --------------------------------------------------------------------------
-      IF self.definition_xml_name IS NOT NULL
-      THEN
-         IF num_pretty_print IS NULL
-         THEN
-            str_xml := dz_json_util.pretty('{',NULL);
-            
-         ELSE
-            str_xml := dz_json_util.pretty('{',-1);
-            
-         END IF;
-         
-         str_xml := str_xml || dz_json_util.pretty(
-             ' ' || dz_json_main.value2json(
-                'name'
-               ,self.definition_xml_name
-               ,num_pretty_print + 2
-            )
-            ,num_pretty_print + 2
-         ) || dz_json_util.pretty(
-             '}'
-            ,num_pretty_print + 1,NULL,NULL
-         );   
-      
-         clb_output := clb_output || dz_json_util.pretty(
-             str_pad || dz_json_main.formatted2json(
-                 'xml'
-                ,str_xml
-                ,num_pretty_print + 1
-             )
-            ,num_pretty_print + 1
-         );
-         
-      END IF;
-      
-      --------------------------------------------------------------------------
-      -- Step 60
       -- Add properties
       --------------------------------------------------------------------------
       IF self.swagger_properties IS NULL
@@ -203,7 +161,7 @@ AS
       
 
       --------------------------------------------------------------------------
-      -- Step 70
+      -- Step 60
       -- Add the left bracket
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
@@ -212,7 +170,7 @@ AS
       );
       
       --------------------------------------------------------------------------
-      -- Step 110
+      -- Step 70
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN clb_output;
@@ -257,31 +215,10 @@ AS
             ,'  '
          );
       
-      END IF;
+      END IF;      
       
       --------------------------------------------------------------------------
       -- Step 40
-      -- Add optional xml object
-      --------------------------------------------------------------------------
-      IF self.definition_xml_name IS NOT NULL
-      THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             'xml: '
-            ,num_pretty_print
-            ,'  '
-         ) || dz_json_util.pretty(
-             'name: ' || dz_swagger_util.yaml_text(
-                 self.definition_xml_name
-                ,num_pretty_print + 1
-             )
-            ,num_pretty_print + 1
-            ,'  '
-         );
-         
-      END IF;
-      
-      --------------------------------------------------------------------------
-      -- Step 50
       -- Add the properties
       --------------------------------------------------------------------------         
       clb_output := clb_output || dz_json_util.pretty_str(
@@ -301,7 +238,7 @@ AS
       END LOOP;
       
       --------------------------------------------------------------------------
-      -- Step 60
+      -- Step 50
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN REGEXP_REPLACE(

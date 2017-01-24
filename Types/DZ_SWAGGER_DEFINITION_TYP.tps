@@ -4,7 +4,6 @@ AS OBJECT (
     versionid            VARCHAR2(40 Char)
    ,definition           VARCHAR2(255 Char)
    ,definition_type      VARCHAR2(255 Char)
-   ,definition_xml_name  VARCHAR2(255 Char)
    ,definition_desc      VARCHAR2(4000 Char)
    ,inline_def           VARCHAR2(5 Char)
    ,swagger_properties   dz_swagger_property_list
@@ -20,7 +19,6 @@ AS OBJECT (
    ,CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
-      ,p_definition_xml_name  IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
@@ -31,7 +29,6 @@ AS OBJECT (
    ,CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
-      ,p_definition_xml_name  IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
