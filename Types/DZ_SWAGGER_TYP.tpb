@@ -431,6 +431,9 @@ AS
          ,p_definition_type     => a.definition_type
          ,p_definition_desc     => a.definition_desc
          ,p_inline_def          => NULL
+         ,p_xml_name            => a.xml_name
+         ,p_xml_namespace       => a.xml_namespace
+         ,p_xml_prefix          => a.xml_prefix
          ,p_versionid           => a.versionid
       )
       BULK COLLECT INTO def_pool
@@ -439,12 +442,18 @@ AS
           aa.definition
          ,aa.definition_type
          ,aa.definition_desc
+         ,aa.xml_name
+         ,aa.xml_namespace
+         ,aa.xml_prefix
          ,aa.versionid
          FROM (
             SELECT
              aaa.definition
             ,aaa.definition_type
             ,aaa.definition_desc
+            ,aaa.xml_name
+            ,aaa.xml_namespace
+            ,aaa.xml_prefix
             ,aaa.versionid
             FROM
             dz_swagger_definition aaa
@@ -559,6 +568,9 @@ AS
                      ,p_definition_type     => a.definition_type
                      ,p_definition_desc     => a.definition_desc
                      ,p_inline_def          => a.inline_def
+                     ,p_xml_name            => a.xml_name
+                     ,p_xml_namespace       => a.xml_namespace
+                     ,p_xml_prefix          => a.xml_prefix
                      ,p_versionid           => a.versionid
                      ,p_swagger_properties  => a.swagger_properties
                   )
@@ -593,6 +605,9 @@ AS
          ,p_definition_type     => a.definition_type
          ,p_definition_desc     => a.definition_desc
          ,p_inline_def          => a.inline_def
+         ,p_xml_name            => a.xml_name
+         ,p_xml_namespace       => a.xml_namespace
+         ,p_xml_prefix          => a.xml_prefix
          ,p_versionid           => a.versionid
          ,p_swagger_properties  => a.swagger_properties
       )

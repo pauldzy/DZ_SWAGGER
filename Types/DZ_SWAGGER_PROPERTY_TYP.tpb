@@ -63,10 +63,8 @@ AS
    AS
       num_pretty_print NUMBER := p_pretty_print;
       clb_output       CLOB;
-      str_xml          VARCHAR2(4000 Char);
       str_pad          VARCHAR2(1 Char);
       str_pad2         VARCHAR2(1 Char);
-      str_pad3         VARCHAR2(1 Char);
       
    BEGIN
       
@@ -232,40 +230,17 @@ AS
                
                IF self.xml_array_name IS NOT NULL
                THEN
-                  IF num_pretty_print IS NULL
-                  THEN
-                     str_xml := dz_json_util.pretty('{',NULL);
-                     str_pad3 := '';
-                     
-                  ELSE
-                     str_xml := dz_json_util.pretty('{',-1);
-                     str_pad3 := ' ';
-                     
-                  END IF;
-                  
-                  str_xml := str_xml || dz_json_util.pretty(
-                      str_pad3 || dz_json_main.value2json(
-                         'name'
-                        ,self.xml_array_name
-                        ,num_pretty_print + 3
-                     )
-                     ,num_pretty_print + 3
-                  );
-                  str_pad3 := ',';
-                  
-                  str_xml := str_xml || dz_json_util.pretty(
-                      '}'
-                     ,num_pretty_print + 2,NULL,NULL
-                  );
-                  
                   clb_output := clb_output || dz_json_util.pretty(
                       str_pad2 || dz_json_main.formatted2json(
-                          'xml'
-                         ,str_xml
-                         ,num_pretty_print + 2
+                         'xml'
+                        ,dz_swagger_xml(
+                           p_xml_name => self.xml_array_name
+                         ).toJSON(num_pretty_print + 2)
+                        ,num_pretty_print + 2
                       )
                      ,num_pretty_print + 2
                   );
+                  str_pad2 := ',';
                   
                END IF;
 
@@ -290,6 +265,35 @@ AS
                ,num_pretty_print + 1
             );
 
+         END IF;
+         
+      --------------------------------------------------------------------------
+      -- Step 90 
+      -- Add optional xml tag items
+      --------------------------------------------------------------------------   
+         IF self.xml_name      IS NOT NULL
+         OR self.xml_namespace IS NOT NULL
+         OR self.xml_prefix    IS NOT NULL
+         OR self.xml_attribute = 'TRUE'
+         OR self.xml_wrapped   = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty(
+                str_pad2 || dz_json_main.formatted2json(
+                   'xml'
+                  ,dz_swagger_xml(
+                      p_xml_name      => self.xml_name
+                     ,p_xml_namespace => self.xml_namespace
+                     ,p_xml_prefix    => self.xml_prefix
+                     ,p_xml_attribute => self.xml_attribute
+                     ,p_xml_wrapped   => self.xml_wrapped
+                   ).toJSON(
+                     p_pretty_print => num_pretty_print + 1
+                   )
+                  ,num_pretty_print + 1
+                )
+               ,num_pretty_print + 1
+            );
+            
          END IF;
          
       END IF;
@@ -420,7 +424,6 @@ AS
       --------------------------------------------------------------------------
          IF self.property_type = 'array' 
          THEN
-         
             clb_output := clb_output || dz_json_util.pretty_str(
                 'items: '
                ,num_pretty_print + 1
@@ -434,6 +437,20 @@ AS
                   ,num_pretty_print + 2
                   ,'  '
                );
+               
+               IF self.xml_array_name IS NOT NULL
+               THEN
+                  clb_output := clb_output || dz_json_util.pretty_str(
+                      'xml: '
+                     ,num_pretty_print + 2
+                     ,'  '
+                  ) || dz_swagger_xml(
+                     p_xml_name => self.xml_array_name
+                  ).toYAML(
+                     num_pretty_print + 3
+                  );
+               
+               END IF;
             
             ELSE
                clb_output := clb_output || dz_json_util.pretty_str(
@@ -446,6 +463,32 @@ AS
                );
             
             END IF;
+         
+         END IF;
+         
+      --------------------------------------------------------------------------
+      -- Step 90 
+      -- Add optional xml tag items
+      --------------------------------------------------------------------------   
+         IF self.xml_name      IS NOT NULL
+         OR self.xml_namespace IS NOT NULL
+         OR self.xml_prefix    IS NOT NULL
+         OR self.xml_attribute = 'TRUE'
+         OR self.xml_wrapped   = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                'xml: '
+               ,num_pretty_print + 1
+               ,'  '
+            ) || dz_swagger_xml(
+                p_xml_name      => self.xml_name
+               ,p_xml_namespace => self.xml_namespace
+               ,p_xml_prefix    => self.xml_prefix
+               ,p_xml_attribute => self.xml_attribute
+               ,p_xml_wrapped   => self.xml_wrapped
+            ).toYAML(
+               num_pretty_print + 2
+            );
          
          END IF;
          

@@ -82,7 +82,7 @@ FROM (
       ,ddd.property_desc_updated
       ,ddd.property_desc_author
       ,ddd.property_desc_notes
-      ,ddd.property_reference
+      ,ddd.property_target
       FROM 
       dz_swagger_def_prop ccc
       JOIN 
@@ -107,7 +107,7 @@ FROM (
              cccc.versionid = 'TRUNK'
          AND cccc.response_schema_type = 'object'
       )
-      CONNECT BY PRIOR ddd.property_reference = ccc.definition
+      CONNECT BY PRIOR ddd.property_target = ccc.definition
       ORDER BY
        CONNECT_BY_ROOT (ccc.definition)
       ,LEVEL

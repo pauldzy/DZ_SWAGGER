@@ -7,6 +7,9 @@ AS OBJECT (
    ,definition_desc      VARCHAR2(4000 Char)
    ,inline_def           VARCHAR2(5 Char)
    ,swagger_properties   dz_swagger_property_list
+   ,xml_name             VARCHAR2(255 Char)
+   ,xml_namespace        VARCHAR2(2000 Char)
+   ,xml_prefix           VARCHAR2(255 Char)
    ,dummy                INTEGER
 
    -----------------------------------------------------------------------------
@@ -21,6 +24,9 @@ AS OBJECT (
       ,p_definition_type      IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
+      ,p_xml_name             IN  VARCHAR2
+      ,p_xml_namespace        IN  VARCHAR2
+      ,p_xml_prefix           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT
    
@@ -31,6 +37,9 @@ AS OBJECT (
       ,p_definition_type      IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
+      ,p_xml_name             IN  VARCHAR2
+      ,p_xml_namespace        IN  VARCHAR2
+      ,p_xml_prefix           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
       ,p_swagger_properties   IN  dz_swagger_property_list
    ) RETURN SELF AS RESULT
