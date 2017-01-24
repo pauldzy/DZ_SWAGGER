@@ -37,5 +37,5 @@ AS OBJECT (
 );
 /
 
-GRANT EXECUTE ON dz_swagger_info TO public;
+GRANT EXECUTE ON dz_swagger_xml TO public;
 
