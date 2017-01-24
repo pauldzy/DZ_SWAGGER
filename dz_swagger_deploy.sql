@@ -17,8 +17,8 @@ AS
    /*
    Header: DZ_SWAGGER
      
-   - Build ID: 2
-   - Change Set: b12d4f3f4bc8a6eec4eaf0bcf99df2e7f08123b3
+   - Build ID: 5
+   - Change Set: 058f3d9286ae176234472be20dcfa7a7012ad1e7
    
    PLSQL module for the creation, storage and production of Open API service 
    definitions.   Support for the unloading of Swagger JSON specifications into
@@ -194,7 +194,6 @@ AS
       str_sql := 'CREATE TABLE dz_swagger_definition('
               || '    definition              VARCHAR2(255 Char) NOT NULL '
               || '   ,definition_type         VARCHAR2(255 Char) NOT NULL '
-              || '   ,definition_xml_name     VARCHAR2(255 Char) '
               || '   ,definition_desc         VARCHAR2(4000 Char) '
               || '   ,definition_desc_updated DATE '
               || '   ,definition_desc_author  VARCHAR2(30 Char) '
@@ -230,9 +229,6 @@ AS
               || '    CONSTRAINT dz_swagger_definition_c01 '
               || '    CHECK (definition = TRIM(definition)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_definition_c02 '
-              || '    CHECK (definition_xml_name = TRIM(definition_xml_name)) '
-              || '    ENABLE VALIDATE '
               || '   ,CONSTRAINT dz_swagger_definition_c03 '
               || '    CHECK (versionid = TRIM(versionid)) '
               || '    ENABLE VALIDATE '
@@ -248,7 +244,7 @@ AS
               || '    property_id           VARCHAR2(255 Char) NOT NULL '
               || '   ,property              VARCHAR2(255 Char) NOT NULL '
               || '   ,property_type         VARCHAR2(255 Char) NOT NULL '
-              || '   ,property_reference    VARCHAR2(255 Char) '
+              || '   ,property_target       VARCHAR2(255 Char) '
               || '   ,property_format       VARCHAR2(255 Char) '
               || '   ,property_title        VARCHAR2(255 Char) '
               || '   ,property_exp_string   VARCHAR2(255 Char) '
@@ -257,6 +253,12 @@ AS
               || '   ,property_desc_updated DATE '
               || '   ,property_desc_author  VARCHAR2(30 Char) '
               || '   ,property_desc_notes   VARCHAR2(255 Char) '
+              || '   ,xml_name              VARCHAR2(255 Char) '
+              || '   ,xml_namespace         VARCHAR2(2000 Char) '
+              || '   ,xml_prefix            VARCHAR2(255 Char) '
+              || '   ,xml_attribute         VARCHAR2(5 Char) '
+              || '   ,xml_wrapped           VARCHAR2(5 Char) '
+              || '   ,xml_array_name        VARCHAR2(255 Char) '
               || '   ,versionid             VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
@@ -289,7 +291,7 @@ AS
               || '    CHECK (property = TRIM(property)) '
               || '    ENABLE VALIDATE '
               || '   ,CONSTRAINT dz_swagger_property_c03 '
-              || '    CHECK (property_reference = TRIM(property_reference)) '
+              || '    CHECK (property_target = TRIM(property_target)) '
               || '    ENABLE VALIDATE '
               || '   ,CONSTRAINT dz_swagger_property_c04 '
               || '    CHECK (versionid = TRIM(versionid)) '
@@ -1178,7 +1180,13 @@ AS OBJECT (
    ,property_exp_string  VARCHAR2(255 Char)
    ,property_exp_number  NUMBER
    ,property_description VARCHAR2(4000 Char)
-   ,property_reference   VARCHAR2(255 Char)
+   ,property_target      VARCHAR2(255 Char)
+   ,xml_name             VARCHAR2(255 Char)
+   ,xml_namespace        VARCHAR2(2000 Char)
+   ,xml_prefix           VARCHAR2(255 Char)
+   ,xml_attribute        VARCHAR2(5 Char)
+   ,xml_wrapped          VARCHAR2(5 Char)
+   ,xml_array_name       VARCHAR2(255 Char)
    ,dummy                INTEGER
    
    -----------------------------------------------------------------------------
@@ -1197,7 +1205,13 @@ AS OBJECT (
       ,p_property_exp_string  IN  VARCHAR2
       ,p_property_exp_number  IN  NUMBER
       ,p_property_description IN  VARCHAR2
-      ,p_property_reference   IN  VARCHAR2
+      ,p_property_target      IN  VARCHAR2
+      ,p_xml_name             IN  VARCHAR2
+      ,p_xml_namespace        IN  VARCHAR2
+      ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_attribute        IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
+      ,p_xml_array_name       IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT
     
@@ -1246,7 +1260,13 @@ AS
       ,p_property_exp_string  IN  VARCHAR2
       ,p_property_exp_number  IN  NUMBER
       ,p_property_description IN  VARCHAR2
-      ,p_property_reference   IN  VARCHAR2
+      ,p_property_target      IN  VARCHAR2
+      ,p_xml_name             IN  VARCHAR2
+      ,p_xml_namespace        IN  VARCHAR2
+      ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_attribute        IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
+      ,p_xml_array_name       IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT 
    AS 
@@ -1260,7 +1280,13 @@ AS
       self.property_exp_string  := TRIM(p_property_exp_string);
       self.property_exp_number  := p_property_exp_number;
       self.property_description := TRIM(p_property_description);
-      self.property_reference   := TRIM(p_property_reference);
+      self.property_target      := TRIM(p_property_target);
+      self.xml_name             := TRIM(p_xml_name);
+      self.xml_namespace        := TRIM(p_xml_namespace);
+      self.xml_prefix           := TRIM(p_xml_prefix);
+      self.xml_attribute        := TRIM(p_xml_attribute);
+      self.xml_wrapped          := TRIM(p_xml_wrapped);
+      self.xml_array_name       := TRIM(p_xml_array_name);
       self.versionid            := p_versionid;
       
       RETURN; 
@@ -1275,8 +1301,10 @@ AS
    AS
       num_pretty_print NUMBER := p_pretty_print;
       clb_output       CLOB;
+      str_xml          VARCHAR2(4000 Char);
       str_pad          VARCHAR2(1 Char);
-      ary_items        MDSYS.SDO_STRING2_ARRAY;
+      str_pad2         VARCHAR2(1 Char);
+      str_pad3         VARCHAR2(1 Char);
       
    BEGIN
       
@@ -1292,15 +1320,19 @@ AS
       IF num_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty(
-             dz_json_main.json_format(self.property) || ': {'
+             dz_json_main.json_format(self.property) || ':{'
             ,NULL
          );
+         str_pad  := '';
+         str_pad2 := '';
          
       ELSE
          clb_output  := dz_json_util.pretty(
              dz_json_main.json_format(self.property) || ': {'
             ,-1
          );
+         str_pad  := ' ';
+         str_pad2 := ' ';
          
       END IF;
       
@@ -1311,26 +1343,28 @@ AS
       IF self.property_type = 'reference'
       THEN
          clb_output := clb_output || dz_json_util.pretty(
-             ' ' || dz_json_main.value2json(
+             str_pad || dz_json_main.value2json(
                 '$ref'
                ,'#/definitions/' || dz_swagger_util.dzcondense(
                   self.versionid 
-                 ,self.property_reference
+                 ,self.property_target
                 )
                ,num_pretty_print + 1
             )
             ,num_pretty_print + 1
          );
+         str_pad := ',';
          
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
-             ' ' || dz_json_main.value2json(
+             str_pad || dz_json_main.value2json(
                 'type'
                ,self.property_type
                ,num_pretty_print + 1
             )
             ,num_pretty_print + 1
          );
+         str_pad := ',';
          
       --------------------------------------------------------------------------
       -- Step 40
@@ -1339,7 +1373,7 @@ AS
          IF self.property_format IS NOT NULL
          THEN
             clb_output := clb_output || dz_json_util.pretty(
-                ',' || dz_json_main.value2json(
+                str_pad || dz_json_main.value2json(
                    'format'
                   ,self.property_format
                   ,num_pretty_print + 1
@@ -1356,7 +1390,7 @@ AS
          IF self.property_title IS NOT NULL
          THEN
             clb_output := clb_output || dz_json_util.pretty(
-                ',' || dz_json_main.value2json(
+                str_pad || dz_json_main.value2json(
                    'title'
                   ,self.property_title
                   ,num_pretty_print + 1
@@ -1373,7 +1407,7 @@ AS
          IF self.property_exp_string IS NOT NULL
          THEN
             clb_output := clb_output || dz_json_util.pretty(
-                ',' || dz_json_main.value2json(
+                str_pad || dz_json_main.value2json(
                    'example'
                   ,self.property_exp_string
                   ,num_pretty_print + 1
@@ -1384,7 +1418,7 @@ AS
          ELSIF self.property_exp_number IS NOT NULL
          THEN
             clb_output := clb_output || dz_json_util.pretty(
-                ',' || dz_json_main.value2json(
+                str_pad || dz_json_main.value2json(
                    'example'
                   ,self.property_exp_number
                   ,num_pretty_print + 1
@@ -1401,7 +1435,7 @@ AS
          IF self.property_description IS NOT NULL
          THEN
             clb_output := clb_output || dz_json_util.pretty(
-                ',' || dz_json_main.value2json(
+                str_pad || dz_json_main.value2json(
                    'description'
                   ,self.property_description
                   ,num_pretty_print + 1
@@ -1417,51 +1451,78 @@ AS
       --------------------------------------------------------------------------
          IF self.property_type = 'array' 
          THEN
-         
-            ary_items := dz_json_util.gz_split(
-                self.property_reference
-               ,','
-            );
-            
             clb_output := clb_output || dz_json_util.pretty(
-                ',' || dz_json_main.fastname('items',num_pretty_print) || '{'
+                str_pad || dz_json_main.fastname('items',num_pretty_print) || '{'
                ,num_pretty_print + 1
             );
             
-            str_pad := ' ';
-         
-            FOR i IN 1 .. ary_items.COUNT
-            LOOP
-               IF LOWER(ary_items(i)) IN ('string','number','integer','boolean')
-               THEN
-                  clb_output := clb_output || dz_json_util.pretty(
-                     str_pad || dz_json_main.value2json(
-                         'type'
-                        ,LOWER(ary_items(i))
-                        ,num_pretty_print + 2
-                     )
+            IF LOWER(self.property_target) IN ('string','number','integer','boolean')
+            THEN
+               clb_output := clb_output || dz_json_util.pretty(
+                  str_pad2 || dz_json_main.value2json(
+                      'type'
+                     ,LOWER(self.property_target)
                      ,num_pretty_print + 2
-                  );
+                  )
+                  ,num_pretty_print + 2
+               );
+               str_pad2 := ',';
                
-               ELSE
-                  clb_output := clb_output || dz_json_util.pretty(
-                     str_pad || dz_json_main.value2json(
-                         '$ref'
-                        ,'#/definitions/' || dz_swagger_util.dzcondense(
-                            self.versionid
-                           ,ary_items(i)
-                         )
-                        ,num_pretty_print + 2
+               IF self.xml_array_name IS NOT NULL
+               THEN
+                  IF num_pretty_print IS NULL
+                  THEN
+                     str_xml := dz_json_util.pretty('{',NULL);
+                     str_pad3 := '';
+                     
+                  ELSE
+                     str_xml := dz_json_util.pretty('{',-1);
+                     str_pad3 := ' ';
+                     
+                  END IF;
+                  
+                  str_xml := str_xml || dz_json_util.pretty(
+                      str_pad3 || dz_json_main.value2json(
+                         'name'
+                        ,self.xml_array_name
+                        ,num_pretty_print + 3
                      )
+                     ,num_pretty_print + 3
+                  );
+                  str_pad3 := ',';
+                  
+                  str_xml := str_xml || dz_json_util.pretty(
+                      '}'
+                     ,num_pretty_print + 2,NULL,NULL
+                  );
+                  
+                  clb_output := clb_output || dz_json_util.pretty(
+                      str_pad2 || dz_json_main.formatted2json(
+                          'xml'
+                         ,str_xml
+                         ,num_pretty_print + 2
+                      )
                      ,num_pretty_print + 2
                   );
                   
                END IF;
+
+            ELSE
+               clb_output := clb_output || dz_json_util.pretty(
+                  str_pad2 || dz_json_main.value2json(
+                      '$ref'
+                     ,'#/definitions/' || dz_swagger_util.dzcondense(
+                         self.versionid
+                        ,self.property_target
+                      )
+                     ,num_pretty_print + 2
+                  )
+                  ,num_pretty_print + 2
+               );
+               str_pad2 := ',';
                
-               str_pad := ',';
-     
-            END LOOP;
-         
+            END IF;
+            
             clb_output := clb_output || dz_json_util.pretty(
                 '}'
                ,num_pretty_print + 1
@@ -1496,7 +1557,6 @@ AS
    AS
       clb_output        CLOB;
       num_pretty_print  NUMBER := p_pretty_print;
-      ary_items         MDSYS.SDO_STRING2_ARRAY;
       
    BEGIN
    
@@ -1514,7 +1574,7 @@ AS
          clb_output := clb_output || dz_json_util.pretty_str(
              '"$ref": "#/definitions/' || dz_swagger_util.dzcondense(
                  self.versionid
-                ,self.property_reference
+                ,self.property_target
              ) || '" '
             ,num_pretty_print + 1
             ,'  '
@@ -1604,35 +1664,26 @@ AS
                ,num_pretty_print + 1
                ,'  '
             );
+
+            IF LOWER(self.property_target) IN ('string','number','integer','boolean')
+            THEN
+               clb_output := clb_output || dz_json_util.pretty_str(
+                   'type: ' || LOWER(self.property_target) || ' '
+                  ,num_pretty_print + 2
+                  ,'  '
+               );
             
-            ary_items := dz_json_util.gz_split(
-                self.property_reference
-               ,','
-            );
+            ELSE
+               clb_output := clb_output || dz_json_util.pretty_str(
+                   '"$ref": "#/definitions/' || dz_swagger_util.dzcondense(
+                       self.versionid
+                      ,self.property_target
+                   ) || '" '
+                  ,num_pretty_print + 2
+                  ,'  '
+               );
             
-            FOR i IN 1 .. ary_items.COUNT
-            LOOP
-               IF LOWER(ary_items(i)) IN ('string','number','integer','boolean')
-               THEN
-                  clb_output := clb_output || dz_json_util.pretty_str(
-                      'type: ' || LOWER(ary_items(i)) || ' '
-                     ,num_pretty_print + 2
-                     ,'  '
-                  );
-               
-               ELSE
-                  clb_output := clb_output || dz_json_util.pretty_str(
-                      '"$ref": "#/definitions/' || dz_swagger_util.dzcondense(
-                          self.versionid
-                         ,ary_items(i)
-                      ) || '" '
-                     ,num_pretty_print + 2
-                     ,'  '
-                  );
-               
-               END IF;
-                 
-            END LOOP;
+            END IF;
          
          END IF;
          
@@ -2579,7 +2630,6 @@ AS OBJECT (
     versionid            VARCHAR2(40 Char)
    ,definition           VARCHAR2(255 Char)
    ,definition_type      VARCHAR2(255 Char)
-   ,definition_xml_name  VARCHAR2(255 Char)
    ,definition_desc      VARCHAR2(4000 Char)
    ,inline_def           VARCHAR2(5 Char)
    ,swagger_properties   dz_swagger_property_list
@@ -2595,7 +2645,6 @@ AS OBJECT (
    ,CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
-      ,p_definition_xml_name  IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
@@ -2606,7 +2655,6 @@ AS OBJECT (
    ,CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
-      ,p_definition_xml_name  IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
@@ -2652,7 +2700,6 @@ AS
    CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
-      ,p_definition_xml_name  IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
@@ -2662,7 +2709,6 @@ AS
    
       self.definition           := p_definition;
       self.definition_type      := p_definition_type;
-      self.definition_xml_name  := p_definition_xml_name;
       self.definition_desc      := p_definition_desc;
       self.inline_def           := p_inline_def;
       self.versionid            := p_versionid;
@@ -2676,7 +2722,6 @@ AS
    CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
-      ,p_definition_xml_name  IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
@@ -2687,7 +2732,6 @@ AS
    
       self.definition           := p_definition;
       self.definition_type      := p_definition_type;
-      self.definition_xml_name  := p_definition_xml_name;
       self.definition_desc      := p_definition_desc;
       self.inline_def           := p_inline_def;
       self.versionid            := p_versionid;
@@ -2745,7 +2789,7 @@ AS
       str_pad := ',';
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 40
       -- Add optional description object
       --------------------------------------------------------------------------
       IF self.definition_desc IS NOT NULL
@@ -2761,47 +2805,9 @@ AS
          str_pad := ',';
       
       END IF;
-      
+  
       --------------------------------------------------------------------------
       -- Step 50
-      -- Add optional xml object
-      --------------------------------------------------------------------------
-      IF self.definition_xml_name IS NOT NULL
-      THEN
-         IF num_pretty_print IS NULL
-         THEN
-            str_xml := dz_json_util.pretty('{',NULL);
-            
-         ELSE
-            str_xml := dz_json_util.pretty('{',-1);
-            
-         END IF;
-         
-         str_xml := str_xml || dz_json_util.pretty(
-             ' ' || dz_json_main.value2json(
-                'name'
-               ,self.definition_xml_name
-               ,num_pretty_print + 2
-            )
-            ,num_pretty_print + 2
-         ) || dz_json_util.pretty(
-             '}'
-            ,num_pretty_print + 1,NULL,NULL
-         );   
-      
-         clb_output := clb_output || dz_json_util.pretty(
-             str_pad || dz_json_main.formatted2json(
-                 'xml'
-                ,str_xml
-                ,num_pretty_print + 1
-             )
-            ,num_pretty_print + 1
-         );
-         
-      END IF;
-      
-      --------------------------------------------------------------------------
-      -- Step 60
       -- Add properties
       --------------------------------------------------------------------------
       IF self.swagger_properties IS NULL
@@ -2839,7 +2845,7 @@ AS
       
 
       --------------------------------------------------------------------------
-      -- Step 70
+      -- Step 60
       -- Add the left bracket
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
@@ -2848,7 +2854,7 @@ AS
       );
       
       --------------------------------------------------------------------------
-      -- Step 110
+      -- Step 70
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN clb_output;
@@ -2893,31 +2899,10 @@ AS
             ,'  '
          );
       
-      END IF;
+      END IF;      
       
       --------------------------------------------------------------------------
       -- Step 40
-      -- Add optional xml object
-      --------------------------------------------------------------------------
-      IF self.definition_xml_name IS NOT NULL
-      THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             'xml: '
-            ,num_pretty_print
-            ,'  '
-         ) || dz_json_util.pretty(
-             'name: ' || dz_swagger_util.yaml_text(
-                 self.definition_xml_name
-                ,num_pretty_print + 1
-             )
-            ,num_pretty_print + 1
-            ,'  '
-         );
-         
-      END IF;
-      
-      --------------------------------------------------------------------------
-      -- Step 50
       -- Add the properties
       --------------------------------------------------------------------------         
       clb_output := clb_output || dz_json_util.pretty_str(
@@ -2937,7 +2922,7 @@ AS
       END LOOP;
       
       --------------------------------------------------------------------------
-      -- Step 60
+      -- Step 50
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN REGEXP_REPLACE(
@@ -5202,7 +5187,6 @@ AS
       SELECT dz_swagger_definition_typ(
           p_definition          => a.definition
          ,p_definition_type     => a.definition_type
-         ,p_definition_xml_name => a.definition_xml_name
          ,p_definition_desc     => a.definition_desc
          ,p_inline_def          => NULL
          ,p_versionid           => a.versionid
@@ -5212,14 +5196,12 @@ AS
          SELECT
           aa.definition
          ,aa.definition_type
-         ,aa.definition_xml_name
          ,aa.definition_desc
          ,aa.versionid
          FROM (
             SELECT
              aaa.definition
             ,aaa.definition_type
-            ,aaa.definition_xml_name
             ,aaa.definition_desc
             ,aaa.versionid
             FROM
@@ -5236,7 +5218,7 @@ AS
             OR (aaa.versionid,aaa.definition) IN (
                SELECT
                 ddd.versionid
-               ,ddd.property_reference 
+               ,ddd.property_target 
                FROM 
                dz_swagger_def_prop ccc
                JOIN
@@ -5246,7 +5228,7 @@ AS
                WHERE 
                    ccc.versionid = self.versionid
                AND ddd.versionid = self.versionid
-               AND ddd.property_reference IS NOT NULL
+               AND ddd.property_target IS NOT NULL
                START WITH (ccc.versionid,ccc.definition,ccc.definition_type) IN (
                   SELECT 
                    cccc.versionid
@@ -5258,10 +5240,10 @@ AS
                   cccc.response_schema_type = 'object'
                )
                CONNECT BY PRIOR 
-               ddd.property_reference = ccc.definition
+               ddd.property_target = ccc.definition
                GROUP BY 
                 ddd.versionid
-               ,ddd.property_reference
+               ,ddd.property_target
             )
          ) aa      
       ) a;
@@ -5282,7 +5264,13 @@ AS
             ,p_property_exp_string  => b.property_exp_string
             ,p_property_exp_number  => b.property_exp_number
             ,p_property_description => b.property_description
-            ,p_property_reference   => b.property_reference
+            ,p_property_target      => b.property_target
+            ,p_xml_name             => b.xml_name
+            ,p_xml_namespace        => b.xml_namespace
+            ,p_xml_prefix           => b.xml_prefix 
+            ,p_xml_attribute        => b.xml_attribute 
+            ,p_xml_wrapped          => b.xml_wrapped
+            ,p_xml_array_name       => b.xml_array_name
             ,p_versionid            => a.versionid
          )
          BULK COLLECT INTO def_pool(i).swagger_properties
@@ -5327,7 +5315,6 @@ AS
                   SELECT dz_swagger_definition_typ(
                       p_definition          => a.definition
                      ,p_definition_type     => a.definition_type
-                     ,p_definition_xml_name => a.definition_xml_name
                      ,p_definition_desc     => a.definition_desc
                      ,p_inline_def          => a.inline_def
                      ,p_versionid           => a.versionid
@@ -5362,7 +5349,6 @@ AS
       dz_swagger_definition_typ(
           p_definition          => a.definition
          ,p_definition_type     => a.definition_type
-         ,p_definition_xml_name => a.definition_xml_name
          ,p_definition_desc     => a.definition_desc
          ,p_inline_def          => a.inline_def
          ,p_versionid           => a.versionid
@@ -7295,10 +7281,10 @@ CREATE OR REPLACE PACKAGE dz_swagger_test
 AUTHID DEFINER
 AS
 
-   C_CHANGESET CONSTANT VARCHAR2(255 Char) := 'b12d4f3f4bc8a6eec4eaf0bcf99df2e7f08123b3';
+   C_CHANGESET CONSTANT VARCHAR2(255 Char) := '058f3d9286ae176234472be20dcfa7a7012ad1e7';
    C_JENKINS_JOBNM CONSTANT VARCHAR2(255 Char) := 'DZ_SWAGGER';
-   C_JENKINS_BUILD CONSTANT NUMBER := 2;
-   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '2';
+   C_JENKINS_BUILD CONSTANT NUMBER := 5;
+   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '5';
    
    C_PREREQUISITES CONSTANT MDSYS.SDO_STRING2_ARRAY := MDSYS.SDO_STRING2_ARRAY(
       'DZ_JSON'
@@ -7512,7 +7498,7 @@ FROM (
       ,ddd.property_desc_updated
       ,ddd.property_desc_author
       ,ddd.property_desc_notes
-      ,ddd.property_reference
+      ,ddd.property_target
       FROM 
       dz_swagger_def_prop ccc
       JOIN 
@@ -7537,7 +7523,7 @@ FROM (
              cccc.versionid = 'TRUNK'
          AND cccc.response_schema_type = 'object'
       )
-      CONNECT BY PRIOR ddd.property_reference = ccc.definition
+      CONNECT BY PRIOR ddd.property_target = ccc.definition
       ORDER BY 
        CONNECT_BY_ROOT(ccc.definition)
       ,LEVEL
