@@ -41,7 +41,10 @@ AS
    AS
       num_pretty_print NUMBER := p_pretty_print;
       clb_output       CLOB;
-      str_pad          VARCHAR2(1 Char);
+      str_pad         VARCHAR2(1 Char);
+      str_pad1         VARCHAR2(1 Char);
+      str_pad2         VARCHAR2(1 Char);
+      str_pad3         VARCHAR2(1 Char);
       str_parms        VARCHAR2(32000 Char);
       str_temp         VARCHAR2(32000 Char);
       
@@ -59,9 +62,41 @@ AS
       IF num_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty('{',NULL);
+         str_pad  := '';
          
       ELSE
          clb_output  := dz_json_util.pretty('{',-1);
+         str_pad  := ' ';
+         
+      END IF;
+      
+      --------------------------------------------------------------------------
+      -- Step 60
+      -- Add base attributes
+      --------------------------------------------------------------------------
+      str_pad1 := str_pad;
+      
+      clb_output := clb_output || dz_json_util.pretty(
+          str_pad1 || dz_json_main.value2json(
+             'summary'
+            ,self.path_summary
+            ,num_pretty_print + 1
+         )
+         ,num_pretty_print + 1
+      );
+      str_pad1 := ',';
+      
+      IF self.path_description IS NOT NULL
+      THEN
+         clb_output := clb_output || dz_json_util.pretty(
+             str_pad1 || dz_json_main.value2json(
+                 'description'
+                ,self.path_description
+                ,num_pretty_print + 1
+             )
+            ,num_pretty_print + 1
+         );
+         str_pad1 := ',';
          
       END IF;
       
@@ -75,6 +110,8 @@ AS
          str_parms := 'null';
          
       ELSE
+         str_pad2 := str_pad;
+         
          IF num_pretty_print IS NULL
          THEN
             str_parms := dz_json_util.pretty('[',NULL);
@@ -83,8 +120,6 @@ AS
             str_parms := dz_json_util.pretty('[',-1);
             
          END IF;
-         
-         str_pad := ' ';
          
          FOR i IN 1 .. self.method_path_parms.COUNT
          LOOP
@@ -98,7 +133,8 @@ AS
                   );
                   
                ELSE
-            
+                  str_pad3 := str_pad;
+                  
                   IF num_pretty_print IS NULL
                   THEN
                      str_temp := dz_json_util.pretty('{',NULL);
@@ -109,13 +145,14 @@ AS
                   END IF;
                   
                   str_temp := str_temp || dz_json_util.pretty(
-                     dz_json_main.value2json(
+                     str_pad3 || dz_json_main.value2json(
                          '$ref'
                         ,'#/parameters/' || self.method_path_parms(i).swagger_parm
                         ,num_pretty_print + 3
                      )
                      ,num_pretty_print + 3
                   );
+                  str_pad3 := ',';
                   
                   str_temp := str_temp || dz_json_util.pretty(
                       '}'
@@ -125,11 +162,10 @@ AS
                END IF;
             
                str_parms := str_parms || dz_json_util.pretty(
-                   str_pad || str_temp
+                   str_pad2 || str_temp
                   ,num_pretty_print + 2
                );
-                  
-               str_pad := ',';
+               str_pad2 := ',';
                
             END IF;
          
@@ -139,36 +175,19 @@ AS
              ']'
             ,num_pretty_print + 1,NULL,NULL
          );
+         
+         clb_output := clb_output || dz_json_util.pretty(
+             str_pad1 || dz_json_main.formatted2json(
+                 'parameters'
+                ,str_parms
+                ,num_pretty_print + 1
+             )
+            ,num_pretty_print + 1
+         );
+         str_pad1 := ',';
       
       END IF;
 
-      --------------------------------------------------------------------------
-      -- Step 60
-      -- Add base attributes
-      --------------------------------------------------------------------------
-      clb_output := clb_output || dz_json_util.pretty(
-          ' ' || dz_json_main.value2json(
-             'summary'
-            ,self.path_summary
-            ,num_pretty_print + 1
-         )
-         ,num_pretty_print + 1
-      ) || dz_json_util.pretty(
-          ',' || dz_json_main.value2json(
-              'description'
-             ,self.path_description
-             ,num_pretty_print + 1
-          )
-         ,num_pretty_print + 1
-      ) || dz_json_util.pretty(
-          ',' || dz_json_main.formatted2json(
-              'parameters'
-             ,str_parms
-             ,num_pretty_print + 1
-          )
-         ,num_pretty_print + 1
-      );
-      
       --------------------------------------------------------------------------
       -- Step 70
       -- Add the optional tags
@@ -177,13 +196,14 @@ AS
       AND self.method_tags.COUNT > 0
       THEN
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.value2json(
+             str_pad1 || dz_json_main.value2json(
                  'tags'
                 ,self.method_tags
                 ,num_pretty_print + 1
              )
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
       END IF;
       
@@ -194,29 +214,27 @@ AS
       IF self.method_responses IS NULL
       OR self.method_responses.COUNT = 0
       THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('responses',num_pretty_print) || 'null'
-            ,num_pretty_print + 1
-         );
+         NULL;
 
       ELSE
+         str_pad2 := str_pad;
+         
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('responses',num_pretty_print) || '{'
+             str_pad1 || dz_json_main.fastname('responses',num_pretty_print) || '{'
             ,num_pretty_print + 1
          );
          
-         str_pad := ' ';
-
          FOR i IN 1 .. self.method_responses.COUNT
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
-                str_pad || self.method_responses(i).toJSON(
-                   p_pretty_print => num_pretty_print + 2
-                )
-               ,num_pretty_print + 2
+                str_pad2 || dz_json_main.json_format(
+                  self.method_responses(i).swagger_response
+               ) || ': ' || self.method_responses(i).toJSON(
+                  p_pretty_print => num_pretty_print + 1
+               )
+               ,num_pretty_print + 1
             );
-            
-            str_pad := ',';
+            str_pad2 := ',';
 
          END LOOP;
 
@@ -224,6 +242,7 @@ AS
              '}'
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
 
       END IF;
 

@@ -7,6 +7,7 @@ AS OBJECT (
    ,property_type	       VARCHAR2(255 Char)
    ,property_title       VARCHAR2(255 Char)
    ,property_format      VARCHAR2(255 Char)
+   ,property_allow_null  VARCHAR2(5 Char)
    ,property_exp_string  VARCHAR2(255 Char)
    ,property_exp_number  NUMBER
    ,property_description VARCHAR2(4000 Char)
@@ -33,6 +34,7 @@ AS OBJECT (
       ,p_property_type	      IN  VARCHAR2
       ,p_property_title       IN  VARCHAR2
       ,p_property_format      IN  VARCHAR2
+      ,p_property_allow_null  IN  VARCHAR2
       ,p_property_exp_string  IN  VARCHAR2
       ,p_property_exp_number  IN  NUMBER
       ,p_property_description IN  VARCHAR2
@@ -50,7 +52,8 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,MEMBER FUNCTION toJSON(
-        p_pretty_print      IN  NUMBER   DEFAULT NULL
+       p_pretty_print      IN  NUMBER   DEFAULT NULL
+      ,p_jsonschema        IN  VARCHAR2 DEFAULT 'FALSE' 
     ) RETURN CLOB
     
    -----------------------------------------------------------------------------

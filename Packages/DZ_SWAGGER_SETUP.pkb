@@ -175,6 +175,7 @@ AS
               || '   ,property_type         VARCHAR2(255 Char) NOT NULL '
               || '   ,property_target       VARCHAR2(255 Char) '
               || '   ,property_format       VARCHAR2(255 Char) '
+              || '   ,property_allow_null   VARCHAR2(5 Char) NOT NULL '
               || '   ,property_title        VARCHAR2(255 Char) '
               || '   ,property_exp_string   VARCHAR2(255 Char) '
               || '   ,property_exp_number   NUMBER '
@@ -224,6 +225,9 @@ AS
               || '    ENABLE VALIDATE '
               || '   ,CONSTRAINT dz_swagger_property_c04 '
               || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_wagger_property_c05 '
+              || '    CHECK (property_allow_null IN (''TRUE'',''FALSE'')) '
               || '    ENABLE VALIDATE '
               || ') ';
               

@@ -511,6 +511,7 @@ AS
             ,p_property             => b.property
             ,p_property_type	      => b.property_type
             ,p_property_format      => b.property_format
+            ,p_property_allow_null  => b.property_allow_null
             ,p_property_title       => b.property_title
             ,p_property_exp_string  => b.property_exp_string
             ,p_property_exp_number  => b.property_exp_number

@@ -72,12 +72,15 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-      p_pretty_print     IN  NUMBER   DEFAULT NULL
+       p_pretty_print      IN  NUMBER   DEFAULT NULL
+      ,p_jsonschema        IN  VARCHAR2 DEFAULT 'FALSE' 
    ) RETURN CLOB
    AS
       num_pretty_print NUMBER := p_pretty_print;
+      str_jsonschema   VARCHAR2(4000 Char) := UPPER(p_jsonschema);
       clb_output       CLOB;
       str_pad          VARCHAR2(1 Char);
+      str_pad1         VARCHAR2(1 Char);
       str_pad2         VARCHAR2(1 Char);
       ary_required     MDSYS.SDO_STRING2_ARRAY;
       int_counter      PLS_INTEGER;
@@ -88,6 +91,12 @@ AS
       -- Step 10
       -- Check incoming parameters
       --------------------------------------------------------------------------
+      IF str_jsonschema IS NULL
+      OR str_jsonschema NOT IN ('TRUE','FALSE')
+      THEN
+         str_jsonschema := 'FALSE';
+         
+      END IF;
       
       --------------------------------------------------------------------------
       -- Step 20
@@ -97,12 +106,10 @@ AS
       THEN
          clb_output  := dz_json_util.pretty('{',NULL);
          str_pad  := '';
-         str_pad2 := '';
          
       ELSE
          clb_output  := dz_json_util.pretty('{',-1);
          str_pad  := ' ';
-         str_pad2 := ' ';
          
       END IF;
       
@@ -110,15 +117,17 @@ AS
       -- Step 30
       -- Add base attributes
       --------------------------------------------------------------------------
+      str_pad1 := str_pad;
+      
       clb_output := clb_output || dz_json_util.pretty(
-          str_pad || dz_json_main.value2json(
+          str_pad1 || dz_json_main.value2json(
              'type'
             ,self.definition_type
             ,num_pretty_print + 1
          )
          ,num_pretty_print + 1
       );
-      str_pad := ',';
+      str_pad1 := ',';
       
       --------------------------------------------------------------------------
       -- Step 40
@@ -127,14 +136,14 @@ AS
       IF self.definition_desc IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty(
-             str_pad || dz_json_main.value2json(
+             str_pad1 || dz_json_main.value2json(
                 'description'
                ,self.definition_desc
                ,num_pretty_print + 1
             )
             ,num_pretty_print + 1
          );
-         str_pad := ',';
+         str_pad1 := ',';
       
       END IF;
       
@@ -142,25 +151,29 @@ AS
       -- Step 50
       -- Add optional xml object
       --------------------------------------------------------------------------
-      IF self.xml_name      IS NOT NULL
-      OR self.xml_namespace IS NOT NULL
-      OR self.xml_prefix    IS NOT NULL
+      IF str_jsonschema = 'FALSE'
       THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             str_pad || dz_json_main.formatted2json(
-                'xml'
-               ,dz_swagger_xml(
-                   p_xml_name      => self.xml_name
-                  ,p_xml_namespace => self.xml_namespace
-                  ,p_xml_prefix    => self.xml_prefix
-                ).toJSON(
-                  p_pretty_print => num_pretty_print + 1
+         IF self.xml_name      IS NOT NULL
+         OR self.xml_namespace IS NOT NULL
+         OR self.xml_prefix    IS NOT NULL
+         THEN
+            clb_output := clb_output || dz_json_util.pretty(
+                str_pad1 || dz_json_main.formatted2json(
+                   'xml'
+                  ,dz_swagger_xml(
+                      p_xml_name      => self.xml_name
+                     ,p_xml_namespace => self.xml_namespace
+                     ,p_xml_prefix    => self.xml_prefix
+                   ).toJSON(
+                     p_pretty_print => num_pretty_print + 1
+                   )
+                  ,num_pretty_print + 1
                 )
                ,num_pretty_print + 1
-             )
-            ,num_pretty_print + 1
-         );
-         str_pad := ',';
+            );
+            str_pad1 := ',';
+            
+         END IF;
          
       END IF;
   
@@ -174,20 +187,22 @@ AS
          NULL;
 
       ELSE
+         str_pad2 := str_pad;
+         
          ary_required := MDSYS.SDO_STRING2_ARRAY();
          int_counter := 1;
       
          clb_output := clb_output || dz_json_util.pretty(
-             str_pad || dz_json_main.fastname('properties',num_pretty_print) || '{'
+             str_pad1 || dz_json_main.fastname('properties',num_pretty_print) || '{'
             ,num_pretty_print + 1
          );
-         str_pad := ',';
          
          FOR i IN 1 .. self.swagger_properties.COUNT
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
                 str_pad2 || self.swagger_properties(i).toJSON(
                    p_pretty_print => num_pretty_print + 2
+                  ,p_jsonschema   => str_jsonschema
                 )
                ,num_pretty_print + 2
             );
@@ -207,6 +222,7 @@ AS
              '}'
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
       --------------------------------------------------------------------------
       -- Step 70
@@ -216,14 +232,14 @@ AS
          AND ary_required.COUNT > 0
          THEN
             clb_output := clb_output || dz_json_util.pretty(
-                str_pad || dz_json_main.value2json(
+                str_pad1 || dz_json_main.value2json(
                    'required'
                   ,ary_required
                   ,num_pretty_print + 1
                )
                ,num_pretty_print + 1
             );
-            str_pad := ',';
+            str_pad1 := ',';
          
          END IF;
       

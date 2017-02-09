@@ -36,6 +36,7 @@ AS
       num_pretty_print NUMBER := p_pretty_print;
       clb_output       CLOB;
       str_pad          VARCHAR2(1 Char);
+      str_pad1         VARCHAR2(1 Char);
       
    BEGIN
       
@@ -54,12 +55,14 @@ AS
              dz_json_main.json_format(self.swagger_path) || ': {'
             ,NULL
          );
+         str_pad := '';
          
       ELSE
          clb_output  := dz_json_util.pretty(
              dz_json_main.json_format(self.swagger_path) || ': {'
             ,-1
          );
+         str_pad := ' ';
          
       END IF;
       
@@ -67,6 +70,8 @@ AS
       -- Step 30
       -- Add the paths
       --------------------------------------------------------------------------
+      str_pad1 := str_pad;
+      
       IF self.swagger_methods IS NULL
       OR self.swagger_methods.COUNT = 0
       THEN
@@ -76,15 +81,14 @@ AS
          FOR i IN 1 .. self.swagger_methods.COUNT
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
-                str_pad || dz_json_main.json_format(
+                str_pad1 || dz_json_main.json_format(
                   self.swagger_methods(i).swagger_http_method
                ) || ': ' || self.swagger_methods(i).toJSON(
                   p_pretty_print => num_pretty_print + 1
                )
                ,num_pretty_print + 1
-            );
-            
-            str_pad := ',';
+            );     
+            str_pad1 := ',';
 
          END LOOP;
 
