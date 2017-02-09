@@ -232,11 +232,7 @@ AS
       -- Step 110
       -- Cough it out without final line feed
       --------------------------------------------------------------------------
-      RETURN REGEXP_REPLACE(
-          clb_output
-         ,'\n$'
-         ,''
-      );
+      RETURN clb_output;
       
    END toYAML;
    

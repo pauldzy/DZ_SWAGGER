@@ -70,6 +70,7 @@ AS
               || '   ,definition_type     VARCHAR2(255 Char) NOT NULL '
               || '   ,property_id         VARCHAR2(255 Char) NOT NULL '
               || '   ,property_order      NUMBER NOT NULL '
+              || '   ,property_required   VARCHAR2(5 Char)   NOT NULL '
               || '   ,column_name         VARCHAR2(30 Char) '
               || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
               || ') ';
@@ -104,6 +105,9 @@ AS
               || '    ENABLE VALIDATE '
               || '   ,CONSTRAINT dz_swagger_def_prop_c03 '
               || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_def_prop_c04 '
+              || '    CHECK (property_required IN (''TRUE'',''FALSE'')) '
               || '    ENABLE VALIDATE '
               || ') ';
               

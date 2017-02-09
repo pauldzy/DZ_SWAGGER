@@ -79,6 +79,8 @@ AS
       clb_output       CLOB;
       str_pad          VARCHAR2(1 Char);
       str_pad2         VARCHAR2(1 Char);
+      ary_required     MDSYS.SDO_STRING2_ARRAY;
+      int_counter      PLS_INTEGER;
       
    BEGIN
       
@@ -158,6 +160,7 @@ AS
              )
             ,num_pretty_print + 1
          );
+         str_pad := ',';
          
       END IF;
   
@@ -171,10 +174,14 @@ AS
          NULL;
 
       ELSE
+         ary_required := MDSYS.SDO_STRING2_ARRAY();
+         int_counter := 1;
+      
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('properties',num_pretty_print) || '{'
+             str_pad || dz_json_main.fastname('properties',num_pretty_print) || '{'
             ,num_pretty_print + 1
          );
+         str_pad := ',';
          
          FOR i IN 1 .. self.swagger_properties.COUNT
          LOOP
@@ -185,18 +192,45 @@ AS
                ,num_pretty_print + 2
             );
             str_pad2 := ',';
+            
+            IF self.swagger_properties(i).property_required = 'TRUE'
+            THEN
+               ary_required.EXTEND();
+               ary_required(int_counter) := self.swagger_properties(i).property;
+               int_counter := int_counter + 1;
 
+            END IF;
+            
          END LOOP;
 
          clb_output := clb_output || dz_json_util.pretty(
              '}'
             ,num_pretty_print + 1
          );
-
-      END IF;
-      
+         
       --------------------------------------------------------------------------
       -- Step 70
+      -- Add properties required array
+      --------------------------------------------------------------------------
+         IF ary_required IS NOT NULL
+         AND ary_required.COUNT > 0
+         THEN
+            clb_output := clb_output || dz_json_util.pretty(
+                str_pad || dz_json_main.value2json(
+                   'required'
+                  ,ary_required
+                  ,num_pretty_print + 1
+               )
+               ,num_pretty_print + 1
+            );
+            str_pad := ',';
+         
+         END IF;
+      
+      END IF;
+        
+      --------------------------------------------------------------------------
+      -- Step 80
       -- Add the left bracket
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
@@ -205,7 +239,7 @@ AS
       );
       
       --------------------------------------------------------------------------
-      -- Step 70
+      -- Step 90
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN clb_output;
@@ -220,6 +254,7 @@ AS
    AS
       clb_output        CLOB;
       num_pretty_print  NUMBER := p_pretty_print;
+      boo_required      BOOLEAN;
       
    BEGIN
       
@@ -277,32 +312,72 @@ AS
       --------------------------------------------------------------------------
       -- Step 50
       -- Add the properties
-      --------------------------------------------------------------------------         
-      clb_output := clb_output || dz_json_util.pretty_str(
-          'properties: '
-         ,num_pretty_print
-         ,'  '
-      );
-       
-      FOR i IN 1 .. self.swagger_properties.COUNT
-      LOOP
+      --------------------------------------------------------------------------
+      boo_required := FALSE;
+      
+      IF self.swagger_properties IS NULL
+      OR self.swagger_properties.COUNT = 0
+      THEN
+         NULL;
+
+      ELSE      
          clb_output := clb_output || dz_json_util.pretty_str(
-             self.swagger_properties(i).property || ': '
-            ,num_pretty_print + 1
+             'properties: '
+            ,num_pretty_print
             ,'  '
-         ) || self.swagger_properties(i).toYAML(num_pretty_print + 1);
- 
-      END LOOP;
+         );
+          
+         FOR i IN 1 .. self.swagger_properties.COUNT
+         LOOP
+            clb_output := clb_output || dz_json_util.pretty_str(
+                self.swagger_properties(i).property || ': '
+               ,num_pretty_print + 1
+               ,'  '
+            ) || self.swagger_properties(i).toYAML(num_pretty_print + 1);
+            
+            IF self.swagger_properties(i).property_required = 'TRUE'
+            THEN
+               boo_required := TRUE;
+               
+            END IF;
+    
+         END LOOP;
+         
+      --------------------------------------------------------------------------
+      -- Step 70
+      -- Add properties required array
+      --------------------------------------------------------------------------
+         IF boo_required
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                'required: '
+               ,num_pretty_print
+               ,'  '
+            );
+            
+            FOR i IN 1 .. self.swagger_properties.COUNT
+            LOOP
+               IF self.swagger_properties(i).property_required = 'TRUE'
+               THEN
+                  clb_output := clb_output || dz_json_util.pretty_str(
+                      '- ' || self.swagger_properties(i).property
+                     ,num_pretty_print
+                     ,'  '
+                  );
+                  
+               END IF;
+               
+            END LOOP;
+         
+         END IF;
+         
+      END IF;
       
       --------------------------------------------------------------------------
-      -- Step 60
+      -- Step 70
       -- Cough it out
       --------------------------------------------------------------------------
-      RETURN REGEXP_REPLACE(
-          clb_output
-         ,'\n$'
-         ,''
-      );
+      RETURN clb_output;
       
    END toYAML;
    

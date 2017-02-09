@@ -23,6 +23,7 @@ AS
       ,p_property_exp_number  IN  NUMBER
       ,p_property_description IN  VARCHAR2
       ,p_property_target      IN  VARCHAR2
+      ,p_property_required    IN  VARCHAR2
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
@@ -43,6 +44,7 @@ AS
       self.property_exp_number  := p_property_exp_number;
       self.property_description := TRIM(p_property_description);
       self.property_target      := TRIM(p_property_target);
+      self.property_required    := TRIM(p_property_required);
       self.xml_name             := TRIM(p_xml_name);
       self.xml_namespace        := TRIM(p_xml_namespace);
       self.xml_prefix           := TRIM(p_xml_prefix);
@@ -498,11 +500,7 @@ AS
       -- Step 110
       -- Cough it out
       --------------------------------------------------------------------------
-      RETURN REGEXP_REPLACE(
-          clb_output
-         ,'\n$'
-         ,''
-      );
+      RETURN clb_output;
       
    END toYAML;
    

@@ -380,11 +380,7 @@ AS
       -- Step 110
       -- Cough it out
       --------------------------------------------------------------------------
-      RETURN REGEXP_REPLACE(
-          clb_output
-         ,'\n$'
-         ,''
-      );
+      RETURN clb_output;
       
    END toYAML;
    

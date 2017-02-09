@@ -516,6 +516,7 @@ AS
             ,p_property_exp_number  => b.property_exp_number
             ,p_property_description => b.property_description
             ,p_property_target      => b.property_target
+            ,p_property_required    => a.property_required
             ,p_xml_name             => b.xml_name
             ,p_xml_namespace        => b.xml_namespace
             ,p_xml_prefix           => b.xml_prefix 
@@ -1304,11 +1305,7 @@ AS
       -- Step 110
       -- Cough it out
       --------------------------------------------------------------------------
-      RETURN REGEXP_REPLACE(
-          clb_output
-         ,'\n$'
-         ,''
-      );
+      RETURN clb_output;
            
    END toYAML;
    
