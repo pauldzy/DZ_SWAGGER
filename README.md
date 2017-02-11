@@ -49,6 +49,20 @@ FROM dual;
 
 See [detailed table definitions](DEFS.md) for more information on fields and their usage.
 
+## JSON Schema Extension
+As Swagger properties are a superset of JSON Schema, one would think flipping between and Swagger and JSON Schema **should** be pretty simple.  However there is really nothing out there for doing the swap nor guidance for the swap.  As its mostly a matter of removing Swagger elements from the definition output, I've included logic to output JSON Schema by endpoint and method:
+
+```
+SELECT dz_swagger_jsonsch_typ(
+    p_swagger_path        => '/NavigationServiceGeoJSON'
+   ,p_swagger_http_method => 'get'
+   ,p_swagger_method      => '200'
+   ,p_versionid           => 'SAMPLE'
+).toJSON(0)
+FROM dual;
+```
+==> [output](jsonschema.txt)
+
 ##Loading Existing Swagger Specifications into DZ_SWAGGER
 As mentioned above the only workflow to add a specification to DZ_SWAGGER is to load each table with the needed elements by hand.  As this involves understanding the data model and quite a bit of up-front work you may not find DZ_SWAGGER of much utility.  I continue to ponder ideas of how to unload existing specifications into Oracle.  I am always interested in your suggestions. 
 
