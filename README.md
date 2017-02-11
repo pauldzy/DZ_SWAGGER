@@ -32,6 +32,8 @@ SELECT dz_swagger_typ(
 ) 
 FROM dual;
 ```
+==> [output](json.txt)
+
 or if YAML is desired
 ```
 SELECT dz_swagger_typ(
@@ -40,6 +42,7 @@ SELECT dz_swagger_typ(
 ).toYAML() 
 FROM dual;
 ```
+==> [output](yaml.txt)
 
 ##Data Model
 ![Entity Relationship](ERD.png)
