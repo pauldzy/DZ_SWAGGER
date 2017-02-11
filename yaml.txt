@@ -1,0 +1,1780 @@
+---
+swagger: '2.0'
+info: 
+  title: U.S. EPA Office of Water WATERS Services
+  description: "The Watershed Assessment, Tracking & Environmental Results System (WATERS) unites water quality information previously available only from several independent and unconnected databases.  WATERS provides a suite of interoperable services that expose components that perform complex analysis and supporting strategic datasets."
+  contact: 
+    name: US EPA Office of Water
+    url: "https://www.epa.gov/aboutepa/about-office-water"
+  license: 
+    name: Creative Commons Zero Public Domain Dedication
+    url: "https://creativecommons.org/publicdomain/zero/1.0/"
+  version: '0.0.0'
+host: ofmpub.epa.gov
+basePath: /waters10
+schemes: 
+- https
+consumes: 
+- application/json
+produces: 
+- application/json
+parameters: 
+  pGeometry: 
+    name: pGeometry
+    in: query
+    description: Input point geometry to index to the NHDPlus.
+    type: string
+    required: true
+  pRaindropSnapMaxDistKM: 
+    name: pRaindropSnapMaxDistKM
+    in: query
+    description: The maximum distance in kilometers of the final path to flowline snap used in raindrop indexing.
+    type: string
+    required: true
+  pRaindropPathMaxDistKM: 
+    name: pRaindropPathMaxDistKM
+    in: query
+    description: The maximum distance in KM to travel during a raindrop indexing action. Note this refers to the actual raindrop traversal, not the final distance snap which is controlled by the pRaindropSnapMaxDistKM parameter.
+    type: string
+    required: true
+  pDistanceMaxDistKM: 
+    name: pDistanceMaxDistKM
+    in: query
+    description: The maximum distance in kilometers to snap to a qualifying NHDPlus flowline.
+    type: string
+    required: true
+  pNavigationType: 
+    name: pNavigationType
+    in: query
+    description: |-
+      Navigation methodolody for network discovery of events:
+      > UT = upstream with tributaries navigation
+      > UM = upstream mainstem navigation
+      > DD = downstream with divergences navigation
+      > DM = downstream mainstem navigation
+      > PP = point-to-point downstream navigation
+    enum: 
+    - UT
+    - UM
+    - DD
+    - DM
+    - PP
+    type: string
+    required: true
+  pIndexingMethod: 
+    name: pIndexingMethod
+    in: query
+    description: "Method to use in service call, either 'DISTANCE' or 'RAINDROP'. Use the raindrop method with caution understanding what kind of results the method produces."
+    enum: 
+    - DISTANCE
+    - RAINDROP
+    type: string
+    required: true
+  pFcodeAllowMod: 
+    name: pFcodeAllowMod
+    in: query
+    description: Modifier explaining the array format used in FcodeAllow.  Leave parameter empty accept default of comma-delimited list.
+    type: string
+    required: true
+  pFcodeDenyMod: 
+    name: pFcodeDenyMod
+    in: query
+    description: Modifier explaining the array format used in FcodeDeny.  Leave parameter empty accept default of comma-delimited list.
+    type: string
+    required: true
+  pGeometryMod: 
+    name: pGeometryMod
+    in: query
+    description: "Modifier explaining the input geometry format.  See https://www.epa.gov/waterdata/waters-http-services for a more information on geometry format types."
+    type: string
+    required: true
+  pFcodeAllow: 
+    name: pFcodeAllow
+    in: query
+    description: List of NHD FCODEs to allow when choosing an indexing destination. 
+    type: string
+    required: true
+  pFcodeDeny: 
+    name: pFcodeDeny
+    in: query
+    description: List of NHD FCODEs to deny when choosing an indexing destination. 
+    type: string
+    required: true
+  pStartComID: 
+    name: pStartComID
+    in: query
+    description: NHDPlus flowline integer ComID to begin navigating from.
+    type: string
+    required: false
+  pStartPermanentIdentifier: 
+    name: pStartPermanentIdentifier
+    in: query
+    description: NHDPlus flowline Permanent Identifier string value to begin navigating from.
+    type: string
+    required: false
+  pStartReachcode: 
+    name: pStartReachcode
+    in: query
+    description: NHDPlus flowline reach code to begin navigating from.  Must be length 14 and contain all digits.
+    type: string
+    required: false
+  pStartMeasure: 
+    name: pStartMeasure
+    in: query
+    description: Measure on the NHDPlus reach code to begin navigating from.  Must be between 0 and 100 inclusive, or NULL. A value of NULL means that a measure will be calculated to be either the bottom or the top of the NHD flowline (depending on whether the navigation type is upstream or downstream and whether it is a start or stop measure).
+    type: string
+    required: false
+  pStopComID: 
+    name: pStopComID
+    in: query
+    description: NHDPlus flowline integer ComID to stop navigating at.  Only used in point-to-point navigation.
+    type: string
+    required: false
+  pStopPermanentIdentifier: 
+    name: pStopPermanentIdentifier
+    in: query
+    description: NHDPlus flowline Permanent Identifier string value to stop navigating at.  Only used in point-to-point navigation.
+    type: string
+    required: false
+  pStopReachcode: 
+    name: pStopReachcode
+    in: query
+    description: NHDPlus reach code to stop navigating at.  Only used in point-to-point navigation.
+    type: string
+    required: false
+  pStopMeasure: 
+    name: pStopMeasure
+    in: query
+    description: Measure on the NHD reach code to stop navigating at.  Must be between 0 and 100 inclusive, or NULL. A value of NULL means that a measure will be calculated to be either the bottom or the top of the NHD flowline (depending on whether the navigation type is upstream or downstream and whether it is a start or stop measure).  Only used in point-to-point navigation.
+    type: string
+    required: false
+  pMaxDistanceKm: 
+    name: pMaxDistanceKm
+    in: query
+    description: Maximum distance in kilometers to navigate.  Only valid with UT, UM, DD and DM navigation.
+    type: string
+    required: false
+  pMaxFlowTimeHour: 
+    name: pMaxFlowTimeHour
+    in: query
+    description: Maximum flow time in hours to navigate.  Only valid with UT, UM, DD and DM navigation.  Currently inoperable.
+    type: string
+    required: false
+  pEventTypeList: 
+    name: pEventTypeList
+    in: query
+    description: "Array of program eventtype identifiers to search for along the navigation route. See the complete list of RAD program abbreviations at https://www.epa.gov/waterdata/rad-event-programs."
+    type: string
+    required: false
+  pEventTypeListMod: 
+    name: pEventTypeListMod
+    in: query
+    description: Modifier explaining the array format used in pEventTypeList.  Leave empty to accept a comma-delimited list format.
+    type: string
+    required: false
+  pArchiveCycleList: 
+    name: pArchiveCycleList
+    in: query
+    description: Array of cycle year identifiers to search in Reach Address Database archives.  Currently inoperable.
+    type: string
+    required: false
+  pArchiveCycleListMod: 
+    name: pArchiveCycleListMod
+    in: query
+    description: Modifier explaining the array format used in pArchiveCycleList.  Leave empty to accept a comma-delimited list format.
+    type: string
+    required: false
+  pReturnNavigationResults: 
+    name: pReturnNavigationResults
+    in: query
+    description: TRUE/FALSE flag to include Navigation results.  As the navigation results may be a large payload, forgoing the results may improve performance.  Note that this switch does not actually avoid navigation itself, just the serialization and return of the data.
+    enum: 
+    - 'TRUE'
+    - 'FALSE'
+    type: string
+    required: false
+  pAddFlowlineAttributes: 
+    name: pAddFlowlineAttributes
+    in: query
+    description: TRUE/FALSE flag to populate navigation results with additional flowline attributes.  Setting this to FALSE will provide a small performance boost at the cost of less information.  Note the nhd_gnis_id and nhd_gnis_name results in the event payload will always be NULL when this switch is FALSE.
+    enum: 
+    - 'TRUE'
+    - 'FALSE'
+    type: string
+    required: false
+  pAddFlowlineGeometry: 
+    name: pAddFlowlineGeometry
+    in: query
+    description: TRUE/FALSE flag to populate navigation results with flowline geometry data.  Setting this to FALSE will provide tabular navigation results without the geometry resulting in a smaller payload.  Note the GeoJSON collection format is not really valid with a null geometry and may require special handling.
+    enum: 
+    - 'TRUE'
+    - 'FALSE'
+    type: string
+    required: false
+  pAddEventGeometry: 
+    name: pAddEventGeometry
+    in: query
+    description: TRUE/FALSE flag to populate event results with event geometry data.  Setting this to FALSE will provide tabular event results without the geometry resulting in a smaller payload.  Note the GeoJSON collection format is not really valid with a null geometry and may require special handling.
+    enum: 
+    - 'TRUE'
+    - 'FALSE'
+    type: string
+    required: false
+  pReturnProgramAttributes: 
+    name: pReturnProgramAttributes
+    in: query
+    description: TRUE/FALSE flag to populate event results with additional program specific tabular attributes.  Extracting program attributes will degrade performance and should be only used if such attributes are actually required.
+    enum: 
+    - 'TRUE'
+    - 'FALSE'
+    type: string
+    required: false
+  optOutPrettyPrint: 
+    name: optOutPrettyPrint
+    in: query
+    description: Optional feature to format output with logical indentations and linefeeds to promote visualization and debugging efforts. Numeric value indicates the number of three-space indentations to begin pretty printing efforts at. Value of 0 begins at the left margin. Simply pass NULL or leave empty for compact results. Pretty printed results should be avoided in production.
+    type: string
+    required: false
+  optOutPruneNumber: 
+    name: optOutPruneNumber
+    in: query
+    description: Optional feature to truncate geometry coordinates to a given amount of precision.  Oracle spatial is able to generate numeric values with up to 32 places of precision which is excessive for web mapping purposes.  Set this value to a reasonable number to lessen the size of the payload.
+    type: string
+    required: false
+  optJSONPCallback: 
+    name: optJSONPCallback
+    in: query
+    description: Optional feature for enclosing results in a JSONP wrapper.  Use a valid JavaScript function string.  This is a synonym to the callback parameter provided for backwards compatibility.
+    type: string
+    required: false
+  optCache: 
+    name: optCache
+    in: query
+    description: Optional feature used to set HTTP header cache of output.
+    type: string
+    required: false
+  optClientRef: 
+    name: optClientRef
+    in: query
+    description: Optional feature used to tag service logs with additional information.  If you are having issues and seek support adding a distinctive value via this parameter will allow EPA support staff to identify your requests in the logs more easily.
+    type: string
+    required: false
+  optGEOJSONbbox: 
+    name: optGEOJSONbbox
+    in: query
+    description: TRUE/FALSE flag to add a bounding box object to all GeoJSON feature collections in the output.  As the bounding box is determined at runtime, a value of TRUE will degrade performance.  Do not use unless your application has a need for this feature.
+    enum: 
+    - 'TRUE'
+    - 'FALSE'
+    type: string
+    required: false
+  callback: 
+    name: callback
+    in: query
+    description: Optional feature for enclosing results in a JSONP wrapper.  Use a valid JavaScript function string.
+    type: string
+    required: false
+paths: 
+  "/PointIndexing.ServiceGeoJSON": 
+    get: 
+      summary: NHDPlus Point Indexing
+      description: This service provides point indexing to NHDPlus using either distance or raindrop association.
+      parameters: 
+      - "$ref": "#/parameters/pGeometry"
+      - "$ref": "#/parameters/pGeometryMod"
+      - "$ref": "#/parameters/pIndexingMethod"
+      - "$ref": "#/parameters/pFcodeAllow"
+      - "$ref": "#/parameters/pFcodeAllowMod"
+      - "$ref": "#/parameters/pFcodeDeny"
+      - "$ref": "#/parameters/pFcodeDenyMod"
+      - "$ref": "#/parameters/pDistanceMaxDistKM"
+      - "$ref": "#/parameters/pRaindropPathMaxDistKM"
+      - "$ref": "#/parameters/pRaindropSnapMaxDistKM"
+      - "$ref": "#/parameters/optOutPrettyPrint"
+      - "$ref": "#/parameters/optOutPruneNumber"
+      - "$ref": "#/parameters/optClientRef"
+      - "$ref": "#/parameters/optJSONPCallback"
+      tags: 
+      - Indexing
+      responses: 
+        '200': 
+          description: Returns a standardized object containing a status message and a data container.
+          schema: 
+            "$ref": "#/definitions/pi.root"
+  "/Navigation20.ServiceGeoJSON": 
+    get: 
+      summary: NHDPlus Navigation - Alternative Service
+      description: This service provides navigation on the NHDPlus network utilizing the Oracle network data model.
+      parameters: 
+      - "$ref": "#/parameters/pNavigationType"
+      - "$ref": "#/parameters/pStartComID"
+      - "$ref": "#/parameters/pStartPermanentIdentifier"
+      - "$ref": "#/parameters/pStartReachcode"
+      - "$ref": "#/parameters/pStartMeasure"
+      - "$ref": "#/parameters/pStopComID"
+      - "$ref": "#/parameters/pStopPermanentIdentifier"
+      - "$ref": "#/parameters/pStopReachcode"
+      - "$ref": "#/parameters/pStopMeasure"
+      - "$ref": "#/parameters/pMaxDistanceKm"
+      - "$ref": "#/parameters/pMaxFlowTimeHour"
+      - "$ref": "#/parameters/optOutPrettyPrint"
+      - "$ref": "#/parameters/optOutPruneNumber"
+      - "$ref": "#/parameters/optJSONPCallback"
+      - "$ref": "#/parameters/optCache"
+      - "$ref": "#/parameters/optGEOJSONbbox"
+      - "$ref": "#/parameters/callback"
+      tags: 
+      - Navigation
+      responses: 
+        '200': 
+          description: Returns a standardized object containing a status message and a data container.
+          schema: 
+            "$ref": "#/definitions/n20.root"
+  "/UpstreamDownstreamSearchV3.Service": 
+    get: 
+      summary: Upstream Downstream Search V3 Service
+      description: This service provides navigation and discovery of Reach Address Database events on the NHDPlus network providing detailed program attributes with results.
+      parameters: 
+      - "$ref": "#/parameters/pNavigationType"
+      - "$ref": "#/parameters/pStartComID"
+      - "$ref": "#/parameters/pStartPermanentIdentifier"
+      - "$ref": "#/parameters/pStartReachcode"
+      - "$ref": "#/parameters/pStartMeasure"
+      - "$ref": "#/parameters/pStopComID"
+      - "$ref": "#/parameters/pStopPermanentIdentifier"
+      - "$ref": "#/parameters/pStopReachcode"
+      - "$ref": "#/parameters/pStopMeasure"
+      - "$ref": "#/parameters/pMaxDistanceKm"
+      - "$ref": "#/parameters/pMaxFlowTimeHour"
+      - "$ref": "#/parameters/pEventTypeList"
+      - "$ref": "#/parameters/pEventTypeListMod"
+      - "$ref": "#/parameters/pArchiveCycleList"
+      - "$ref": "#/parameters/pArchiveCycleListMod"
+      - "$ref": "#/parameters/pReturnNavigationResults"
+      - "$ref": "#/parameters/pAddFlowlineAttributes"
+      - "$ref": "#/parameters/pAddFlowlineGeometry"
+      - "$ref": "#/parameters/pAddEventGeometry"
+      - "$ref": "#/parameters/pReturnProgramAttributes"
+      - "$ref": "#/parameters/optOutPrettyPrint"
+      - "$ref": "#/parameters/optOutPruneNumber"
+      - "$ref": "#/parameters/optJSONPCallback"
+      - "$ref": "#/parameters/optCache"
+      - "$ref": "#/parameters/optClientRef"
+      - "$ref": "#/parameters/optGEOJSONbbox"
+      - "$ref": "#/parameters/callback"
+      tags: 
+      - Event Discovery
+      - Navigation
+      responses: 
+        '200': 
+          description: Returns a standardized object containing a status message and a data container.
+          schema: 
+            "$ref": "#/definitions/updnv3root"
+definitions: 
+  n20.root: 
+    type: object
+    properties: 
+      status: 
+        type: string
+        title: Status
+        description: Service response status indicating the success or failure of the service request.
+      data: 
+        "$ref": "#/definitions/n20.data" 
+    required: 
+    - status
+    - data
+  n20.data: 
+    type: object
+    properties: 
+      session_id: 
+        type: string
+        title: Session ID
+        description: Global unique identifier for a given service request.
+      navigation_results: 
+        "$ref": "#/definitions/updnv3n" 
+    required: 
+    - session_id
+    - navigation_results
+  pifl.properties: 
+    type: object
+    properties: 
+      permanent_identifier: 
+        type: string
+        title: Permanent Identifier
+        description: Global unique identifier assigned to each event feature.
+      comid: 
+        type: integer
+        title: ComID
+        description: Unique integer identifier for NHDPlus features.
+      fdate: 
+        type: string
+        format: date-time
+        title: Feature Date
+        description: Date indicating the vintage of the source NHD feature.
+      resolution: 
+        type: integer
+        title: Resolution Indicator Flag
+        description: Integer flag indicating if the flowline represents Local (1), High (2) or Medium (3) NHD features.
+      gnis_id: 
+        type: string
+        title: NHDPlus GNIS ID
+        description: Unique identifier assigned by GNIS, length 10.
+      gnis_name: 
+        type: string
+        title: NHDPlus GNIS Name
+        description: Proper name, specific term, or expression by which a particular geographic entity is known, length 65.
+      lengthkm: 
+        type: number
+        title: Length (km)
+        description: Length of linear feature, Albers Equal Area Conic, length 8.
+      reachcode: 
+        type: string
+        title: Reach Code
+        description: |-
+          Unique identifier composed of two parts. The first eight digits is the subbasin code as defined by FIPS 103. The next
+          six digits are randomly assigned, sequential numbers that are unique within a Cataloging Unit, length 14.
+      flowdir: 
+        type: integer
+        title: Flow Direction Flag
+        description: Integer flag indicating if flowline feature has directed flow (1) or not (0).
+      wbarea_permanent_identifier: 
+        type: string
+        title: Waterbody/Area Permanent Identifier
+        description: Permanent_Identifier of the waterbody through which the Flowline (Artificial Path) flows.
+      wbarea_comid: 
+        type: integer
+        title: Waterbody/Area ComID
+        description: ComID of the waterbody through which the Flowline (Artificial Path) flows.
+      ftype: 
+        type: integer
+        title: NHD Feature Type Identifier
+        description: Three digit integer value, unique identifier of a feature type.
+      fcode: 
+        type: integer
+        title: NHD Feature Code Identifier
+        description: Five-digit integer value comprised of the feature type and combinations of characteristics and values.
+      reachsmdate: 
+        type: string
+        format: date-time
+        title: Reach Version Date
+        description: Reach version date indicating the last change to the feature identified by the reach code.
+      fmeasure: 
+        type: number
+        title: From Measure
+        description: Measure along the reach, in percent from downstream end, where a linear event begins (from).
+      tmeasure: 
+        type: number
+        title: To Measure
+        description: Measure along the reach, in percent from downstream end, where a linear event ends (to).
+      wbarea_ftype: 
+        type: integer
+        title: Waterbody/Area Feature Type
+        description: Feature type of the waterbody/area associated with artificial path flowlines.
+      wbarea_fcode: 
+        type: integer
+        title: Waterbody/Area Feature Code
+        description: Feature code of the waterbody/area associated with artificial path flowlines.
+      wbd_huc12: 
+        type: string
+        title: Watershed Boundary Dataset HUC12
+        description: WBD HUC12 unit that most encompasses the feature.
+      catchment_featureid: 
+        type: integer
+        title: Catchment Feature ID
+        description: Identifier of the NHDPlus catchment with which the feature is associated.
+      streamlevel: 
+        type: integer
+        title: Stream Level
+        description: StreamLevel is a numeric code that traces main paths of water flow upstream through the drainage network.
+      streamorder: 
+        type: integer
+        title: Stream Order
+        description: StreamOrder order in NHDPlus is a modified version of stream order as defined by Strahler. The Strahler stream order algorithm does not account for flow splits in the network. The NHDPlus algorithm for stream order does take flow splits into consideration.
+      hydroseq: 
+        type: integer
+        title: Hydrosequence ID
+        description: Hydrologic sequence number; places flowlines in hydrologic order; processing NHDFlowline features in ascending order, encounters the features from downstream to upstream; processing the NHDFlowline features in descending order, encounters the features from upstream to downstream.
+      levelpathid: 
+        type: integer
+        title: Level Path ID
+        description: Hydrologic sequence number of most downstream NHDFlowline feature in the level path.
+      terminalpathid: 
+        type: integer
+        title: Terminal Path Identifier
+        description: Hydrologic sequence number of terminal NHDFlowline feature.
+      uphydroseq: 
+        type: integer
+        title: Up Hydrosequence
+        description: Upstream mainstem hydrologic sequence number.
+      dnhydroseq: 
+        type: integer
+        title: Down Hydrosequence Identifier
+        description: Downstream mainstem hydrologic sequence number.
+      snap_measure: 
+        type: number
+        title: Snap Measure
+        description: The LRS measure on flowline of indexing end point.
+      snap_distancekm: 
+        type: number
+        title: Snap Length (km)
+        description: Length of the indexing path in kilometers.
+    required: 
+    - permanent_identifier
+    - comid
+    - fdate
+    - resolution
+    - gnis_id
+    - gnis_name
+    - lengthkm
+    - reachcode
+    - flowdir
+    - wbarea_permanent_identifier
+    - wbarea_comid
+    - ftype
+    - fcode
+    - reachsmdate
+    - fmeasure
+    - tmeasure
+    - wbarea_ftype
+    - wbarea_fcode
+    - wbd_huc12
+    - catchment_featureid
+    - streamlevel
+    - streamorder
+    - hydroseq
+    - levelpathid
+    - terminalpathid
+    - uphydroseq
+    - dnhydroseq
+    - snap_measure
+    - snap_distancekm
+  pifl.features: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON FeatureCollection type attribute
+      geometry: 
+        "$ref": "#/definitions/geo" 
+      properties: 
+        "$ref": "#/definitions/pifl.properties" 
+    required: 
+    - type
+    - geometry
+    - properties
+  pi.root: 
+    type: object
+    properties: 
+      status: 
+        type: string
+        title: Status
+        description: Service response status indicating the success or failure of the service request.
+      data: 
+        "$ref": "#/definitions/pi.data" 
+    required: 
+    - status
+    - data
+  pi.data: 
+    type: object
+    properties: 
+      session_id: 
+        type: string
+        title: Session ID
+        description: Global unique identifier for a given service request.
+      start_point: 
+        "$ref": "#/definitions/fea" 
+      end_point: 
+        "$ref": "#/definitions/fea" 
+      indexing_line: 
+        "$ref": "#/definitions/fea" 
+      indexing_line_length: 
+        type: number
+        title: Indexing Line Length (km)
+        description: Length of the indexing path in kilometers.
+      flowlines: 
+        "$ref": "#/definitions/pifl" 
+    required: 
+    - session_id
+    - start_point
+    - end_point
+    - indexing_line
+    - indexing_line_length
+    - flowlines
+  pifl: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON Feature type attribute
+      bbox: 
+        type: array
+        title: GeoJSON Bbox
+        description: GeoJSON bounding box array.
+        items: 
+          type: number 
+      features: 
+        type: array
+        title: End Snap Point
+        description: Service payload containing the results of a successful request.
+        items: 
+          "$ref": "#/definitions/pifl.features" 
+    required: 
+    - type
+    - bbox
+    - features
+  updnv3pa_frspub.medium: 
+    type: object
+    properties: 
+      reporting_year: 
+        type: string
+        title: Reporting Year
+        description: TRI environmental medium reporting year.  Current reporting year is 2015.
+      environmental_medium: 
+        type: string
+        title: Environmental Medium
+        description: TRI environmental medium code value.
+    required: 
+    - reporting_year
+    - environmental_medium
+  fea: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON FeatureCollection type attribute
+      bbox: 
+        type: array
+        title: GeoJSON Bbox
+        description: GeoJSON bounding box array.
+        items: 
+          type: number 
+      geometry: 
+        "$ref": "#/definitions/geo" 
+    required: 
+    - type
+    - bbox
+    - geometry
+  updnv3root: 
+    type: object
+    properties: 
+      status: 
+        type: string
+        title: Status
+        description: Service response status indicating the success or failure of the service request.
+      data: 
+        "$ref": "#/definitions/updnv3data" 
+    required: 
+    - status
+    - data
+  updnv3data: 
+    type: object
+    properties: 
+      session_id: 
+        type: string
+        title: Session ID
+        description: Global unique identifier for a given service request.
+      navigation_results: 
+        "$ref": "#/definitions/updnv3n" 
+      event_point_results: 
+        "$ref": "#/definitions/updnv3ep" 
+      event_line_results: 
+        "$ref": "#/definitions/updnv3el" 
+      event_area_results: 
+        "$ref": "#/definitions/updnv3ea" 
+    required: 
+    - session_id
+    - navigation_results
+    - event_point_results
+    - event_line_results
+    - event_area_results
+  updnv3n: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON Feature type attribute
+      bbox: 
+        type: array
+        title: GeoJSON Bbox
+        description: GeoJSON bounding box array.
+        items: 
+          type: number 
+      features: 
+        type: array
+        title: Features
+        items: 
+          "$ref": "#/definitions/updnv3n.features" 
+    required: 
+    - type
+    - bbox
+    - features
+  updnv3ep: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON Feature type attribute
+      bbox: 
+        type: array
+        title: GeoJSON Bbox
+        description: GeoJSON bounding box array.
+        items: 
+          type: number 
+      features: 
+        type: array
+        title: Features
+        items: 
+          "$ref": "#/definitions/updnv3ep.features" 
+    required: 
+    - type
+    - bbox
+    - features
+  updnv3el: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON Feature type attribute
+      bbox: 
+        type: array
+        title: GeoJSON Bbox
+        description: GeoJSON bounding box array.
+        items: 
+          type: number 
+      features: 
+        type: array
+        title: Features
+        items: 
+          "$ref": "#/definitions/updnv3el.features" 
+    required: 
+    - type
+    - bbox
+    - features
+  updnv3ea: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON Feature type attribute
+      bbox: 
+        type: array
+        title: GeoJSON Bbox
+        description: GeoJSON bounding box array.
+        items: 
+          type: number 
+      features: 
+        type: array
+        title: Features
+        items: 
+          "$ref": "#/definitions/updnv3ea.features" 
+    required: 
+    - type
+    - bbox
+    - features
+  geo: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON Geometry type attribute
+      coordinates: 
+        type: array
+        title: Coordinates
+        description: Array of coordinates representing the GeoJSON geometry
+        items: 
+          type: number 
+    required: 
+    - type
+    - coordinates
+  updnv3n.properties: 
+    type: object
+    properties: 
+      start_permanent_identifier: 
+        type: string
+        title: Start Permanent Identifier
+        description: Permanent Identifier of the flowline from which the navigation occurs.
+      permanent_identifier: 
+        type: string
+        title: Permanent Identifier
+        description: Global unique identifier assigned to each event feature.
+      start_comid: 
+        type: integer
+        title: Start ComID
+        description: NHDPlus ComID of the flowline from which the navigation occurs.
+      comid: 
+        type: integer
+        title: ComID
+        description: Unique integer identifier for NHDPlus features.
+      reachcode: 
+        type: string
+        title: Reach Code
+        description: |-
+          Unique identifier composed of two parts. The first eight digits is the subbasin code as defined by FIPS 103. The next
+          six digits are randomly assigned, sequential numbers that are unique within a Cataloging Unit, length 14.
+      fmeasure: 
+        type: number
+        title: From Measure
+        description: Measure along the reach, in percent from downstream end, where a linear event begins (from).
+      tmeasure: 
+        type: number
+        title: To Measure
+        description: Measure along the reach, in percent from downstream end, where a linear event ends (to).
+      total_distancekm: 
+        type: number
+        title: Running Total Distance
+        description: Running distance in kilometers of the navigation from the start point to this feature.
+      total_flowtimehour: 
+        type: number
+        title: Running Total Flow Time
+        description: Running flow time in hours of the navigation from the start point to this feature.  Currently nonfunctional.
+      hydroseq: 
+        type: integer
+        title: Hydrosequence ID
+        description: Hydrologic sequence number; places flowlines in hydrologic order; processing NHDFlowline features in ascending order, encounters the features from downstream to upstream; processing the NHDFlowline features in descending order, encounters the features from upstream to downstream.
+      levelpathid: 
+        type: integer
+        title: Level Path ID
+        description: Hydrologic sequence number of most downstream NHDFlowline feature in the level path.
+      terminalpathid: 
+        type: integer
+        title: Terminal Path Identifier
+        description: Hydrologic sequence number of terminal NHDFlowline feature.
+      uphydroseq: 
+        type: integer
+        title: Up Hydrosequence
+        description: Upstream mainstem hydrologic sequence number.
+      dnhydroseq: 
+        type: integer
+        title: Down Hydrosequence Identifier
+        description: Downstream mainstem hydrologic sequence number.
+      pathlength: 
+        type: number
+        title: Path Length
+        description: Distance to the terminal NHDFlowline feature downstream along the main path.
+      lengthkm: 
+        type: number
+        title: Length (km)
+        description: Length of linear feature, Albers Equal Area Conic, length 8.
+      pathtime: 
+        type: number
+        title: Path Time
+        description: Flow time to the terminal NHDFlowline feature downstream along the main path.
+      travtime: 
+        type: number
+        title: Travel Time
+        description: Travel flow time of the NHDPlus flowline.
+      reachsmdate: 
+        type: string
+        format: date-time
+        title: Reach Version Date
+        description: Reach version date indicating the last change to the feature identified by the reach code.
+      ftype: 
+        type: integer
+        title: NHD Feature Type Identifier
+        description: Three digit integer value, unique identifier of a feature type.
+      fcode: 
+        type: integer
+        title: NHD Feature Code Identifier
+        description: Five-digit integer value comprised of the feature type and combinations of characteristics and values.
+      gnis_id: 
+        type: string
+        title: NHDPlus GNIS ID
+        description: Unique identifier assigned by GNIS, length 10.
+      gnis_name: 
+        type: string
+        title: NHDPlus GNIS Name
+        description: Proper name, specific term, or expression by which a particular geographic entity is known, length 65.
+      wbarea_permanent_identifier: 
+        type: string
+        title: Waterbody/Area Permanent Identifier
+        description: Permanent_Identifier of the waterbody through which the Flowline (Artificial Path) flows.
+      wbarea_comid: 
+        type: integer
+        title: Waterbody/Area ComID
+        description: ComID of the waterbody through which the Flowline (Artificial Path) flows.
+      wbd_huc12: 
+        type: string
+        title: Watershed Boundary Dataset HUC12
+        description: WBD HUC12 unit that most encompasses the feature.
+    required: 
+    - start_permanent_identifier
+    - permanent_identifier
+    - start_comid
+    - comid
+    - reachcode
+    - fmeasure
+    - tmeasure
+    - total_distancekm
+    - total_flowtimehour
+    - hydroseq
+    - levelpathid
+    - terminalpathid
+    - uphydroseq
+    - dnhydroseq
+    - pathlength
+    - lengthkm
+    - pathtime
+    - travtime
+    - reachsmdate
+    - ftype
+    - fcode
+    - gnis_id
+    - gnis_name
+    - wbarea_permanent_identifier
+    - wbarea_comid
+    - wbd_huc12
+  updnv3ep.properties: 
+    type: object
+    properties: 
+      nhd_permanent_identifier: 
+        type: string
+        title: NHDPlus Permanent Identifier
+        description: An unique identifier for each NHD feature, may be a string value of the integer ComID a global unique identifier.
+      nhdplus_comid: 
+        type: integer
+        title: NHDPlus ComID
+        description: An integer unique id for each NHD feature.
+      nhd_gnis_id: 
+        type: string
+        title: NHDPlus GNIS ID
+        description: Unique identifier assigned by GNIS, length 10.
+      nhd_gnis_name: 
+        type: string
+        title: NHDPlus GNIS Name
+        description: Proper name, specific term, or expression by which a particular geographic entity is known, length 65.
+      total_distancekm: 
+        type: number
+        title: Running Total Distance
+        description: Running distance in kilometers of the navigation from the start point to this feature.
+      total_flowtimehour: 
+        type: number
+        title: Running Total Flow Time
+        description: Running flow time in hours of the navigation from the start point to this feature.  Currently nonfunctional.
+      catchment_featureid: 
+        type: integer
+        title: Catchment Feature ID
+        description: Identifier of the NHDPlus catchment with which the feature is associated.
+      reachcode: 
+        type: string
+        title: Reach Code
+        description: |-
+          Unique identifier composed of two parts. The first eight digits is the subbasin code as defined by FIPS 103. The next
+          six digits are randomly assigned, sequential numbers that are unique within a Cataloging Unit, length 14.
+      reachsmdate: 
+        type: string
+        format: date-time
+        title: Reach Version Date
+        description: Reach version date indicating the last change to the feature identified by the reach code.
+      measure: 
+        type: number
+        title: Event Measure
+        description: Measure along the reach, in percent from downstream end, where a point event is located.
+      eventtype: 
+        type: number
+        title: Event Type Identifier
+        description: "Domain value indicating the program for which the event has been created. See https://www.epa.gov/waterdata/rad-event-programs for values of each Reach Address Database program."
+      event_permanent_identifier: 
+        type: string
+        title: Event Permanent Identifier
+        description: 40-char GUID value that uniquely identifies the occurrence of each event.
+      source_originator: 
+        type: string
+        title: Source Originator
+        description: Originator of the event.
+      source_featureid: 
+        type: string
+        title: Source Feature ID
+        description: Identifier of the entity used in the source data.
+      source_datadesc: 
+        type: string
+        title: Source Data Description
+        description: Description of the entity.
+      featuredetailurl: 
+        type: string
+        title: Feature Detail Url Resource
+        description: URL where detailed event entity data can be found.
+      geogstate: 
+        type: string
+        title: Geographic State
+        description: Abbreviation of the state where the event takes place regardless of the source originator. In most cases this will be the same as source_originator, but they may differ in cases such that tribes, state cooperators, and other non-state specific organizations manage the data. This distinction allows for both state based and management-based analysis.
+      cycle_year: 
+        type: string
+        title: Event Cycle Year
+        description: Optional field indicating a year for which the event is considered to be valid. Only a subset of programs track events via cycle year.
+      start_date: 
+        type: string
+        format: date-time
+        title: Start Date
+        description: The date by which the event first is considered to be valid.
+      end_date: 
+        type: string
+        format: date-time
+        title: End Date
+        description: The date by which the event is considered to be closed.
+      wbd_huc12: 
+        type: string
+        title: Watershed Boundary Dataset HUC12
+        description: WBD HUC12 unit that most encompasses the feature.
+      program_key: 
+        type: string
+        title: Program Key
+        description: Combined unique identifier for use in systems only allowing single key table joins (e.g. Esri GIS systems).
+      program_attributes_303d: 
+        "$ref": "#/definitions/updnv3pa_303d" 
+      program_attributes_grts: 
+        "$ref": "#/definitions/updnv3pa_grts" 
+      program_attributes_npdes: 
+        "$ref": "#/definitions/updnv3pa_npdes" 
+      program_attributes_frspub: 
+        "$ref": "#/definitions/updnv3pa_frspub" 
+    required: 
+    - nhd_permanent_identifier
+    - nhdplus_comid
+    - nhd_gnis_id
+    - nhd_gnis_name
+    - total_distancekm
+    - total_flowtimehour
+    - catchment_featureid
+    - reachcode
+    - reachsmdate
+    - measure
+    - eventtype
+    - event_permanent_identifier
+    - source_originator
+    - source_featureid
+    - source_datadesc
+    - featuredetailurl
+    - geogstate
+    - cycle_year
+    - start_date
+    - end_date
+    - wbd_huc12
+    - program_key
+    - program_attributes_303d
+    - program_attributes_grts
+    - program_attributes_npdes
+    - program_attributes_frspub
+  updnv3el.properties: 
+    type: object
+    properties: 
+      nhd_permanent_identifier: 
+        type: string
+        title: NHDPlus Permanent Identifier
+        description: An unique identifier for each NHD feature, may be a string value of the integer ComID a global unique identifier.
+      nhdplus_comid: 
+        type: integer
+        title: NHDPlus ComID
+        description: An integer unique id for each NHD feature.
+      nhd_gnis_id: 
+        type: string
+        title: NHDPlus GNIS ID
+        description: Unique identifier assigned by GNIS, length 10.
+      nhd_gnis_name: 
+        type: string
+        title: NHDPlus GNIS Name
+        description: Proper name, specific term, or expression by which a particular geographic entity is known, length 65.
+      total_distancekm: 
+        type: number
+        title: Running Total Distance
+        description: Running distance in kilometers of the navigation from the start point to this feature.
+      total_flowtimehour: 
+        type: number
+        title: Running Total Flow Time
+        description: Running flow time in hours of the navigation from the start point to this feature.  Currently nonfunctional.
+      catchment_featureid: 
+        type: integer
+        title: Catchment Feature ID
+        description: Identifier of the NHDPlus catchment with which the feature is associated.
+      reachcode: 
+        type: string
+        title: Reach Code
+        description: |-
+          Unique identifier composed of two parts. The first eight digits is the subbasin code as defined by FIPS 103. The next
+          six digits are randomly assigned, sequential numbers that are unique within a Cataloging Unit, length 14.
+      reachsmdate: 
+        type: string
+        format: date-time
+        title: Reach Version Date
+        description: Reach version date indicating the last change to the feature identified by the reach code.
+      fmeasure: 
+        type: number
+        title: From Measure
+        description: Measure along the reach, in percent from downstream end, where a linear event begins (from).
+      tmeasure: 
+        type: number
+        title: To Measure
+        description: Measure along the reach, in percent from downstream end, where a linear event ends (to).
+      eventtype: 
+        type: number
+        title: Event Type Identifier
+        description: "Domain value indicating the program for which the event has been created. See https://www.epa.gov/waterdata/rad-event-programs for values of each Reach Address Database program."
+      event_permanent_identifier: 
+        type: string
+        title: Event Permanent Identifier
+        description: 40-char GUID value that uniquely identifies the occurrence of each event.
+      source_originator: 
+        type: string
+        title: Source Originator
+        description: Originator of the event.
+      source_featureid: 
+        type: string
+        title: Source Feature ID
+        description: Identifier of the entity used in the source data.
+      source_datadesc: 
+        type: string
+        title: Source Data Description
+        description: Description of the entity.
+      featuredetailurl: 
+        type: string
+        title: Feature Detail Url Resource
+        description: URL where detailed event entity data can be found.
+      event_lengthkm: 
+        type: number
+        title: Event Length (km)
+        description: Length of the linear event in kilometers.
+      geogstate: 
+        type: string
+        title: Geographic State
+        description: Abbreviation of the state where the event takes place regardless of the source originator. In most cases this will be the same as source_originator, but they may differ in cases such that tribes, state cooperators, and other non-state specific organizations manage the data. This distinction allows for both state based and management-based analysis.
+      cycle_year: 
+        type: string
+        title: Event Cycle Year
+        description: Optional field indicating a year for which the event is considered to be valid. Only a subset of programs track events via cycle year.
+      start_date: 
+        type: string
+        format: date-time
+        title: Start Date
+        description: The date by which the event first is considered to be valid.
+      end_date: 
+        type: string
+        format: date-time
+        title: End Date
+        description: The date by which the event is considered to be closed.
+      wbd_huc12: 
+        type: string
+        title: Watershed Boundary Dataset HUC12
+        description: WBD HUC12 unit that most encompasses the feature.
+      program_key: 
+        type: string
+        title: Program Key
+        description: Combined unique identifier for use in systems only allowing single key table joins (e.g. Esri GIS systems).
+      program_attributes_303d: 
+        "$ref": "#/definitions/updnv3pa_303d" 
+      program_attributes_grts: 
+        "$ref": "#/definitions/updnv3pa_grts" 
+      program_attributes_npdes: 
+        "$ref": "#/definitions/updnv3pa_npdes" 
+      program_attributes_frspub: 
+        "$ref": "#/definitions/updnv3pa_frspub" 
+    required: 
+    - nhd_permanent_identifier
+    - nhdplus_comid
+    - nhd_gnis_id
+    - nhd_gnis_name
+    - total_distancekm
+    - total_flowtimehour
+    - catchment_featureid
+    - reachcode
+    - reachsmdate
+    - fmeasure
+    - tmeasure
+    - eventtype
+    - event_permanent_identifier
+    - source_originator
+    - source_featureid
+    - source_datadesc
+    - featuredetailurl
+    - event_lengthkm
+    - geogstate
+    - cycle_year
+    - start_date
+    - end_date
+    - wbd_huc12
+    - program_key
+    - program_attributes_303d
+    - program_attributes_grts
+    - program_attributes_npdes
+    - program_attributes_frspub
+  updnv3ea.properties: 
+    type: object
+    properties: 
+      nhd_permanent_identifier: 
+        type: string
+        title: NHDPlus Permanent Identifier
+        description: An unique identifier for each NHD feature, may be a string value of the integer ComID a global unique identifier.
+      nhdplus_comid: 
+        type: integer
+        title: NHDPlus ComID
+        description: An integer unique id for each NHD feature.
+      nhd_gnis_id: 
+        type: string
+        title: NHDPlus GNIS ID
+        description: Unique identifier assigned by GNIS, length 10.
+      nhd_gnis_name: 
+        type: string
+        title: NHDPlus GNIS Name
+        description: Proper name, specific term, or expression by which a particular geographic entity is known, length 65.
+      total_distancekm: 
+        type: number
+        title: Running Total Distance
+        description: Running distance in kilometers of the navigation from the start point to this feature.
+      total_flowtimehour: 
+        type: number
+        title: Running Total Flow Time
+        description: Running flow time in hours of the navigation from the start point to this feature.  Currently nonfunctional.
+      catchment_featureid: 
+        type: integer
+        title: Catchment Feature ID
+        description: Identifier of the NHDPlus catchment with which the feature is associated.
+      reachcode: 
+        type: string
+        title: Reach Code
+        description: |-
+          Unique identifier composed of two parts. The first eight digits is the subbasin code as defined by FIPS 103. The next
+          six digits are randomly assigned, sequential numbers that are unique within a Cataloging Unit, length 14.
+      reachsmdate: 
+        type: string
+        format: date-time
+        title: Reach Version Date
+        description: Reach version date indicating the last change to the feature identified by the reach code.
+      eventtype: 
+        type: number
+        title: Event Type Identifier
+        description: "Domain value indicating the program for which the event has been created. See https://www.epa.gov/waterdata/rad-event-programs for values of each Reach Address Database program."
+      event_permanent_identifier: 
+        type: string
+        title: Event Permanent Identifier
+        description: 40-char GUID value that uniquely identifies the occurrence of each event.
+      source_originator: 
+        type: string
+        title: Source Originator
+        description: Originator of the event.
+      source_featureid: 
+        type: string
+        title: Source Feature ID
+        description: Identifier of the entity used in the source data.
+      source_datadesc: 
+        type: string
+        title: Source Data Description
+        description: Description of the entity.
+      featuredetailurl: 
+        type: string
+        title: Feature Detail Url Resource
+        description: URL where detailed event entity data can be found.
+      event_areasqkm: 
+        type: number
+        title: Event Area (sqkm)
+        description: Area of the areal event in square kilometers.
+      geogstate: 
+        type: string
+        title: Geographic State
+        description: Abbreviation of the state where the event takes place regardless of the source originator. In most cases this will be the same as source_originator, but they may differ in cases such that tribes, state cooperators, and other non-state specific organizations manage the data. This distinction allows for both state based and management-based analysis.
+      cycle_year: 
+        type: string
+        title: Event Cycle Year
+        description: Optional field indicating a year for which the event is considered to be valid. Only a subset of programs track events via cycle year.
+      start_date: 
+        type: string
+        format: date-time
+        title: Start Date
+        description: The date by which the event first is considered to be valid.
+      end_date: 
+        type: string
+        format: date-time
+        title: End Date
+        description: The date by which the event is considered to be closed.
+      wbd_huc12: 
+        type: string
+        title: Watershed Boundary Dataset HUC12
+        description: WBD HUC12 unit that most encompasses the feature.
+      program_key: 
+        type: string
+        title: Program Key
+        description: Combined unique identifier for use in systems only allowing single key table joins (e.g. Esri GIS systems).
+      program_attributes_303d: 
+        "$ref": "#/definitions/updnv3pa_303d" 
+      program_attributes_grts: 
+        "$ref": "#/definitions/updnv3pa_grts" 
+      program_attributes_npdes: 
+        "$ref": "#/definitions/updnv3pa_npdes" 
+      program_attributes_frspub: 
+        "$ref": "#/definitions/updnv3pa_frspub" 
+    required: 
+    - nhd_permanent_identifier
+    - nhdplus_comid
+    - nhd_gnis_id
+    - nhd_gnis_name
+    - total_distancekm
+    - total_flowtimehour
+    - catchment_featureid
+    - reachcode
+    - reachsmdate
+    - eventtype
+    - event_permanent_identifier
+    - source_originator
+    - source_featureid
+    - source_datadesc
+    - featuredetailurl
+    - event_areasqkm
+    - geogstate
+    - cycle_year
+    - start_date
+    - end_date
+    - wbd_huc12
+    - program_key
+    - program_attributes_303d
+    - program_attributes_grts
+    - program_attributes_npdes
+    - program_attributes_frspub
+  updnv3pa_303d: 
+    type: object
+    properties: 
+      cycle_year: 
+        type: string
+        title: ATTAINS Cycle Year
+        description: The even-numbered year associated with the list or assessment (e.g., 1996, 1998, 2000). This field is included for all entries.
+      listed_water_id: 
+        type: string
+        title: Listed Water ID
+        description: "Unique ID assigned to each state-listed waterbody or segment. The first two characters are the state abbreviation. The following characters are the water's Waterbody System ID, another state-derived ID, or an arbitrary ID assigned by the state. This field is included for all entries."
+      state: 
+        type: string
+        title: State
+        description: The state abbreviation (US Postal) for the state. This field is included for all entries.
+      listed_water_name: 
+        type: string
+        title: Listed Water Name
+        description: Water name used by the state.
+      water_type: 
+        type: string
+        title: Water Type
+        description: A description of the type of water that the assessment unit represents.
+      water_type_size: 
+        type: number
+        title: Water Type Size
+        description: Size of the assessed waterbody (e.g. miles, acres). This field is optional and not included for all entries.
+      waterbody_type_group: 
+        type: string
+        title: Waterbody Type Group Name
+        description: "A description of the \"parent\" type of water that the assessment unit represents."
+      size_unit: 
+        type: string
+        title: Size Unit
+        description: The standard unit of measure to use for this water type (miles, acres, square miles).
+      waterbody_type_display: 
+        type: string
+        title: Waterbody Type Display Name
+        description: Display version of water type, for use in web reports.
+      ir_state: 
+        type: string
+        title: Integrated Report State Status
+        description: Flag (Y/N) indicating whether the state data submission is integrated or a separate 303(d) and 305(b).  If a state data submission is not IR, there are certain data elements that are not available in a 303(d) submission (e.g., designated uses and probable sources).
+      causes: 
+        type: array
+        title: Causes
+        items: 
+          "$ref": "#/definitions/updnv3pa_303d.causes" 
+      ir_sources: 
+        type: array
+        title: Sources
+        items: 
+          "$ref": "#/definitions/updnv3pa_305b.sources" 
+      ir_uses: 
+        type: array
+        title: Uses
+        items: 
+          "$ref": "#/definitions/updnv3pa_305b.uses" 
+    required: 
+    - cycle_year
+    - listed_water_id
+    - state
+    - listed_water_name
+    - water_type
+    - water_type_size
+    - waterbody_type_group
+    - size_unit
+    - waterbody_type_display
+    - ir_state
+    - causes
+    - ir_sources
+    - ir_uses
+  updnv3pa_303d.causes: 
+    type: object
+    properties: 
+      detailed_cause_id: 
+        type: integer
+        title: Detailed Cause ID
+        description: Numeric ID assigned to the cause of impairment.
+      detailed_cause_name: 
+        type: string
+        title: Detailed Cause Name
+        description: The name of the cause of impairment. This field is included for all entries.
+      parent_cause_id: 
+        type: integer
+        title: Parent Cause ID
+        description: "ID associated with the \"parent\" impairment cause. The parent cause of impairment represents an EPA-assigned, general categorization for the specific, state-reported impairment causes. This field is included for all entries."
+      parent_cause_name: 
+        type: string
+        title: Parent Cause Name
+        description: "Cause of impairment group name such as 'Pathogens' or 'Sediment.'"
+    required: 
+    - detailed_cause_id
+    - detailed_cause_name
+    - parent_cause_id
+    - parent_cause_name
+  updnv3pa_305b.sources: 
+    type: object
+    properties: 
+      detailed_source_id: 
+        type: integer
+        title: Detailed Source ID
+        description: Numeric ID assigned to the probable source.
+      detailed_source_name: 
+        type: string
+        title: Detailed Source Name
+        description: The name of the probable source.  This field is optional and only available for states that submit integrated data.  Blank fields indicate that the state did not report this information in their data submission.
+      parent_source_id: 
+        type: integer
+        title: Parent Source ID
+        description: "ID associated with the \"parent\" probable source. The parent probable source represents an EPA-assigned, general categorization for the specific, state-reported probable sources. This field is optional."
+      parent_source_name: 
+        type: string
+        title: Parent Source Name
+        description: Probable source group such as ?Agriculture? or ?Hydromodification.?  The parent probable source group represents an EPA-assigned, general categorization for the specific, state-reported probable source.
+    required: 
+    - detailed_source_id
+    - detailed_source_name
+    - parent_source_id
+    - parent_source_name
+  updnv3pa_305b.uses: 
+    type: object
+    properties: 
+      detailed_use_id: 
+        type: integer
+        title: Detailed Use ID
+        description: EPA unique Identifier assigned to a designated use.
+      detailed_use_desc: 
+        type: string
+        title: Detailed Use Description
+        description: Water use description as defined by EPAS Water Quality Standards System.
+      parent_use_id: 
+        type: integer
+        title: Parent Use ID
+        description: "ID associated with the \"parent\" use. A parent is a higher category of at least two category levels."
+      parent_use_desc: 
+        type: string
+        title: Parent Use Description
+        description: Water use description as defined by EPAS Water Quality Standards System.
+    required: 
+    - detailed_use_id
+    - detailed_use_desc
+    - parent_use_id
+    - parent_use_desc
+  updnv3pa_grts: 
+    type: object
+    properties: 
+      prjdrar_seq: 
+        type: integer
+        title: Project Drainage Identifier
+        description: System generated sequence number to uniquely reference a project drainage record.
+      prj_seq: 
+        type: integer
+        title: Project Identifier
+        description: System generated sequence number to uniquely reference a project record
+      grant_no: 
+        type: string
+        title: GRTS Grant Number
+        description: Reference value identifying the Grant record.
+      prj_no: 
+        type: string
+        title: Project Number
+        description: Unique Identifier for a project within the assigned grant
+      approp_year: 
+        type: string
+        title: Appropriation Year
+        description: Project appropriation year.
+      pre_state: 
+        type: string
+        title: Non-point Source Project State
+        description: The state identifier for pre-award projects that have not been assigned to a grant.
+      pre_rgn_code: 
+        type: string
+        title: Non-point Source Project Region
+        description: The regional identifier for pre-award projects that have not been assigned to a grant.
+      prj_start_date: 
+        type: string
+        format: date-time
+        title: Project Start Date
+        description: The start date of the project.
+      prj_start_actual_ind: 
+        type: string
+        title: Project Start Actual Indicator
+        description: Indicator to signify whether the start date value represents a project that has truly started.
+      prj_complete_date: 
+        type: string
+        format: date-time
+        title: Project End Date
+        description: The completion date of the project.
+      prj_complete_actual_ind: 
+        type: string
+        title: Project Start Actual Indicator
+        description: Indicator to signify whether the start date value represents a project that has truly started.
+      prj_title: 
+        type: string
+        title: Project Title
+        description: A brief narrative description of the project.
+      statewide_ind: 
+        type: string
+        title: Statewide Indicator
+        description: Indicator to identify whether this project is statewide.
+      prj_type_code: 
+        type: string
+        title: Project Functional Category Code
+        description: Reference value identifying the Functional Category Record.
+      prj_type: 
+        type: string
+        title: Project Functional Category Description
+        description: Description of the functional category.
+      pollutants: 
+        type: array
+        title: Pollutants
+        items: 
+          "$ref": "#/definitions/updnv3pa_grts.pollutants" 
+    required: 
+    - prjdrar_seq
+    - prj_seq
+    - grant_no
+    - prj_no
+    - approp_year
+    - pre_state
+    - pre_rgn_code
+    - prj_start_date
+    - prj_start_actual_ind
+    - prj_complete_date
+    - prj_complete_actual_ind
+    - prj_title
+    - statewide_ind
+    - prj_type_code
+    - prj_type
+    - pollutants
+  updnv3pa_grts.pollutants: 
+    type: object
+    properties: 
+      plttyp_code: 
+        type: string
+        title: Pollutant Type Code
+        description: A selection that indicates the type of pollutant addressed in this drainage area.
+      plttyp_name: 
+        type: string
+        title: Pollutant Description
+        description: Description of pollutant addressed by project.
+    required: 
+    - plttyp_code
+    - plttyp_name
+  updnv3pa_npdes: 
+    type: object
+    properties: 
+      npdes_permit_nmbr: 
+        type: string
+        title: NPDES Permit Number
+        description: Permit Number from ICIS permitting database.
+      permit_name: 
+        type: string
+        title: NPDES Permit Name
+        description: Permit Name from ICIS permitting database.
+      registry_id: 
+        type: string
+        title: Facility Registry Identifier
+        description: The identification number assigned by the EPA Facility Registry System to uniquely identify a facility site.
+      primary_name: 
+        type: string
+        title: Facility Site Name
+        description: The public or commercial name of a facility site (i.e., the full name that commonly appears on invoices, signs, or other business documents, or as assigned by the state when the name is ambiguous).
+      interests: 
+        type: array
+        title: Interests
+        items: 
+          "$ref": "#/definitions/updnv3pa_frspub.interests" 
+      sic_codes: 
+        type: array
+        title: SIC Codes
+        description: FRS SIC codes.
+        items: 
+          "$ref": "#/definitions/updnv3pa_frspub.sic_codes" 
+    required: 
+    - npdes_permit_nmbr
+    - permit_name
+    - registry_id
+    - primary_name
+    - interests
+    - sic_codes
+  updnv3pa_frspub: 
+    type: object
+    properties: 
+      registry_id: 
+        type: string
+        title: Facility Registry Identifier
+        description: The identification number assigned by the EPA Facility Registry System to uniquely identify a facility site.
+      primary_name: 
+        type: string
+        title: Facility Site Name
+        description: The public or commercial name of a facility site (i.e., the full name that commonly appears on invoices, signs, or other business documents, or as assigned by the state when the name is ambiguous).
+      state_code: 
+        type: string
+        title: State USPS Code
+        description: The U.S. Postal Service abbreviation that represents the state or state equivalent for the U.S. and Canada.
+      tribal_land_code: 
+        type: string
+        title: Tribal Land Indicator Code
+        description: Code indicating whether or not the facility site is located on tribal land.
+      tribal_land_name: 
+        type: string
+        title: Tribal Land Name
+        description: "The name of the Tribal Reservation, statistical area, or Public Domain Allotment.  If the tribal entity has no land base, the name of the tribal entity is used as the Tribal Land Name. Examples: Colorado River Indian Reservation, Ponca Tribal Designated Statistical Area, Wampanoag Tribe of Gay Head (Aquinnah) of Massachusetts."
+      programs: 
+        type: array
+        title: Programs
+        description: FRS program codes.
+        items: 
+          "$ref": "#/definitions/updnv3pa_frspub.programs" 
+    required: 
+    - registry_id
+    - primary_name
+    - state_code
+    - tribal_land_code
+    - tribal_land_name
+    - programs
+  updnv3pa_frspub.programs: 
+    type: object
+    properties: 
+      pgm_sys_acrnm: 
+        type: string
+        title: Environmental Information System Abbreviated Name
+        description: The abbreviated name that represents the name of an information management system for an environmental program.
+      pgm_sys_id: 
+        type: string
+        title: Environmental Information System Identification Number
+        description: The identification number, such as the permit number, assigned by an information management system that represents a facility site, waste site, operable unit, or other feature tracked by that Environmental Information System.
+      interests: 
+        type: array
+        title: Interests
+        items: 
+          "$ref": "#/definitions/updnv3pa_frspub.interests" 
+      sic_codes: 
+        type: array
+        title: SIC Codes
+        description: FRS SIC codes.
+        items: 
+          "$ref": "#/definitions/updnv3pa_frspub.sic_codes" 
+      medium: 
+        type: array
+        title: TRI Environmental Medium
+        items: 
+          "$ref": "#/definitions/updnv3pa_frspub.medium" 
+    required: 
+    - pgm_sys_acrnm
+    - pgm_sys_id
+    - interests
+    - sic_codes
+    - medium
+  updnv3pa_frspub.interests: 
+    type: object
+    properties: 
+      interest_type: 
+        type: string
+        title: Environmental Interest Type
+        description: The environmental permit or regulatory program that applies to the facility site (e.g., TRI Reporter, NPDES Major, Air Stationary Source Major, Hazardous Waste TSD, Hazardous Waste LQG, Superfund NPL)
+      active_status: 
+        type: string
+        title: Active Status
+        description: FRS Interest active status.
+    required: 
+    - interest_type
+    - active_status
+  updnv3pa_frspub.sic_codes: 
+    type: object
+    properties: 
+      sic_code: 
+        type: string
+        title: SIC Code Identifier
+        description: The code that represents the economic activity of a company (four-digits).
+      sic_description: 
+        type: string
+        title: SIC Code Description
+        description: The meaning of the SIC code.
+      primary_indicator: 
+        type: string
+        title: SIC Primary Indicator
+        description: "The name that indicates whether the associated SIC Code represents the primary activity occurring at the facility site. Allowable Values are 'Primary', 'Secondary', or 'Unknown'."
+    required: 
+    - sic_code
+    - sic_description
+    - primary_indicator
+  updnv3ea.features: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON FeatureCollection type attribute
+      geometry: 
+        "$ref": "#/definitions/geo" 
+      properties: 
+        "$ref": "#/definitions/updnv3ea.properties" 
+    required: 
+    - type
+    - geometry
+    - properties
+  updnv3el.features: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON FeatureCollection type attribute
+      geometry: 
+        "$ref": "#/definitions/geo" 
+      properties: 
+        "$ref": "#/definitions/updnv3el.properties" 
+    required: 
+    - type
+    - geometry
+    - properties
+  updnv3ep.features: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON FeatureCollection type attribute
+      geometry: 
+        "$ref": "#/definitions/geo" 
+      properties: 
+        "$ref": "#/definitions/updnv3ep.properties" 
+    required: 
+    - type
+    - geometry
+    - properties
+  updnv3n.features: 
+    type: object
+    properties: 
+      type: 
+        type: string
+        title: Type
+        description: GeoJSON FeatureCollection type attribute
+      geometry: 
+        "$ref": "#/definitions/geo" 
+      properties: 
+        "$ref": "#/definitions/updnv3n.properties" 
+    required: 
+    - type
+    - geometry
+    - properties

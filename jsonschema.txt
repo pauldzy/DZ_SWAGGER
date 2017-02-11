@@ -1,0 +1,398 @@
+{
+    "$schema": "http:\/\/json-schema.org\/draft-04\/schema#"
+   ,"title": "\/Navigation20.ServiceGeoJSON get 200 - SAMPLE"
+   ,"type": "object"
+   ,"properties": {
+       "status": {
+          "type": [
+             "string"
+            ,"null"
+         ]
+         ,"title": "Status"
+         ,"description": "Service response status indicating the success or failure of the service request."
+      }
+      ,"data": {
+          "$ref": "#\/definitions\/n20.data"
+      }
+   }
+   ,"required": [
+       "status"
+      ,"data"
+   ]
+   ,"definitions": {
+       "n20.root": {
+          "type": "object"
+         ,"properties": {
+             "status": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Status"
+               ,"description": "Service response status indicating the success or failure of the service request."
+            }
+            ,"data": {
+                "$ref": "#\/definitions\/n20.data"
+            }
+         }
+         ,"required": [
+             "status"
+            ,"data"
+         ]
+      }
+      ,"n20.data": {
+          "type": "object"
+         ,"properties": {
+             "session_id": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Session ID"
+               ,"description": "Global unique identifier for a given service request."
+            }
+            ,"navigation_results": {
+                "$ref": "#\/definitions\/updnv3n"
+            }
+         }
+         ,"required": [
+             "session_id"
+            ,"navigation_results"
+         ]
+      }
+      ,"updnv3n": {
+          "type": "object"
+         ,"properties": {
+             "type": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Type"
+               ,"description": "GeoJSON Feature type attribute"
+            }
+            ,"bbox": {
+                "type": [
+                   "array"
+                  ,"null"
+               ]
+               ,"title": "GeoJSON Bbox"
+               ,"description": "GeoJSON bounding box array."
+               ,"items": {
+                   "type": "number"
+               }
+            }
+            ,"features": {
+                "type": [
+                   "array"
+                  ,"null"
+               ]
+               ,"title": "Features"
+               ,"items": {
+                   "$ref": "#\/definitions\/updnv3n.features"
+               }
+            }
+         }
+         ,"required": [
+             "type"
+            ,"bbox"
+            ,"features"
+         ]
+      }
+      ,"geo": {
+          "type": "object"
+         ,"properties": {
+             "type": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Type"
+               ,"description": "GeoJSON Geometry type attribute"
+            }
+            ,"coordinates": {
+                "type": [
+                   "array"
+                  ,"null"
+               ]
+               ,"title": "Coordinates"
+               ,"description": "Array of coordinates representing the GeoJSON geometry"
+               ,"items": {
+                   "type": "number"
+               }
+            }
+         }
+         ,"required": [
+             "type"
+            ,"coordinates"
+         ]
+      }
+      ,"updnv3n.properties": {
+          "type": "object"
+         ,"properties": {
+             "start_permanent_identifier": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Start Permanent Identifier"
+               ,"description": "Permanent Identifier of the flowline from which the navigation occurs."
+            }
+            ,"permanent_identifier": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Permanent Identifier"
+               ,"description": "Global unique identifier assigned to each event feature."
+            }
+            ,"start_comid": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "Start ComID"
+               ,"description": "NHDPlus ComID of the flowline from which the navigation occurs."
+            }
+            ,"comid": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "ComID"
+               ,"description": "Unique integer identifier for NHDPlus features."
+            }
+            ,"reachcode": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Reach Code"
+               ,"description": "Unique identifier composed of two parts. The first eight digits is the subbasin code as defined by FIPS 103. The next\nsix digits are randomly assigned, sequential numbers that are unique within a Cataloging Unit, length 14."
+            }
+            ,"fmeasure": {
+                "type": [
+                   "number"
+                  ,"null"
+               ]
+               ,"title": "From Measure"
+               ,"description": "Measure along the reach, in percent from downstream end, where a linear event begins (from)."
+            }
+            ,"tmeasure": {
+                "type": [
+                   "number"
+                  ,"null"
+               ]
+               ,"title": "To Measure"
+               ,"description": "Measure along the reach, in percent from downstream end, where a linear event ends (to)."
+            }
+            ,"total_distancekm": {
+                "type": [
+                   "number"
+                  ,"null"
+               ]
+               ,"title": "Running Total Distance"
+               ,"description": "Running distance in kilometers of the navigation from the start point to this feature."
+            }
+            ,"total_flowtimehour": {
+                "type": [
+                   "number"
+                  ,"null"
+               ]
+               ,"title": "Running Total Flow Time"
+               ,"description": "Running flow time in hours of the navigation from the start point to this feature.  Currently nonfunctional."
+            }
+            ,"hydroseq": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "Hydrosequence ID"
+               ,"description": "Hydrologic sequence number; places flowlines in hydrologic order; processing NHDFlowline features in ascending order, encounters the features from downstream to upstream; processing the NHDFlowline features in descending order, encounters the features from upstream to downstream."
+            }
+            ,"levelpathid": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "Level Path ID"
+               ,"description": "Hydrologic sequence number of most downstream NHDFlowline feature in the level path."
+            }
+            ,"terminalpathid": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "Terminal Path Identifier"
+               ,"description": "Hydrologic sequence number of terminal NHDFlowline feature."
+            }
+            ,"uphydroseq": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "Up Hydrosequence"
+               ,"description": "Upstream mainstem hydrologic sequence number."
+            }
+            ,"dnhydroseq": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "Down Hydrosequence Identifier"
+               ,"description": "Downstream mainstem hydrologic sequence number."
+            }
+            ,"pathlength": {
+                "type": [
+                   "number"
+                  ,"null"
+               ]
+               ,"title": "Path Length"
+               ,"description": "Distance to the terminal NHDFlowline feature downstream along the main path."
+            }
+            ,"lengthkm": {
+                "type": [
+                   "number"
+                  ,"null"
+               ]
+               ,"title": "Length (km)"
+               ,"description": "Length of linear feature, Albers Equal Area Conic, length 8."
+            }
+            ,"pathtime": {
+                "type": [
+                   "number"
+                  ,"null"
+               ]
+               ,"title": "Path Time"
+               ,"description": "Flow time to the terminal NHDFlowline feature downstream along the main path."
+            }
+            ,"travtime": {
+                "type": [
+                   "number"
+                  ,"null"
+               ]
+               ,"title": "Travel Time"
+               ,"description": "Travel flow time of the NHDPlus flowline."
+            }
+            ,"reachsmdate": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"format": "date-time"
+               ,"title": "Reach Version Date"
+               ,"description": "Reach version date indicating the last change to the feature identified by the reach code."
+            }
+            ,"ftype": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "NHD Feature Type Identifier"
+               ,"description": "Three digit integer value, unique identifier of a feature type."
+            }
+            ,"fcode": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "NHD Feature Code Identifier"
+               ,"description": "Five-digit integer value comprised of the feature type and combinations of characteristics and values."
+            }
+            ,"gnis_id": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "NHDPlus GNIS ID"
+               ,"description": "Unique identifier assigned by GNIS, length 10."
+            }
+            ,"gnis_name": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "NHDPlus GNIS Name"
+               ,"description": "Proper name, specific term, or expression by which a particular geographic entity is known, length 65."
+            }
+            ,"wbarea_permanent_identifier": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Waterbody\/Area Permanent Identifier"
+               ,"description": "Permanent_Identifier of the waterbody through which the Flowline (Artificial Path) flows."
+            }
+            ,"wbarea_comid": {
+                "type": [
+                   "integer"
+                  ,"null"
+               ]
+               ,"title": "Waterbody\/Area ComID"
+               ,"description": "ComID of the waterbody through which the Flowline (Artificial Path) flows."
+            }
+            ,"wbd_huc12": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Watershed Boundary Dataset HUC12"
+               ,"description": "WBD HUC12 unit that most encompasses the feature."
+            }
+         }
+         ,"required": [
+             "start_permanent_identifier"
+            ,"permanent_identifier"
+            ,"start_comid"
+            ,"comid"
+            ,"reachcode"
+            ,"fmeasure"
+            ,"tmeasure"
+            ,"total_distancekm"
+            ,"total_flowtimehour"
+            ,"hydroseq"
+            ,"levelpathid"
+            ,"terminalpathid"
+            ,"uphydroseq"
+            ,"dnhydroseq"
+            ,"pathlength"
+            ,"lengthkm"
+            ,"pathtime"
+            ,"travtime"
+            ,"reachsmdate"
+            ,"ftype"
+            ,"fcode"
+            ,"gnis_id"
+            ,"gnis_name"
+            ,"wbarea_permanent_identifier"
+            ,"wbarea_comid"
+            ,"wbd_huc12"
+         ]
+      }
+      ,"updnv3n.features": {
+          "type": "object"
+         ,"properties": {
+             "type": {
+                "type": [
+                   "string"
+                  ,"null"
+               ]
+               ,"title": "Type"
+               ,"description": "GeoJSON FeatureCollection type attribute"
+            }
+            ,"geometry": {
+                "$ref": "#\/definitions\/geo"
+            }
+            ,"properties": {
+                "$ref": "#\/definitions\/updnv3n.properties"
+            }
+         }
+         ,"required": [
+             "type"
+            ,"geometry"
+            ,"properties"
+         ]
+      }
+   }
+   ,"additionalProperties": false
+}
