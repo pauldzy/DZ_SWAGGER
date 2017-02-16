@@ -80,15 +80,36 @@ AS
       ELSE
          FOR i IN 1 .. self.swagger_methods.COUNT
          LOOP
-            clb_output := clb_output || dz_json_util.pretty(
-                str_pad1 || dz_json_main.json_format(
-                  self.swagger_methods(i).swagger_http_method
-               ) || ': ' || self.swagger_methods(i).toJSON(
-                  p_pretty_print => num_pretty_print + 1
-               )
-               ,num_pretty_print + 1
-            );     
-            str_pad1 := ',';
+            IF self.swagger_methods(i).swagger_http_method = 'get/post'
+            THEN
+               clb_output := clb_output || dz_json_util.pretty(
+                   str_pad1 || '"get": ' || self.swagger_methods(i).toJSON(
+                     p_pretty_print => num_pretty_print + 1
+                  )
+                  ,num_pretty_print + 1
+               );     
+               str_pad1 := ',';
+               
+               clb_output := clb_output || dz_json_util.pretty(
+                   str_pad1 || '"post": ' || self.swagger_methods(i).toJSON(
+                      p_pretty_print => num_pretty_print + 1
+                  )
+                  ,num_pretty_print + 1
+               );     
+               str_pad1 := ',';
+         
+            ELSE
+               clb_output := clb_output || dz_json_util.pretty(
+                   str_pad1 || dz_json_main.json_format(
+                     self.swagger_methods(i).swagger_http_method
+                  ) || ': ' || self.swagger_methods(i).toJSON(
+                     p_pretty_print => num_pretty_print + 1
+                  )
+                  ,num_pretty_print + 1
+               );     
+               str_pad1 := ',';
+               
+            END IF;
 
          END LOOP;
 
@@ -140,11 +161,32 @@ AS
       ELSE
          FOR i IN 1 .. self.swagger_methods.COUNT
          LOOP
-            clb_output := clb_output || dz_json_util.pretty(
-                self.swagger_methods(i).swagger_http_method || ': '
-               ,num_pretty_print
-               ,'  '
-            ) || self.swagger_methods(i).toYAML(num_pretty_print + 1);
+            IF self.swagger_methods(i).swagger_http_method = 'get/post'
+            THEN
+               clb_output := clb_output || dz_json_util.pretty(
+                   'get: '
+                  ,num_pretty_print
+                  ,'  '
+               ) || self.swagger_methods(i).toYAML(
+                  p_pretty_print => num_pretty_print + 1   
+               );
+               
+               clb_output := clb_output || dz_json_util.pretty(
+                   'post: '
+                  ,num_pretty_print
+                  ,'  '
+               ) || self.swagger_methods(i).toYAML(
+                  p_pretty_print => num_pretty_print + 1
+               );
+            
+            ELSE
+               clb_output := clb_output || dz_json_util.pretty(
+                   self.swagger_methods(i).swagger_http_method || ': '
+                  ,num_pretty_print
+                  ,'  '
+               ) || self.swagger_methods(i).toYAML(num_pretty_print + 1);
+               
+            END IF;
             
          END LOOP;
 

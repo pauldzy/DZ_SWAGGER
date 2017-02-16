@@ -723,6 +723,8 @@ AS
       clb_output        CLOB;
       str_host          VARCHAR2(4000 Char);
       str_pad           VARCHAR2(1 Char);
+      str_pad1          VARCHAR2(1 Char);
+      str_pad2          VARCHAR2(1 Char);
       ary_schemes       MDSYS.SDO_STRING2_ARRAY;
       ary_consumes      MDSYS.SDO_STRING2_ARRAY;
       ary_produces      MDSYS.SDO_STRING2_ARRAY;
@@ -743,9 +745,11 @@ AS
       IF num_pretty_print IS NULL
       THEN
          clb_output := dz_json_util.pretty('{',NULL);
+         str_pad := '';
          
       ELSE
          clb_output := dz_json_util.pretty('{',-1);
+         str_pad := ' ';
          
       END IF;
       
@@ -753,21 +757,27 @@ AS
       -- Step 30
       -- Add base attributes
       --------------------------------------------------------------------------
+      str_pad1 := str_pad;
+      
       clb_output := clb_output || dz_json_util.pretty(
-          ' ' || dz_json_main.value2json(
+          str_pad1 || dz_json_main.value2json(
              'swagger'
             ,c_swagger_version
             ,num_pretty_print + 1
          )
          ,num_pretty_print + 1
-      ) || dz_json_util.pretty(
-          ',' || dz_json_main.formatted2json(
+      );
+      str_pad1 := ','; 
+
+      clb_output := clb_output || dz_json_util.pretty(
+          str_pad1 || dz_json_main.formatted2json(
               'info'
              ,self.swagger_info.toJSON(num_pretty_print + 1)
              ,num_pretty_print + 1
           )
          ,num_pretty_print + 1
       );
+      str_pad1 := ',';
       
       --------------------------------------------------------------------------
       -- Step 80
@@ -785,13 +795,14 @@ AS
       IF str_host IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.value2json(
+             str_pad1 || dz_json_main.value2json(
                  'host'
                 ,str_host
                 ,num_pretty_print + 1
              )
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
       END IF;    
       
@@ -802,13 +813,14 @@ AS
       IF self.swagger_basepath IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.value2json(
+             str_pad1 || dz_json_main.value2json(
                  'basePath'
                 ,self.swagger_basepath
                 ,num_pretty_print + 1
              )
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
       END IF;
       
@@ -830,13 +842,14 @@ AS
       AND ary_schemes.COUNT > 0
       THEN     
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.value2json(
+             str_pad1 || dz_json_main.value2json(
                  'schemes'
                 ,ary_schemes
                 ,num_pretty_print + 1
              )
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
       
       END IF;
 
@@ -866,13 +879,14 @@ AS
       AND ary_consumes.COUNT > 0
       THEN
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.value2json(
+             str_pad1 || dz_json_main.value2json(
                  'consumes'
                 ,ary_consumes
                 ,num_pretty_print + 1
              )
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
       END IF;
       
@@ -902,13 +916,14 @@ AS
       AND ary_produces.COUNT > 0
       THEN
          clb_output := clb_output ||  dz_json_util.pretty(
-             ',' || dz_json_main.value2json(
+             str_pad1 || dz_json_main.value2json(
                  'produces'
                 ,ary_produces
                 ,num_pretty_print + 1
              )
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
       END IF;
       
@@ -923,25 +938,24 @@ AS
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('parameters',num_pretty_print) || '{'
+             str_pad1 || dz_json_main.fastname('parameters',num_pretty_print) || '{'
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
-         str_pad := ' ';
-
+         str_pad2 := str_pad;
          FOR i IN 1 .. self.swagger_parms.COUNT
          LOOP
             IF  self.swagger_parms(i).inline_parm = 'FALSE'
             AND self.swagger_parms(i).parm_undocumented = 'FALSE'
             THEN
                clb_output := clb_output || dz_json_util.pretty(
-                   str_pad || '"' || self.swagger_parms(i).swagger_parm || '": ' || self.swagger_parms(i).toJSON(
+                   str_pad2 || '"' || self.swagger_parms(i).swagger_parm || '": ' || self.swagger_parms(i).toJSON(
                       p_pretty_print => num_pretty_print + 2
                    )
                   ,num_pretty_print + 2
-               );
-               
-               str_pad := ',';
+               );    
+               str_pad2 := ',';
 
             END IF;
             
@@ -965,22 +979,21 @@ AS
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('paths',num_pretty_print) || '{'
+             str_pad1 || dz_json_main.fastname('paths',num_pretty_print) || '{'
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
-         str_pad := ' ';
-
+         str_pad2 := str_pad;
          FOR i IN 1 .. self.swagger_paths.COUNT
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
-                str_pad || self.swagger_paths(i).toJSON(
+                str_pad2 || self.swagger_paths(i).toJSON(
                    p_pretty_print => num_pretty_print + 2
                 )
                ,num_pretty_print + 2
             );
-            
-            str_pad := ',';
+            str_pad2 := ',';
 
          END LOOP;
 
@@ -1002,18 +1015,18 @@ AS
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.fastname('definitions',num_pretty_print) || '{'
+             str_pad1 || dz_json_main.fastname('definitions',num_pretty_print) || '{'
             ,num_pretty_print + 1
          );
+         str_pad1 := ',';
          
-         str_pad := ' ';
-
+         str_pad2 := str_pad;
          FOR i IN 1 .. self.swagger_defs.COUNT
          LOOP
             IF self.swagger_defs(i).inline_def = 'FALSE'
             THEN
                clb_output := clb_output || dz_json_util.pretty(
-                   str_pad || '"' || dz_swagger_util.dzcondense(
+                   str_pad2 || '"' || dz_swagger_util.dzcondense(
                       self.swagger_defs(i).versionid
                      ,self.swagger_defs(i).definition
                    ) || '": ' || self.swagger_defs(i).toJSON(
@@ -1021,8 +1034,7 @@ AS
                    )
                   ,num_pretty_print + 2
                );
-               
-               str_pad := ',';
+               str_pad2 := ',';
                
             END IF;
 

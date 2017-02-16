@@ -41,7 +41,7 @@ AS
    AS
       num_pretty_print NUMBER := p_pretty_print;
       clb_output       CLOB;
-      str_pad         VARCHAR2(1 Char);
+      str_pad          VARCHAR2(1 Char);
       str_pad1         VARCHAR2(1 Char);
       str_pad2         VARCHAR2(1 Char);
       str_pad3         VARCHAR2(1 Char);
