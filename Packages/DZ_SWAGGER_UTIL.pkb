@@ -194,6 +194,15 @@ AS
       
    BEGIN
    
+      --------------------------------------------------------------------------
+      -- Step 10
+      -- Check over incoming parameters
+      --------------------------------------------------------------------------
+      
+      --------------------------------------------------------------------------
+      -- Step 20
+      -- Pull condense universe from source table
+      --------------------------------------------------------------------------
       SELECT
        a.condense_key
       ,a.condense_value
@@ -207,9 +216,12 @@ AS
       ORDER BY
       LENGTH(a.condense_key) DESC;
       
+      --------------------------------------------------------------------------
+      -- Step 30
+      -- Loop through results looking for replacement candidates
+      --------------------------------------------------------------------------
       FOR i IN 1 .. ary_keys.COUNT
       LOOP
-      
          IF REGEXP_INSTR(p_input,ary_keys(i)) > 0
          THEN
             str_output := REGEXP_REPLACE(
@@ -229,6 +241,16 @@ AS
          END IF;
       
       END LOOP;
+      
+      --------------------------------------------------------------------------
+      -- Step 40
+      -- Remove final underscore if found
+      --------------------------------------------------------------------------
+      IF SUBSTR(str_output,-1) = '_'
+      THEN
+         str_output := SUBSTR(str_output,1,LENGTH(str_output) - 1);
+         
+      END IF;
       
       RETURN str_output;
       

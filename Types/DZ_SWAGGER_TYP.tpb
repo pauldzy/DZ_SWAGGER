@@ -1,16 +1,16 @@
 CREATE OR REPLACE TYPE BODY dz_swagger_typ
-AS 
-   
+AS
+
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    CONSTRUCTOR FUNCTION dz_swagger_typ
-   RETURN SELF AS RESULT 
-   AS 
-   BEGIN 
-      RETURN; 
-      
+   RETURN SELF AS RESULT
+   AS
+   BEGIN
+      RETURN;
+
    END dz_swagger_typ;
-   
+
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    CONSTRUCTOR FUNCTION dz_swagger_typ(
@@ -21,9 +21,9 @@ AS
    AS
       str_path_group_id VARCHAR2(4000 Char);
       str_versionid     VARCHAR2(40 Char) := p_versionid;
-      
+
    BEGIN
-   
+
       --------------------------------------------------------------------------
       -- Step 10
       -- Check over incoming parameters
@@ -31,12 +31,12 @@ AS
       IF p_path_group_id IS NULL
       THEN
          str_path_group_id := p_header_id;
-         
+
       ELSE
          str_path_group_id := p_path_group_id;
-         
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 20
       -- Determine the default version if not provided
@@ -52,16 +52,16 @@ AS
             WHERE
                 a.is_default = 'TRUE'
             AND rownum <= 1;
-            
+
          EXCEPTION
             WHEN NO_DATA_FOUND
             THEN
                RAISE;
-         
+
          END;
-      
+
       END IF;
-   
+
       --------------------------------------------------------------------------
       -- Step 30
       -- Fetch the header record from dz_swagger_head
@@ -85,9 +85,9 @@ AS
          )
          ,p_swagger_host        => a.swagger_host
          ,p_swagger_basepath    => a.swagger_basepath
-         ,p_schemes_https       => a.schemes_https 
-         ,p_consumes_json       => a.consumes_json 
-         ,p_consumes_xml        => a.consumes_xml 
+         ,p_schemes_https       => a.schemes_https
+         ,p_consumes_json       => a.consumes_json
+         ,p_consumes_xml        => a.consumes_xml
          ,p_produces_json       => a.produces_json
          ,p_produces_xml        => a.produces_xml
          ,p_versionid           => a.versionid
@@ -100,9 +100,9 @@ AS
       AND a.header_id = p_header_id;
 
       RETURN;
-   
+
    END dz_swagger_typ;
-   
+
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    CONSTRUCTOR FUNCTION dz_swagger_typ(
@@ -121,14 +121,14 @@ AS
       ary_groups MDSYS.SDO_STRING2_ARRAY;
       parm_pool  dz_swagger_parm_list;
       def_pool   dz_swagger_definition_list;
-      
+
    BEGIN
-   
+
       --------------------------------------------------------------------------
       -- Step 10
       -- Check over incoming parameters
       --------------------------------------------------------------------------
-      
+
       --------------------------------------------------------------------------
       -- Step 20
       -- Load the object
@@ -143,7 +143,7 @@ AS
       self.produces_json       := p_produces_json;
       self.produces_xml        := p_produces_xml;
       self.versionid           := p_versionid;
-      
+
       --------------------------------------------------------------------------
       -- Step 30
       -- Parse the group id
@@ -152,7 +152,7 @@ AS
           p_str   => p_path_group_id
          ,p_regex => ','
       );
-      
+
       --------------------------------------------------------------------------
       -- Step 40
       -- Bail if a problem with the groups
@@ -161,9 +161,9 @@ AS
       AND ary_groups.COUNT = 0
       THEN
          RETURN;
-         
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 50
       -- Pull the list of paths
@@ -171,8 +171,8 @@ AS
       SELECT dz_swagger_path_typ(
           p_swagger_path => a.swagger_path
          ,p_versionid    => a.versionid
-      )      
-      BULK COLLECT INTO 
+      )
+      BULK COLLECT INTO
       self.swagger_paths
       FROM
       dz_swagger_path a
@@ -187,14 +187,14 @@ AS
       ,a.swagger_path
       ORDER BY
       MAX(a.path_order);
-      
+
       IF self.swagger_paths IS NULL
       OR self.swagger_paths.COUNT = 0
       THEN
          RETURN;
-      
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 60
       -- Load the paths subobjects
@@ -208,28 +208,38 @@ AS
             ,p_path_description    => a.path_description
             ,p_versionid           => a.versionid
          )
-         BULK COLLECT INTO 
+         BULK COLLECT INTO
          self.swagger_paths(i).swagger_methods
-         FROM
-         dz_swagger_path a
+         FROM (
+            SELECT
+             aa.versionid
+            ,aa.swagger_path
+            ,aa.swagger_http_method
+            ,aa.path_summary
+            ,aa.path_description
+            ,ROW_NUMBER() OVER (
+               PARTITION BY
+                aa.versionid
+               ,aa.swagger_path
+               ,aa.swagger_http_method
+               ORDER BY
+                aa.path_order
+            ) AS rn
+            FROM
+            dz_swagger_path aa
+            WHERE
+                aa.versionid    = self.swagger_paths(i).versionid
+            AND aa.swagger_path = self.swagger_paths(i).swagger_path
+         ) a
          WHERE
-             a.versionid    = self.swagger_paths(i).versionid
-         AND a.swagger_path = self.swagger_paths(i).swagger_path
-         GROUP BY
-          a.versionid
-         ,a.swagger_path
-         ,a.swagger_http_method
-         ,a.path_summary
-         ,a.path_description
-         ORDER BY
-         MAX(a.path_order);
-         
+         a.rn = 1;
+
       END LOOP;
-      
+
       --------------------------------------------------------------------------
       -- Step 70
       -- Fill the parameter pool
-      --------------------------------------------------------------------------      
+      --------------------------------------------------------------------------
       SELECT dz_swagger_parm_typ(
           p_swagger_parm_id      => a.swagger_parm_id
          ,p_swagger_parm         => a.swagger_parm
@@ -265,10 +275,10 @@ AS
             ,bb.versionid
             FROM
             dz_swagger_path_parm aa
-            JOIN 
+            JOIN
             dz_swagger_parm bb
             ON
-            aa.swagger_parm_id = bb.swagger_parm_id 
+            aa.swagger_parm_id = bb.swagger_parm_id
             WHERE
             (aa.versionid,aa.swagger_path,aa.swagger_http_method) IN (
                SELECT
@@ -309,8 +319,8 @@ AS
                SELECT
                 cccc.swagger_parm_id
                ,cccc.swagger_parm
-               FROM 
-               parms cccc 
+               FROM
+               parms cccc
                GROUP BY
                 cccc.swagger_parm_id
                ,cccc.swagger_parm
@@ -321,7 +331,7 @@ AS
          ON
          bb.swagger_parm = cc.swagger_parm
       ) a;
-         
+
       --------------------------------------------------------------------------
       -- Step 80
       -- Load the methods subobjects
@@ -346,7 +356,7 @@ AS
                ,p_inline_parm          => a.inline_parm
                ,p_versionid            => a.versionid
             )
-            BULK COLLECT INTO 
+            BULK COLLECT INTO
             self.swagger_paths(i).swagger_methods(j).method_path_parms
             FROM
             TABLE(parm_pool) a
@@ -355,10 +365,10 @@ AS
             AND a.swagger_http_method = self.swagger_paths(i).swagger_methods(j).swagger_http_method
             ORDER BY
             a.path_param_sort;
-            
+
             SELECT
             a.swagger_tag
-            BULK COLLECT INTO 
+            BULK COLLECT INTO
             self.swagger_paths(i).swagger_methods(j).method_tags
             FROM
             dz_swagger_path_tags a
@@ -366,7 +376,7 @@ AS
                 a.versionid           = self.swagger_paths(i).swagger_methods(j).versionid
             AND a.swagger_path        = self.swagger_paths(i).swagger_methods(j).swagger_path
             AND a.swagger_http_method = self.swagger_paths(i).swagger_methods(j).swagger_http_method;
-            
+
             SELECT dz_swagger_response_typ(
                 p_swagger_path         => a.swagger_path
                ,p_swagger_http_method  => a.swagger_http_method
@@ -376,7 +386,7 @@ AS
                ,p_response_schema_type => a.response_schema_type
                ,p_versionid            => a.versionid
             )
-            BULK COLLECT INTO 
+            BULK COLLECT INTO
             self.swagger_paths(i).swagger_methods(j).method_responses
             FROM
             dz_swagger_path_resp a
@@ -384,11 +394,11 @@ AS
                 a.versionid           = self.swagger_paths(i).swagger_methods(j).versionid
             AND a.swagger_path        = self.swagger_paths(i).swagger_methods(j).swagger_path
             AND a.swagger_http_method = self.swagger_paths(i).swagger_methods(j).swagger_http_method;
-         
+
          END LOOP;
-         
+
       END LOOP;
-      
+
       --------------------------------------------------------------------------
       -- Step 100
       -- Shrink the pool of parms down to just unique items
@@ -419,13 +429,13 @@ AS
       ,a.swagger_parm_id
       ORDER BY
       MAX(a.param_sort);
-      
+
       parm_pool := dz_swagger_parm_list();
-      
+
       --------------------------------------------------------------------------
       -- Step 110
       -- Get the universe of definitions
-      --------------------------------------------------------------------------    
+      --------------------------------------------------------------------------
       SELECT dz_swagger_definition_typ(
           p_definition          => a.definition
          ,p_definition_type     => a.definition_type
@@ -459,53 +469,53 @@ AS
             dz_swagger_definition aaa
             WHERE
             (aaa.versionid,aaa.definition,aaa.definition_type) IN (
-               SELECT 
+               SELECT
                 bbb.versionid
                ,bbb.response_schema_def
-               ,bbb.response_schema_type 
-               FROM 
+               ,bbb.response_schema_type
+               FROM
                TABLE(self.all_responses()) bbb
             )
             OR (aaa.versionid,aaa.definition) IN (
                SELECT
                 ddd.versionid
-               ,ddd.property_target 
-               FROM 
+               ,ddd.property_target
+               FROM
                dz_swagger_def_prop ccc
                JOIN
                dz_swagger_property ddd
                ON
                ccc.property_id = ddd.property_id
-               WHERE 
+               WHERE
                    ccc.versionid = self.versionid
                AND ddd.versionid = self.versionid
                AND ddd.property_target IS NOT NULL
                START WITH (ccc.versionid,ccc.definition,ccc.definition_type) IN (
-                  SELECT 
+                  SELECT
                    cccc.versionid
                   ,cccc.response_schema_def
                   ,cccc.response_schema_type
-                  FROM 
+                  FROM
                   TABLE(self.all_responses()) cccc
                   WHERE
                   cccc.response_schema_type = 'object'
                )
-               CONNECT BY PRIOR 
+               CONNECT BY PRIOR
                ddd.property_target = ccc.definition
-               GROUP BY 
+               GROUP BY
                 ddd.versionid
                ,ddd.property_target
             )
-         ) aa      
+         ) aa
       ) a;
-      
+
       --------------------------------------------------------------------------
       -- Step 120
       -- Add the properties to the definitions
       --------------------------------------------------------------------------
       FOR i IN 1 .. def_pool.COUNT
-      LOOP   
-      
+      LOOP
+
          SELECT dz_swagger_property_typ(
              p_property_id          => a.property_id
             ,p_property             => b.property
@@ -520,8 +530,8 @@ AS
             ,p_property_required    => a.property_required
             ,p_xml_name             => b.xml_name
             ,p_xml_namespace        => b.xml_namespace
-            ,p_xml_prefix           => b.xml_prefix 
-            ,p_xml_attribute        => b.xml_attribute 
+            ,p_xml_prefix           => b.xml_prefix
+            ,p_xml_attribute        => b.xml_attribute
             ,p_xml_wrapped          => b.xml_wrapped
             ,p_xml_array_name       => b.xml_array_name
             ,p_versionid            => a.versionid
@@ -540,18 +550,18 @@ AS
          AND a.definition_type = def_pool(i).definition_type
          ORDER BY
          a.property_order;
-         
+
          IF  def_pool(i).swagger_properties IS NOT NULL
          AND def_pool(i).swagger_properties.COUNT = 1
          AND def_pool(i).swagger_properties(1).property_type = 'reference'
          THEN
             def_pool(i).inline_def := 'TRUE';
-         
+
          ELSE
             def_pool(i).inline_def := 'FALSE';
-            
+
          END IF;
-         
+
       END LOOP;
 
       --------------------------------------------------------------------------
@@ -561,7 +571,7 @@ AS
       FOR i IN 1 .. self.swagger_paths.COUNT
       LOOP
          FOR j IN 1 .. self.swagger_paths(i).swagger_methods.COUNT
-         LOOP      
+         LOOP
             FOR k IN 1 .. self.swagger_paths(i).swagger_methods(j).method_responses.COUNT
             LOOP
                BEGIN
@@ -576,27 +586,27 @@ AS
                      ,p_versionid           => a.versionid
                      ,p_swagger_properties  => a.swagger_properties
                   )
-                  INTO 
+                  INTO
                   self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_obj
                   FROM
                   TABLE(def_pool) a
                   WHERE
-                      a.definition      = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_def 
+                      a.definition      = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_def
                   AND a.definition_type = self.swagger_paths(i).swagger_methods(j).method_responses(k).response_schema_type;
 
                EXCEPTION
                   WHEN NO_DATA_FOUND
                   THEN
                      NULL;
-                     
+
                END;
-            
+
             END LOOP;
-         
+
          END LOOP;
 
       END LOOP;
-      
+
       --------------------------------------------------------------------------
       -- Step 140
       -- Filter the defs down to only objects
@@ -614,15 +624,17 @@ AS
          ,p_swagger_properties  => a.swagger_properties
       )
       BULK COLLECT INTO self.swagger_defs
-      FROM 
+      FROM
       TABLE(def_pool) a
       WHERE
-      a.definition_type IN ('object');
-      
-      RETURN;       
-       
+      a.definition_type IN ('object')
+      ORDER BY
+      a.definition;
+
+      RETURN;
+
    END dz_swagger_typ;
-   
+
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION all_methods
@@ -630,18 +642,18 @@ AS
    AS
       list_output dz_swagger_method_list;
       int_index   PLS_INTEGER;
-      
+
    BEGIN
       IF self.swagger_paths IS NULL
       OR self.swagger_paths.COUNT = 0
       THEN
          RETURN NULL;
-      
+
       END IF;
-      
+
       int_index   := 0;
       list_output := dz_swagger_method_list();
-      
+
       FOR i IN 1 .. self.swagger_paths.COUNT
       LOOP
          IF  self.swagger_paths(i).swagger_methods IS NOT NULL
@@ -652,17 +664,17 @@ AS
                list_output.EXTEND();
                int_index := int_index + 1;
                list_output(int_index) := self.swagger_paths(i).swagger_methods(j);
-               
+
             END LOOP;
-         
+
          END IF;
-      
+
       END LOOP;
-      
+
       RETURN list_output;
-      
+
    END all_methods;
-   
+
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION all_responses
@@ -670,18 +682,18 @@ AS
    AS
       list_output dz_swagger_response_list;
       int_index   PLS_INTEGER;
-      
+
    BEGIN
       IF self.swagger_paths IS NULL
       OR self.swagger_paths.COUNT = 0
       THEN
          RETURN NULL;
-      
+
       END IF;
-      
+
       int_index   := 0;
       list_output := dz_swagger_response_list();
-      
+
       FOR i IN 1 .. self.swagger_paths.COUNT
       LOOP
          IF  self.swagger_paths(i).swagger_methods IS NOT NULL
@@ -697,21 +709,21 @@ AS
                      list_output.EXTEND();
                      int_index := int_index + 1;
                      list_output(int_index) := self.swagger_paths(i).swagger_methods(j).method_responses(k);
-               
+
                   END LOOP;
-               
+
                END IF;
-               
+
             END LOOP;
-         
+
          END IF;
-      
+
       END LOOP;
-      
+
       RETURN list_output;
-      
+
    END all_responses;
-   
+
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
@@ -730,14 +742,14 @@ AS
       ary_produces      MDSYS.SDO_STRING2_ARRAY;
       int_index         PLS_INTEGER;
       c_swagger_version VARCHAR2(4 Char) := '2.0';
-      
+
    BEGIN
-      
+
       --------------------------------------------------------------------------
       -- Step 10
       -- Check incoming parameters
       --------------------------------------------------------------------------
-      
+
       --------------------------------------------------------------------------
       -- Step 20
       -- Add the left bracket
@@ -746,19 +758,19 @@ AS
       THEN
          clb_output := dz_json_util.pretty('{',NULL);
          str_pad := '';
-         
+
       ELSE
          clb_output := dz_json_util.pretty('{',-1);
          str_pad := ' ';
-         
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 30
       -- Add base attributes
       --------------------------------------------------------------------------
       str_pad1 := str_pad;
-      
+
       clb_output := clb_output || dz_json_util.pretty(
           str_pad1 || dz_json_main.value2json(
              'swagger'
@@ -767,7 +779,7 @@ AS
          )
          ,num_pretty_print + 1
       );
-      str_pad1 := ','; 
+      str_pad1 := ',';
 
       clb_output := clb_output || dz_json_util.pretty(
           str_pad1 || dz_json_main.formatted2json(
@@ -778,7 +790,7 @@ AS
          ,num_pretty_print + 1
       );
       str_pad1 := ',';
-      
+
       --------------------------------------------------------------------------
       -- Step 80
       -- Override the host if needed
@@ -786,12 +798,12 @@ AS
       IF p_host_override_val IS NOT NULL
       THEN
          str_host := p_host_override_val;
-         
+
       ELSE
          str_host := self.swagger_host;
-         
+
       END IF;
-      
+
       IF str_host IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty(
@@ -803,9 +815,9 @@ AS
             ,num_pretty_print + 1
          );
          str_pad1 := ',';
-         
-      END IF;    
-      
+
+      END IF;
+
       --------------------------------------------------------------------------
       -- Step 90
       -- Finish base attributes
@@ -821,9 +833,9 @@ AS
             ,num_pretty_print + 1
          );
          str_pad1 := ',';
-         
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 30
       -- Build the schemes array
@@ -835,12 +847,12 @@ AS
          int_index := int_index + 1;
          ary_schemes.EXTEND();
          ary_schemes(int_index) := 'https';
-         
+
       END IF;
-      
+
       IF ary_schemes IS NOT NULL
       AND ary_schemes.COUNT > 0
-      THEN     
+      THEN
          clb_output := clb_output || dz_json_util.pretty(
              str_pad1 || dz_json_main.value2json(
                  'schemes'
@@ -850,7 +862,7 @@ AS
             ,num_pretty_print + 1
          );
          str_pad1 := ',';
-      
+
       END IF;
 
       --------------------------------------------------------------------------
@@ -864,17 +876,17 @@ AS
          int_index := int_index + 1;
          ary_consumes.EXTEND();
          ary_consumes(int_index) := 'application/json';
-         
+
       END IF;
-      
+
       IF self.consumes_xml = 'TRUE'
       THEN
          int_index := int_index + 1;
          ary_consumes.EXTEND();
          ary_consumes(int_index) := 'application/xml';
-         
+
       END IF;
-      
+
       IF ary_consumes IS NOT NULL
       AND ary_consumes.COUNT > 0
       THEN
@@ -887,9 +899,9 @@ AS
             ,num_pretty_print + 1
          );
          str_pad1 := ',';
-         
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 50
       -- Add the produces array
@@ -901,17 +913,17 @@ AS
          int_index := int_index + 1;
          ary_produces.EXTEND();
          ary_produces(int_index) := 'application/json';
-         
+
       END IF;
-      
+
       IF self.produces_xml = 'TRUE'
       THEN
          int_index := int_index + 1;
          ary_produces.EXTEND();
          ary_produces(int_index) := 'application/xml';
-         
+
       END IF;
-      
+
       IF ary_produces IS NOT NULL
       AND ary_produces.COUNT > 0
       THEN
@@ -924,9 +936,9 @@ AS
             ,num_pretty_print + 1
          );
          str_pad1 := ',';
-         
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 50
       -- Add the parameters
@@ -942,7 +954,7 @@ AS
             ,num_pretty_print + 1
          );
          str_pad1 := ',';
-         
+
          str_pad2 := str_pad;
          FOR i IN 1 .. self.swagger_parms.COUNT
          LOOP
@@ -954,20 +966,20 @@ AS
                       p_pretty_print => num_pretty_print + 2
                    )
                   ,num_pretty_print + 2
-               );    
+               );
                str_pad2 := ',';
 
             END IF;
-            
+
          END LOOP;
 
          clb_output := clb_output || dz_json_util.pretty(
              '}'
             ,num_pretty_print + 1
          );
-      
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 80
       -- Add the paths
@@ -983,7 +995,7 @@ AS
             ,num_pretty_print + 1
          );
          str_pad1 := ',';
-         
+
          str_pad2 := str_pad;
          FOR i IN 1 .. self.swagger_paths.COUNT
          LOOP
@@ -1003,7 +1015,7 @@ AS
          );
 
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 90
       -- Add the defs
@@ -1019,7 +1031,7 @@ AS
             ,num_pretty_print + 1
          );
          str_pad1 := ',';
-         
+
          str_pad2 := str_pad;
          FOR i IN 1 .. self.swagger_defs.COUNT
          LOOP
@@ -1035,7 +1047,7 @@ AS
                   ,num_pretty_print + 2
                );
                str_pad2 := ',';
-               
+
             END IF;
 
          END LOOP;
@@ -1046,7 +1058,7 @@ AS
          );
 
       END IF;
-   
+
       --------------------------------------------------------------------------
       -- Step 100
       -- Add the left bracket
@@ -1055,15 +1067,15 @@ AS
           '}'
          ,num_pretty_print,NULL,NULL
       );
-      
+
       --------------------------------------------------------------------------
       -- Step 110
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN clb_output;
-           
+
    END toJSON;
-   
+
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
@@ -1074,17 +1086,17 @@ AS
       c_swagger_version VARCHAR2(4 Char) := '2.0';
       str_host          VARCHAR2(4000 Char);
       int_counter       PLS_INTEGER;
-      
+
    BEGIN
-      
+
       --------------------------------------------------------------------------
       -- Step 10
       -- Check incoming parameters
       --------------------------------------------------------------------------
-      
+
       --------------------------------------------------------------------------
       -- Step 20
-      -- Write the yaml 
+      -- Write the yaml
       --------------------------------------------------------------------------
       clb_output := dz_json_util.pretty_str(
           '---'
@@ -1099,7 +1111,7 @@ AS
          ,0
          ,'  '
       ) || self.swagger_info.toYAML(1);
-      
+
       --------------------------------------------------------------------------
       -- Step 30
       -- Override the host if needed
@@ -1107,12 +1119,12 @@ AS
       IF p_host_override_val IS NOT NULL
       THEN
          str_host := p_host_override_val;
-         
+
       ELSE
          str_host := self.swagger_host;
-         
+
       END IF;
-      
+
       IF str_host IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
@@ -1120,9 +1132,9 @@ AS
             ,0
             ,'  '
          );
-         
-      END IF;    
-      
+
+      END IF;
+
       --------------------------------------------------------------------------
       -- Step 40
       -- Add the optional basepath
@@ -1134,9 +1146,9 @@ AS
             ,0
             ,'  '
          );
-      
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 50
       -- Add the schemes array
@@ -1146,17 +1158,17 @@ AS
          ,0
          ,'  '
       );
-      
+
       IF self.schemes_https = 'TRUE'
-      THEN      
+      THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              '- https'
             ,0
             ,'  '
          );
-      
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 60
       -- Add the consumes array
@@ -1166,27 +1178,27 @@ AS
          ,0
          ,'  '
       );
-      
+
       IF self.consumes_json = 'TRUE'
-      THEN      
+      THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              '- application/json'
             ,0
             ,'  '
          );
-      
+
       END IF;
-      
+
       IF self.consumes_xml = 'TRUE'
-      THEN      
+      THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              '- application/xml'
             ,0
             ,'  '
          );
-      
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 70
       -- Add the produces array
@@ -1196,25 +1208,25 @@ AS
          ,0
          ,'  '
       );
-      
+
       IF self.produces_json = 'TRUE'
-      THEN      
+      THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              '- application/json'
             ,0
             ,'  '
          );
-      
+
       END IF;
-      
+
       IF self.produces_xml = 'TRUE'
-      THEN      
+      THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              '- application/xml'
             ,0
             ,'  '
          );
-      
+
       END IF;
 
       --------------------------------------------------------------------------
@@ -1228,8 +1240,8 @@ AS
              'parameters: '
             ,0
             ,'  '
-         ); 
-         
+         );
+
          FOR i IN 1 .. self.swagger_parms.COUNT
          LOOP
             IF  self.swagger_parms(i).inline_parm = 'FALSE'
@@ -1240,13 +1252,13 @@ AS
                   ,1
                   ,'  '
                ) || self.swagger_parms(i).toYAML(2);
-               
+
             END IF;
 
          END LOOP;
-         
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 90
       -- Do the paths
@@ -1256,7 +1268,7 @@ AS
          ,0
          ,'  '
       );
-      
+
       FOR i IN 1 .. self.swagger_paths.COUNT
       LOOP
          clb_output := clb_output || dz_json_util.pretty_str(
@@ -1266,7 +1278,7 @@ AS
          ) || self.swagger_paths(i).toYAML(2);
 
       END LOOP;
-      
+
       --------------------------------------------------------------------------
       -- Step 100
       -- Do the definitions
@@ -1280,11 +1292,11 @@ AS
             IF self.swagger_defs(i).inline_def = 'FALSE'
             THEN
                int_counter := int_counter + 1;
-               
+
             END IF;
-            
+
          END LOOP;
-         
+
          IF int_counter > 0
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
@@ -1292,7 +1304,7 @@ AS
                ,0
                ,'  '
             );
-            
+
             FOR i IN 1 .. self.swagger_defs.COUNT
             LOOP
                IF self.swagger_defs(i).inline_def = 'FALSE'
@@ -1305,23 +1317,23 @@ AS
                      ,1
                      ,'  '
                   ) || self.swagger_defs(i).toYAML(2);
-                  
+
                END IF;
 
             END LOOP;
-            
+
          END IF;
-         
+
       END IF;
-      
+
       --------------------------------------------------------------------------
       -- Step 110
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN clb_output;
-           
+
    END toYAML;
-   
+
 END;
 /
 
