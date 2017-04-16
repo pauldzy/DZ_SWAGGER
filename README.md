@@ -44,7 +44,7 @@ FROM dual;
 ```
 ==> [output](yaml.txt)
 
-##Data Model
+## Data Model
 ![Entity Relationship](ERD.png)
 
 See [detailed table definitions](DEFS.md) for more information on fields and their usage.
