@@ -440,7 +440,7 @@ AS
           p_definition          => a.definition
          ,p_definition_type     => a.definition_type
          ,p_definition_desc     => a.definition_desc
-         ,p_inline_def          => NULL
+         ,p_inline_def          => a.inline_def
          ,p_xml_name            => a.xml_name
          ,p_xml_namespace       => a.xml_namespace
          ,p_xml_prefix          => a.xml_prefix
@@ -452,6 +452,7 @@ AS
           aa.definition
          ,aa.definition_type
          ,aa.definition_desc
+         ,aa.inline_def
          ,aa.xml_name
          ,aa.xml_namespace
          ,aa.xml_prefix
@@ -461,6 +462,7 @@ AS
              aaa.definition
             ,aaa.definition_type
             ,aaa.definition_desc
+            ,'TRUE' AS inline_def
             ,aaa.xml_name
             ,aaa.xml_namespace
             ,aaa.xml_prefix
@@ -476,7 +478,19 @@ AS
                FROM
                TABLE(self.all_responses()) bbb
             )
-            OR (aaa.versionid,aaa.definition) IN (
+            UNION ALL SELECT
+             aaa.definition
+            ,aaa.definition_type
+            ,aaa.definition_desc
+            ,'FALSE' AS inline_def
+            ,aaa.xml_name
+            ,aaa.xml_namespace
+            ,aaa.xml_prefix
+            ,aaa.versionid
+            FROM
+            dz_swagger_definition aaa
+            WHERE
+            (aaa.versionid,aaa.definition) IN (
                SELECT
                 ddd.versionid
                ,ddd.property_target
@@ -515,7 +529,7 @@ AS
       --------------------------------------------------------------------------
       FOR i IN 1 .. def_pool.COUNT
       LOOP
-
+         
          SELECT dz_swagger_property_typ(
              p_property_id          => a.property_id
             ,p_property             => b.property
@@ -544,24 +558,21 @@ AS
          ON
          a.property_id = b.property_id
          WHERE
-             a.versionid        = def_pool(i).versionid
-         AND b.versionid        = def_pool(i).versionid
+             a.versionid       = def_pool(i).versionid
+         AND b.versionid       = def_pool(i).versionid
          AND a.definition      = def_pool(i).definition
          AND a.definition_type = def_pool(i).definition_type
          ORDER BY
          a.property_order;
 
          IF  def_pool(i).swagger_properties IS NOT NULL
-         AND def_pool(i).swagger_properties.COUNT = 1
+         AND def_pool(i).swagger_properties.COUNT > 1
          AND def_pool(i).swagger_properties(1).property_type = 'reference'
          THEN
-            def_pool(i).inline_def := 'TRUE';
-
-         ELSE
             def_pool(i).inline_def := 'FALSE';
 
          END IF;
-
+         
       END LOOP;
 
       --------------------------------------------------------------------------
