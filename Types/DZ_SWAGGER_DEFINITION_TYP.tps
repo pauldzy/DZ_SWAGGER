@@ -1,5 +1,5 @@
 CREATE OR REPLACE TYPE dz_swagger_definition_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid            VARCHAR2(40 Char)
    ,definition           VARCHAR2(255 Char)

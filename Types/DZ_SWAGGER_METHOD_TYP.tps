@@ -1,5 +1,5 @@
 CREATE OR REPLACE TYPE dz_swagger_method_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid           VARCHAR2(40 Char)
    ,swagger_path        VARCHAR2(255 Char)

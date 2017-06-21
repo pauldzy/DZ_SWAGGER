@@ -1,5 +1,5 @@
 CREATE OR REPLACE TYPE dz_swagger_info_license FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     license_name        VARCHAR2(255 Char)
    ,license_url         VARCHAR2(255 Char)

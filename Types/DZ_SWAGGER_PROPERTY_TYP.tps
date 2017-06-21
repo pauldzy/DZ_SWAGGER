@@ -1,5 +1,5 @@
 CREATE OR REPLACE TYPE dz_swagger_property_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid            VARCHAR2(40 Char)
    ,property_id          VARCHAR2(255 Char)

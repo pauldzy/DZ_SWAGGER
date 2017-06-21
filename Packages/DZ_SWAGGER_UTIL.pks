@@ -1,5 +1,5 @@
 CREATE OR REPLACE PACKAGE dz_swagger_util
-AUTHID CURRENT_USER
+AUTHID DEFINER
 AS
 
    -----------------------------------------------------------------------------

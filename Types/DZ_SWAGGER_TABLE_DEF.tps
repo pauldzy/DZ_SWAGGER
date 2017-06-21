@@ -1,5 +1,5 @@
 CREATE OR REPLACE TYPE dz_swagger_table_def FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     definition          VARCHAR2(255 Char)
    ,table_owner         VARCHAR2(30 Char)

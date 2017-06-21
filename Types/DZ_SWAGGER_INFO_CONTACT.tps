@@ -1,5 +1,5 @@
 CREATE OR REPLACE TYPE dz_swagger_info_contact FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     contact_name        VARCHAR2(255 Char)
    ,contact_url         VARCHAR2(255 Char)

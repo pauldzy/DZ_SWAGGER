@@ -1,5 +1,5 @@
 CREATE OR REPLACE TYPE dz_swagger_argument FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     object_owner        VARCHAR2(30 Char)
    ,object_name	      VARCHAR2(30 Char)

@@ -1,5 +1,5 @@
 CREATE OR REPLACE TYPE dz_swagger_xml FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     xml_name            VARCHAR2(255 Char)
    ,xml_namespace       VARCHAR2(2000 Char)
