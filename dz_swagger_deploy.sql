@@ -10,15 +10,15 @@ SET DEFINE OFF;
 PROMPT DZ_SWAGGER_CONSTANTS.pks;
 
 CREATE OR REPLACE PACKAGE dz_swagger_constants
-AUTHID CURRENT_USER
+AUTHID DEFINER
 AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    /*
    Header: DZ_SWAGGER
      
-   - Build ID: 17
-   - Change Set: 2a551e67827bdf8d9e243bd6c168e42d9abd3952
+   - Build ID: 19
+   - Change Set: 16c33c167a8252e85c450484419f951f9d2f57e6
    
    PLSQL module for the creation, storage and production of Open API service 
    definitions.   Support for the unloading of Swagger JSON specifications into
@@ -54,7 +54,7 @@ GRANT EXECUTE ON dz_swagger_constants TO PUBLIC;
 PROMPT DZ_SWAGGER_SETUP.pks;
 
 CREATE OR REPLACE PACKAGE dz_swagger_setup
-AUTHID CURRENT_USER
+AUTHID DEFINER
 AS
   
    -----------------------------------------------------------------------------
@@ -827,7 +827,7 @@ END;
 PROMPT DZ_SWAGGER_UTIL.pks;
 
 CREATE OR REPLACE PACKAGE dz_swagger_util
-AUTHID CURRENT_USER
+AUTHID DEFINER
 AS
 
    -----------------------------------------------------------------------------
@@ -1138,7 +1138,7 @@ END dz_swagger_util;
 PROMPT DZ_SWAGGER_XML.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_xml FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     xml_name            VARCHAR2(255 Char)
    ,xml_namespace       VARCHAR2(2000 Char)
@@ -1477,7 +1477,7 @@ END;
 PROMPT DZ_SWAGGER_ARGUMENT.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_argument FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     object_owner        VARCHAR2(30 Char)
    ,object_name	      VARCHAR2(30 Char)
@@ -1572,7 +1572,7 @@ GRANT EXECUTE ON dz_swagger_argument_list TO public;
 PROMPT DZ_SWAGGER_PROPERTY_TYP.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_property_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid            VARCHAR2(40 Char)
    ,property_id          VARCHAR2(255 Char)
@@ -2208,7 +2208,7 @@ GRANT EXECUTE ON dz_swagger_property_list TO public;
 PROMPT DZ_SWAGGER_INFO_CONTACT.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_info_contact FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     contact_name        VARCHAR2(255 Char)
    ,contact_url         VARCHAR2(255 Char)
@@ -2499,7 +2499,7 @@ END;
 PROMPT DZ_SWAGGER_INFO_LICENSE.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_info_license FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     license_name        VARCHAR2(255 Char)
    ,license_url         VARCHAR2(255 Char)
@@ -2727,7 +2727,7 @@ END;
 PROMPT DZ_SWAGGER_INFO.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_info FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     info_title          VARCHAR2(255 Char)
    ,info_description    VARCHAR2(4000 Char)
@@ -3101,7 +3101,7 @@ END;
 PROMPT DZ_SWAGGER_DEFINITION_TYP.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_definition_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid            VARCHAR2(40 Char)
    ,definition           VARCHAR2(255 Char)
@@ -3584,7 +3584,7 @@ GRANT EXECUTE ON dz_swagger_definition_list TO public;
 PROMPT DZ_SWAGGER_JSONSCH_TYP.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_jsonsch_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid             VARCHAR2(40 Char)
    ,swagger_path          VARCHAR2(255 Char)
@@ -4097,7 +4097,7 @@ END;
 PROMPT DZ_SWAGGER_PARM_TYP.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_parm_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid           VARCHAR2(40 Char)
    ,swagger_parm_id     VARCHAR2(255 Char)
@@ -4583,7 +4583,7 @@ GRANT EXECUTE ON dz_swagger_parm_list TO public;
 PROMPT DZ_SWAGGER_RESPONSE_TYP.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_response_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid            VARCHAR2(40 Char)
    ,swagger_path         VARCHAR2(255 Char)
@@ -4951,7 +4951,7 @@ GRANT EXECUTE ON dz_swagger_response_list TO public;
 PROMPT DZ_SWAGGER_METHOD_TYP.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_method_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid           VARCHAR2(40 Char)
    ,swagger_path        VARCHAR2(255 Char)
@@ -5422,7 +5422,7 @@ GRANT EXECUTE ON dz_swagger_method_list TO public;
 PROMPT DZ_SWAGGER_PATH_TYP.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_path_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid         VARCHAR2(40 Char)
    ,swagger_path      VARCHAR2(255 Char)
@@ -5683,7 +5683,7 @@ GRANT EXECUTE ON dz_swagger_path_list TO public;
 PROMPT DZ_SWAGGER_TABLE_DEF.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_table_def FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     definition          VARCHAR2(255 Char)
    ,table_owner         VARCHAR2(30 Char)
@@ -5877,7 +5877,7 @@ GRANT EXECUTE ON dz_swagger_table_def_list TO public;
 PROMPT DZ_SWAGGER_TYP.tps;
 
 CREATE OR REPLACE TYPE dz_swagger_typ FORCE
-AUTHID CURRENT_USER 
+AUTHID DEFINER 
 AS OBJECT (
     versionid           VARCHAR2(40 Char)
    ,path_group_id       VARCHAR2(255 Char)
@@ -7308,7 +7308,7 @@ END;
 PROMPT DZ_SWAGGER_MAINT.pks;
 
 CREATE OR REPLACE PACKAGE dz_swagger_maint
-AUTHID CURRENT_USER
+AUTHID DEFINER
 AS
 
    -----------------------------------------------------------------------------
@@ -8526,10 +8526,10 @@ CREATE OR REPLACE PACKAGE dz_swagger_test
 AUTHID DEFINER
 AS
 
-   C_CHANGESET CONSTANT VARCHAR2(255 Char) := '2a551e67827bdf8d9e243bd6c168e42d9abd3952';
+   C_CHANGESET CONSTANT VARCHAR2(255 Char) := '16c33c167a8252e85c450484419f951f9d2f57e6';
    C_JENKINS_JOBNM CONSTANT VARCHAR2(255 Char) := 'DZ_SWAGGER';
-   C_JENKINS_BUILD CONSTANT NUMBER := 17;
-   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '17';
+   C_JENKINS_BUILD CONSTANT NUMBER := 19;
+   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '19';
    
    C_PREREQUISITES CONSTANT MDSYS.SDO_STRING2_ARRAY := MDSYS.SDO_STRING2_ARRAY(
       'DZ_JSON'
