@@ -184,6 +184,7 @@ AS
             ,p_xml_name            => a.xml_name
             ,p_xml_namespace       => a.xml_namespace
             ,p_xml_prefix          => a.xml_prefix
+            ,p_xml_wrapped         => a.xml_wrapped
             ,p_versionid           => a.versionid
             ,p_swagger_properties  => a.swagger_properties
          )
@@ -226,6 +227,7 @@ AS
          ,p_xml_name            => a.xml_name
          ,p_xml_namespace       => a.xml_namespace
          ,p_xml_prefix          => a.xml_prefix
+         ,p_xml_wrapped         => a.xml_wrapped
          ,p_versionid           => a.versionid
          ,p_swagger_properties  => a.swagger_properties
       )
