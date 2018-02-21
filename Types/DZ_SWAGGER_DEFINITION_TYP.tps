@@ -10,6 +10,7 @@ AS OBJECT (
    ,xml_name             VARCHAR2(255 Char)
    ,xml_namespace        VARCHAR2(2000 Char)
    ,xml_prefix           VARCHAR2(255 Char)
+   ,xml_wrapped          VARCHAR2(5 Char)
    ,dummy                INTEGER
 
    -----------------------------------------------------------------------------
@@ -27,6 +28,7 @@ AS OBJECT (
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT
    
@@ -40,6 +42,7 @@ AS OBJECT (
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
       ,p_swagger_properties   IN  dz_swagger_property_list
    ) RETURN SELF AS RESULT

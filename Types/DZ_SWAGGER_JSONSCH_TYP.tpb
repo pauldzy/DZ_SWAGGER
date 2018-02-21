@@ -40,6 +40,7 @@ AS
          ,p_xml_name            => a.xml_name
          ,p_xml_namespace       => a.xml_namespace
          ,p_xml_prefix          => a.xml_prefix
+         ,p_xml_wrapped         => a.xml_wrapped
          ,p_versionid           => a.versionid
       )
       BULK COLLECT INTO def_pool
@@ -51,6 +52,7 @@ AS
          ,aa.xml_name
          ,aa.xml_namespace
          ,aa.xml_prefix
+         ,aa.xml_wrapped
          ,aa.versionid
          FROM (
             SELECT
@@ -60,6 +62,7 @@ AS
             ,aaa.xml_name
             ,aaa.xml_namespace
             ,aaa.xml_prefix
+            ,aaa.xml_wrapped
             ,aaa.versionid
             FROM
             dz_swagger_definition aaa

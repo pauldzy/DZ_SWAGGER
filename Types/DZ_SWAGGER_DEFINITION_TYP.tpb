@@ -21,6 +21,7 @@ AS
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT 
    AS 
@@ -33,6 +34,7 @@ AS
       self.xml_name             := TRIM(p_xml_name);
       self.xml_namespace        := TRIM(p_xml_namespace);
       self.xml_prefix           := TRIM(p_xml_prefix);
+      self.xml_wrapped          := p_xml_wrapped;
       self.versionid            := p_versionid;
       
       RETURN; 
@@ -49,6 +51,7 @@ AS
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
       ,p_swagger_properties   IN  dz_swagger_property_list
    ) RETURN SELF AS RESULT 
@@ -62,6 +65,7 @@ AS
       self.xml_name             := TRIM(p_xml_name);
       self.xml_namespace        := TRIM(p_xml_namespace);
       self.xml_prefix           := TRIM(p_xml_prefix);
+      self.xml_wrapped          := p_xml_wrapped;
       self.versionid            := p_versionid;
       self.swagger_properties   := p_swagger_properties;
       
@@ -164,6 +168,7 @@ AS
                       p_xml_name      => self.xml_name
                      ,p_xml_namespace => self.xml_namespace
                      ,p_xml_prefix    => self.xml_prefix
+                     ,p_xml_wrapped   => self.xml_wrapped
                    ).toJSON(
                      p_pretty_print => num_pretty_print + 1
                    )
@@ -319,6 +324,7 @@ AS
              p_xml_name      => self.xml_name
             ,p_xml_namespace => self.xml_namespace
             ,p_xml_prefix    => self.xml_prefix
+            ,p_xml_wrapped   => self.xml_wrapped
          ).toYAML(
             num_pretty_print + 1
          );

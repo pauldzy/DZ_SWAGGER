@@ -127,6 +127,7 @@ AS
               || '   ,xml_name                VARCHAR2(255 Char) '
               || '   ,xml_namespace           VARCHAR2(2000 Char) '
               || '   ,xml_prefix              VARCHAR2(255 Char) '
+              || '   ,xml_wrapped             VARCHAR2(5 Char) '
               || '   ,table_owner             VARCHAR2(30 Char) '
               || '   ,table_name              VARCHAR2(30 Char) '
               || '   ,table_mapping           VARCHAR2(30 Char) '
