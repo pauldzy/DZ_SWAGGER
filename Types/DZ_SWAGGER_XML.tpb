@@ -275,13 +275,9 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 70
-      -- Cough it out without final line feed
+      -- Cough it out 
       --------------------------------------------------------------------------
-      RETURN REGEXP_REPLACE(
-          clb_output
-         ,'\n$'
-         ,''
-      );
+      RETURN clb_output;
       
    END toYAML;
    

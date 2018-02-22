@@ -243,7 +243,7 @@ AS
       SELECT dz_swagger_parm_typ(
           p_swagger_parm_id      => a.swagger_parm_id
          ,p_swagger_parm         => a.swagger_parm
-         ,p_parm_description     => a.parm_description
+         ,p_parm_description     => REGEXP_REPLACE(a.parm_description,'(' || CHR(10) || '|' || CHR(13) || ')$','')
          ,p_parm_type            => a.parm_type
          ,p_parm_default_string  => a.parm_default_string
          ,p_parm_default_number  => a.parm_default_number
@@ -540,7 +540,7 @@ AS
             ,p_property_type	      => b.property_type
             ,p_property_format      => b.property_format
             ,p_property_allow_null  => b.property_allow_null
-            ,p_property_title       => b.property_title
+            ,p_property_title       => REGEXP_REPLACE(b.property_title,'(' || CHR(10) || '|' || CHR(13) || ')$','')
             ,p_property_exp_string  => b.property_exp_string
             ,p_property_exp_number  => b.property_exp_number
             ,p_property_description => b.property_description
