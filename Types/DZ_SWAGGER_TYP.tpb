@@ -70,7 +70,7 @@ AS
           p_path_group_id       => str_path_group_id
          ,p_swagger_info        => dz_swagger_info(
              p_info_title          => a.info_title
-            ,p_info_description    => a.info_description
+            ,p_info_description    => REGEXP_REPLACE(a.info_description,'(' || CHR(10) || '|' || CHR(13) || ')$','')
             ,p_info_termsofservice => a.info_termsofservice
             ,p_info_contact        => dz_swagger_info_contact(
                 p_contact_name     => a.info_contact_name
