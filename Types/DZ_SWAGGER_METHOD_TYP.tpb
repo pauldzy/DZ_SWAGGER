@@ -47,6 +47,7 @@ AS
       str_pad3         VARCHAR2(1 Char);
       str_parms        VARCHAR2(32000 Char);
       str_temp         VARCHAR2(32000 Char);
+      str_summary      VARCHAR2(32000 Char);
       
    BEGIN
       
@@ -76,10 +77,19 @@ AS
       --------------------------------------------------------------------------
       str_pad1 := str_pad;
       
+      IF self.path_summary IS NOT NULL
+      THEN
+         str_summary := self.path_summary;
+         
+      ELSE
+         str_summary := 'Placeholder';
+         
+      END IF;
+      
       clb_output := clb_output || dz_json_util.pretty(
           str_pad1 || dz_json_main.value2json(
              'summary'
-            ,self.path_summary
+            ,str_summary
             ,num_pretty_print + 1
          )
          ,num_pretty_print + 1
