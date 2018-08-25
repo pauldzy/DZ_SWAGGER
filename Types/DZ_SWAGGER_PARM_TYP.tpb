@@ -24,6 +24,7 @@ AS
       ,p_parm_undocumented    IN  VARCHAR2
       ,p_swagger_path         IN  VARCHAR2
       ,p_swagger_http_method  IN  VARCHAR2
+      ,p_parameter_in_type    IN  VARCHAR2
       ,p_path_param_sort      IN  NUMBER
       ,p_param_sort           IN  NUMBER
       ,p_inline_parm          IN  VARCHAR2
@@ -42,6 +43,7 @@ AS
       self.parm_undocumented    := p_parm_undocumented;
       self.swagger_path         := p_swagger_path;
       self.swagger_http_method  := p_swagger_http_method;
+      self.parameter_in_type    := p_parameter_in_type;
       self.path_param_sort      := p_path_param_sort;
       self.param_sort           := p_param_sort;
       self.inline_parm          := p_inline_parm;
@@ -105,8 +107,8 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 40
-      -- Add base attributes
+      -- Step 30
+      -- Add name attribute
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           ' ' || dz_json_main.value2json(
@@ -115,15 +117,25 @@ AS
             ,num_pretty_print + 1
          )
          ,p_pretty_print + 1
-      ) || dz_json_util.pretty(
-          ',' || dz_json_main.value2json(
+      );
+      
+      --------------------------------------------------------------------------
+      -- Step 40
+      -- Add in attribute
+      --------------------------------------------------------------------------
+      clb_output := clb_output || dz_json_util.pretty(
+         ',' || dz_json_main.value2json(
               'in'
-             ,'query'
+             ,self.parameter_in_type
              ,num_pretty_print + 1
           )
          ,p_pretty_print + 1
       );
       
+      --------------------------------------------------------------------------
+      -- Step 50
+      -- Add optional description
+      --------------------------------------------------------------------------     
       IF self.parm_description IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty(
@@ -138,7 +150,7 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 60
       -- Add optional enum array
       --------------------------------------------------------------------------
       IF self.parm_enums_string IS NOT NULL
@@ -196,8 +208,8 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 70
-      -- Add base attributes
+      -- Step 80
+      -- Add type attributes
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           ',' || dz_json_main.value2json(
@@ -209,8 +221,8 @@ AS
       );
       
       --------------------------------------------------------------------------
-      -- Step 70
-      -- Add base attributes
+      -- Step 90
+      -- Add required attribute
       --------------------------------------------------------------------------
       IF LOWER(self.parm_required) = 'true'
       THEN
@@ -276,14 +288,20 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 20
-      -- Write the yaml name to description
+      -- Write the yaml name attribute
       --------------------------------------------------------------------------
       clb_output := dz_json_util.pretty_str(
           str_pad || 'name: ' || dz_swagger_util.yaml_text(self.swagger_parm,num_pretty_print)
          ,p_pretty_print
          ,'  '
-      ) || dz_json_util.pretty_str(
-          'in: query'
+      );
+      
+      --------------------------------------------------------------------------
+      -- Step 30
+      -- Write the yaml in attribute 
+      --------------------------------------------------------------------------
+      clb_output := clb_output || dz_json_util.pretty_str(
+          'in: ' || dz_swagger_util.yaml_text(self.parameter_in_type,num_pretty_print)
          ,num_pretty_print
          ,'  '
       );

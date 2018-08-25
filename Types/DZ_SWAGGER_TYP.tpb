@@ -88,6 +88,7 @@ AS
          ,p_schemes_https       => a.schemes_https
          ,p_consumes_json       => a.consumes_json
          ,p_consumes_xml        => a.consumes_xml
+         ,p_consumes_form       => a.consumes_form
          ,p_produces_json       => a.produces_json
          ,p_produces_xml        => a.produces_xml
          ,p_versionid           => a.versionid
@@ -113,6 +114,7 @@ AS
       ,p_schemes_https       IN  VARCHAR2
       ,p_consumes_json       IN  VARCHAR2
       ,p_consumes_xml        IN  VARCHAR2
+      ,p_consumes_form       IN  VARCHAR2
       ,p_produces_json       IN  VARCHAR2
       ,p_produces_xml        IN  VARCHAR2
       ,p_versionid           IN  VARCHAR2
@@ -140,6 +142,7 @@ AS
       self.schemes_https       := p_schemes_https;
       self.consumes_json       := p_consumes_json;
       self.consumes_xml        := p_consumes_xml;
+      self.consumes_form       := p_consumes_form;
       self.produces_json       := p_produces_json;
       self.produces_xml        := p_produces_xml;
       self.versionid           := p_versionid;
@@ -169,8 +172,10 @@ AS
       -- Pull the list of paths
       --------------------------------------------------------------------------
       SELECT dz_swagger_path_typ(
-          p_swagger_path => a.swagger_path
-         ,p_versionid    => a.versionid
+          p_swagger_path     => a.swagger_path
+         ,p_path_summary     => MAX(a.path_summary)
+         ,p_path_description => MAX(a.path_description)
+         ,p_versionid        => a.versionid
       )
       BULK COLLECT INTO
       self.swagger_paths
@@ -204,8 +209,13 @@ AS
          SELECT dz_swagger_method_typ(
              p_swagger_path        => a.swagger_path
             ,p_swagger_http_method => a.swagger_http_method
-            ,p_path_summary        => a.path_summary
-            ,p_path_description    => a.path_description
+            ,p_path_summary        => self.swagger_paths(i).path_summary
+            ,p_path_description    => self.swagger_paths(i).path_description
+            ,p_consumes_json       => a.consumes_json
+            ,p_consumes_xml        => a.consumes_xml
+            ,p_consumes_form       => a.consumes_form
+            ,p_produces_json       => a.produces_json
+            ,p_produces_xml        => a.produces_xml
             ,p_versionid           => a.versionid
          )
          BULK COLLECT INTO
@@ -215,24 +225,19 @@ AS
              aa.versionid
             ,aa.swagger_path
             ,aa.swagger_http_method
-            ,aa.path_summary
-            ,aa.path_description
-            ,ROW_NUMBER() OVER (
-               PARTITION BY
-                aa.versionid
-               ,aa.swagger_path
-               ,aa.swagger_http_method
-               ORDER BY
-                aa.path_order
-            ) AS rn
+            ,aa.consumes_json
+            ,aa.consumes_xml
+            ,aa.consumes_form
+            ,aa.produces_json
+            ,aa.produces_xml
             FROM
-            dz_swagger_path aa
+            dz_swagger_path_method aa
             WHERE
                 aa.versionid    = self.swagger_paths(i).versionid
             AND aa.swagger_path = self.swagger_paths(i).swagger_path
          ) a
-         WHERE
-         a.rn = 1;
+         ORDER BY
+         a.swagger_http_method;
 
       END LOOP;
 
@@ -251,6 +256,7 @@ AS
          ,p_parm_undocumented    => a.parm_undocumented
          ,p_swagger_path         => a.swagger_path
          ,p_swagger_http_method  => a.swagger_http_method
+         ,p_parameter_in_type    => a.parameter_in_type
          ,p_path_param_sort      => a.path_param_sort
          ,p_param_sort           => a.param_sort
          ,p_inline_parm          => a.parm_move_inline
@@ -270,6 +276,7 @@ AS
             ,bb.parm_undocumented
             ,aa.swagger_path
             ,aa.swagger_http_method
+            ,aa.parameter_in_type
             ,aa.path_param_sort
             ,bb.param_sort
             ,bb.versionid
@@ -300,6 +307,7 @@ AS
          ,bb.parm_undocumented
          ,bb.swagger_path
          ,bb.swagger_http_method
+         ,bb.parameter_in_type
          ,bb.path_param_sort
          ,bb.param_sort
          ,CASE WHEN cc.parm_count > 1
@@ -351,6 +359,7 @@ AS
                ,p_parm_undocumented    => a.parm_undocumented
                ,p_swagger_path         => a.swagger_path
                ,p_swagger_http_method  => a.swagger_http_method
+               ,p_parameter_in_type    => a.parameter_in_type
                ,p_path_param_sort      => a.path_param_sort
                ,p_param_sort           => a.param_sort
                ,p_inline_parm          => a.inline_parm
@@ -414,6 +423,7 @@ AS
          ,p_parm_undocumented    => MAX(a.parm_undocumented)
          ,p_swagger_path         => NULL
          ,p_swagger_http_method  => NULL
+         ,p_parameter_in_type    => a.parameter_in_type
          ,p_path_param_sort      => NULL
          ,p_param_sort           => MAX(a.param_sort)
          ,p_inline_parm          => 'FALSE'
@@ -427,6 +437,7 @@ AS
       GROUP BY
        a.versionid
       ,a.swagger_parm_id
+      ,a.parameter_in_type
       ORDER BY
       MAX(a.param_sort);
 
@@ -903,6 +914,14 @@ AS
          ary_consumes(int_index) := 'application/xml';
 
       END IF;
+      
+      IF self.consumes_form = 'TRUE'
+      THEN
+         int_index := int_index + 1;
+         ary_consumes.EXTEND();
+         ary_consumes(int_index) := 'application/x-www-form-urlencoded';
+
+      END IF;
 
       IF ary_consumes IS NOT NULL
       AND ary_consumes.COUNT > 0
@@ -1170,14 +1189,14 @@ AS
       -- Step 50
       -- Add the schemes array
       --------------------------------------------------------------------------
-      clb_output := clb_output || dz_json_util.pretty_str(
-          'schemes: '
-         ,0
-         ,'  '
-      );
-
       IF self.schemes_https = 'TRUE'
       THEN
+         clb_output := clb_output || dz_json_util.pretty_str(
+             'schemes: '
+            ,0
+            ,'  '
+         );
+         
          clb_output := clb_output || dz_json_util.pretty_str(
              '- https'
             ,0
@@ -1190,60 +1209,81 @@ AS
       -- Step 60
       -- Add the consumes array
       --------------------------------------------------------------------------
-      clb_output := clb_output || dz_json_util.pretty_str(
-          'consumes: '
-         ,0
-         ,'  '
-      );
-
       IF self.consumes_json = 'TRUE'
+      OR self.consumes_xml = 'TRUE'
+      OR self.consumes_form = 'TRUE'
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
-             '- application/json'
+             'consumes: '
             ,0
             ,'  '
          );
 
-      END IF;
+         IF self.consumes_json = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/json'
+               ,0
+               ,'  '
+            );
 
-      IF self.consumes_xml = 'TRUE'
-      THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             '- application/xml'
-            ,0
-            ,'  '
-         );
+         END IF;
 
+         IF self.consumes_xml = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/xml'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
+         IF self.consumes_form = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/x-www-form-urlencoded'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
       END IF;
 
       --------------------------------------------------------------------------
       -- Step 70
       -- Add the produces array
       --------------------------------------------------------------------------
-      clb_output := clb_output || dz_json_util.pretty_str(
-          'produces: '
-         ,0
-         ,'  '
-      );
-
       IF self.produces_json = 'TRUE'
+      OR self.produces_xml  = 'TRUE'
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
-             '- application/json'
+             'produces: '
             ,0
             ,'  '
          );
 
-      END IF;
+         IF self.produces_json = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/json'
+               ,0
+               ,'  '
+            );
 
-      IF self.produces_xml = 'TRUE'
-      THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             '- application/xml'
-            ,0
-            ,'  '
-         );
+         END IF;
 
+         IF self.produces_xml = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/xml'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
       END IF;
 
       --------------------------------------------------------------------------

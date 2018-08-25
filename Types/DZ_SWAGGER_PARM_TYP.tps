@@ -12,6 +12,7 @@ AS OBJECT (
    ,parm_undocumented   VARCHAR2(5 Char)
    ,swagger_path        VARCHAR2(255 Char)
    ,swagger_http_method VARCHAR2(255 Char)
+   ,parameter_in_type   VARCHAR2(255 Char)
    ,path_param_sort     NUMBER
    ,param_sort          NUMBER
    ,inline_parm         VARCHAR2(5 Char)
@@ -36,6 +37,7 @@ AS OBJECT (
       ,p_parm_undocumented    IN  VARCHAR2
       ,p_swagger_path         IN  VARCHAR2
       ,p_swagger_http_method  IN  VARCHAR2
+      ,p_parameter_in_type    IN  VARCHAR2
       ,p_path_param_sort      IN  NUMBER
       ,p_param_sort           IN  NUMBER
       ,p_inline_parm          IN  VARCHAR2

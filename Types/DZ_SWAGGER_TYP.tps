@@ -9,6 +9,7 @@ AS OBJECT (
    ,schemes_https       VARCHAR2(5 Char)
    ,consumes_json       VARCHAR2(5 Char)
    ,consumes_xml        VARCHAR2(5 Char)
+   ,consumes_form       VARCHAR2(5 Char)
    ,produces_json       VARCHAR2(5 Char)
    ,produces_xml        VARCHAR2(5 Char)
    ,swagger_paths       dz_swagger_path_list
@@ -38,6 +39,7 @@ AS OBJECT (
       ,p_schemes_https       IN  VARCHAR2
       ,p_consumes_json       IN  VARCHAR2
       ,p_consumes_xml        IN  VARCHAR2
+      ,p_consumes_form       IN  VARCHAR2
       ,p_produces_json       IN  VARCHAR2
       ,p_produces_xml        IN  VARCHAR2
       ,p_versionid           IN  VARCHAR2

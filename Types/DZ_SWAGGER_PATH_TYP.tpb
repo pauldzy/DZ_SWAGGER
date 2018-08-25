@@ -14,14 +14,18 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    CONSTRUCTOR FUNCTION dz_swagger_path_typ(
-       p_swagger_path        IN VARCHAR2
-      ,p_versionid          IN  VARCHAR2
+       p_swagger_path        IN  VARCHAR2
+      ,p_path_summary        IN  VARCHAR2
+      ,p_path_description    IN  VARCHAR2
+      ,p_versionid           IN  VARCHAR2
    ) RETURN SELF AS RESULT 
    AS 
    BEGIN 
    
-      self.swagger_path := p_swagger_path;
-      self.versionid    := p_versionid;
+      self.swagger_path     := p_swagger_path;
+      self.path_summary     := p_path_summary;
+      self.path_description := p_path_description;
+      self.versionid        := p_versionid;
       
       RETURN; 
       

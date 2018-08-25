@@ -1,9 +1,11 @@
 CREATE OR REPLACE TYPE dz_swagger_path_typ FORCE
 AUTHID DEFINER 
 AS OBJECT (
-    versionid         VARCHAR2(40 Char)
-   ,swagger_path      VARCHAR2(255 Char)
-   ,swagger_methods   dz_swagger_method_list
+    versionid           VARCHAR2(40 Char)
+   ,swagger_path        VARCHAR2(255 Char)
+   ,path_summary        VARCHAR2(4000 Char)
+   ,path_description    VARCHAR2(4000 Char)
+   ,swagger_methods     dz_swagger_method_list
   
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
@@ -13,8 +15,10 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,CONSTRUCTOR FUNCTION dz_swagger_path_typ(
-       p_swagger_path        IN VARCHAR2
-      ,p_versionid          IN  VARCHAR2
+       p_swagger_path        IN  VARCHAR2
+      ,p_path_summary        IN  VARCHAR2
+      ,p_path_description    IN  VARCHAR2
+      ,p_versionid           IN  VARCHAR2
    ) RETURN SELF AS RESULT
     
    -----------------------------------------------------------------------------

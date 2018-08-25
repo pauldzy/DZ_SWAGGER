@@ -6,6 +6,11 @@ AS OBJECT (
    ,swagger_http_method VARCHAR2(255 Char)
    ,path_summary        VARCHAR2(4000 Char)
    ,path_description    VARCHAR2(4000 Char)
+   ,consumes_json       VARCHAR2(5 Char)
+   ,consumes_xml        VARCHAR2(5 Char)
+   ,consumes_form       VARCHAR2(5 Char)
+   ,produces_json       VARCHAR2(5 Char)
+   ,produces_xml        VARCHAR2(5 Char)
    ,method_path_parms   dz_swagger_parm_list
    ,method_tags         MDSYS.SDO_STRING2_ARRAY
    ,method_responses    dz_swagger_response_list
@@ -22,6 +27,11 @@ AS OBJECT (
       ,p_swagger_http_method IN  VARCHAR2
       ,p_path_summary        IN  VARCHAR2
       ,p_path_description    IN  VARCHAR2
+      ,p_consumes_json       IN  VARCHAR2
+      ,p_consumes_xml        IN  VARCHAR2
+      ,p_consumes_form       IN  VARCHAR2
+      ,p_produces_json       IN  VARCHAR2
+      ,p_produces_xml        IN  VARCHAR2
       ,p_versionid           IN  VARCHAR2
    ) RETURN SELF AS RESULT
     
