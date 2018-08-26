@@ -233,7 +233,7 @@ AS
          FOR i IN 1 .. self.method_path_parms.COUNT
          LOOP
          
-            IF  self.method_path_parms(i).parm_undocumented = 'FALSE'
+            IF self.method_path_parms(i).parm_undocumented = 'FALSE'
             THEN
                IF self.method_path_parms(i).inline_parm = 'TRUE'
                THEN
@@ -256,7 +256,7 @@ AS
                   str_temp := str_temp || dz_json_util.pretty(
                      str_pad3 || dz_json_main.value2json(
                          '$ref'
-                        ,'#/parameters/' || self.method_path_parms(i).swagger_parm
+                        ,'#/parameters/' || self.method_path_parms(i).parameter_ref_id
                         ,num_pretty_print + 3
                      )
                      ,num_pretty_print + 3
@@ -530,7 +530,7 @@ AS
                   
                ELSE
                   clb_output := clb_output || dz_json_util.pretty(
-                      '- "$ref": "#/parameters/' || self.method_path_parms(i).swagger_parm || '"'
+                      '- "$ref": "#/parameters/' || self.method_path_parms(i).parameter_ref_id || '"'
                      ,num_pretty_print
                      ,'  '
                   );

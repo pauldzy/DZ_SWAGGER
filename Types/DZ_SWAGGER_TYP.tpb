@@ -322,22 +322,27 @@ AS
          JOIN (
             SELECT
              ccc.swagger_parm
+            ,ccc.swagger_http_method
             ,COUNT(*) AS parm_count
             FROM (
                SELECT
                 cccc.swagger_parm_id
                ,cccc.swagger_parm
+               ,cccc.swagger_http_method
                FROM
                parms cccc
                GROUP BY
                 cccc.swagger_parm_id
                ,cccc.swagger_parm
+               ,cccc.swagger_http_method
             ) ccc
             GROUP BY
-            ccc.swagger_parm
+             ccc.swagger_parm
+            ,ccc.swagger_http_method
          ) cc
          ON
-         bb.swagger_parm = cc.swagger_parm
+             bb.swagger_parm        = cc.swagger_parm
+         AND bb.swagger_http_method = cc.swagger_http_method
       ) a;
 
       --------------------------------------------------------------------------
@@ -383,8 +388,7 @@ AS
             dz_swagger_path_tags a
             WHERE
                 a.versionid           = self.swagger_paths(i).swagger_methods(j).versionid
-            AND a.swagger_path        = self.swagger_paths(i).swagger_methods(j).swagger_path
-            AND a.swagger_http_method = self.swagger_paths(i).swagger_methods(j).swagger_http_method;
+            AND a.swagger_path        = self.swagger_paths(i).swagger_methods(j).swagger_path;
 
             SELECT dz_swagger_response_typ(
                 p_swagger_path         => a.swagger_path
@@ -998,7 +1002,7 @@ AS
             AND self.swagger_parms(i).parm_undocumented = 'FALSE'
             THEN
                clb_output := clb_output || dz_json_util.pretty(
-                   str_pad2 || '"' || self.swagger_parms(i).swagger_parm || '": ' || self.swagger_parms(i).toJSON(
+                   str_pad2 || '"' || self.swagger_parms(i).parameter_ref_id || '": ' || self.swagger_parms(i).toJSON(
                       p_pretty_print => num_pretty_print + 2
                    )
                   ,num_pretty_print + 2
@@ -1305,7 +1309,7 @@ AS
             AND self.swagger_parms(i).parm_undocumented = 'FALSE'
             THEN
                clb_output := clb_output || dz_json_util.pretty(
-                   self.swagger_parms(i).swagger_parm || ': '
+                   self.swagger_parms(i).parameter_ref_id || ': '
                   ,1
                   ,'  '
                ) || self.swagger_parms(i).toYAML(2);

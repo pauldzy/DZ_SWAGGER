@@ -49,6 +49,19 @@ AS
       self.inline_parm          := p_inline_parm;
       self.versionid            := p_versionid;
       
+      IF self.parameter_in_type = 'query'
+      THEN
+         self.parameter_ref_id := 'q.' || self.swagger_parm;
+         
+      ELSIF self.parameter_in_type = 'formData'
+      THEN
+         self.parameter_ref_id := 'f.' || self.swagger_parm;
+         
+      ELSE
+         self.parameter_ref_id := self.swagger_parm;
+         
+      END IF;
+      
       SELECT
        a.enum_value_string
       ,a.enum_value_number

@@ -4,6 +4,7 @@ AS OBJECT (
     versionid           VARCHAR2(40 Char)
    ,swagger_parm_id     VARCHAR2(255 Char)
    ,swagger_parm	      VARCHAR2(255 Char)
+   ,parameter_ref_id    VARCHAR2(255 Char)
    ,parm_description    VARCHAR2(4000 Char)
    ,parm_type           VARCHAR2(255 Char)
    ,parm_default_string VARCHAR2(255 Char)
