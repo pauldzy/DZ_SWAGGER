@@ -1,8 +1,10 @@
+/* DZ_SWAGGER_VERS */
 Insert into DZ_SWAGGER_VERS
    (versionid, is_default, version_owner, version_created, version_notes)
  Values
    ('SAMPLE', 'TRUE', 'WATERS', TO_DATE('1/7/2017', 'MM/DD/YYYY'), 'Sample Dataset');
 COMMIT;
+/* DZ_SWAGGER_PROPERTY */
 Insert into DZ_SWAGGER_PROPERTY
    (property_id, property, property_type, property_target, property_allow_null, 
     property_title, property_desc_updated, property_desc_author, versionid)
@@ -911,23 +913,25 @@ Insert into DZ_SWAGGER_PROPERTY
    ('npdes_permit_nmbr', 'npdes_permit_nmbr', 'string', 'TRUE', 'NPDES Permit Number', 
     'Permit Number from ICIS permitting database.', TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_PATH_TAGS */
 Insert into DZ_SWAGGER_PATH_TAGS
-   (swagger_path, swagger_http_method, swagger_tag, versionid)
+   (swagger_path, swagger_tag, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'Navigation', 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'Navigation', 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_TAGS
-   (swagger_path, swagger_http_method, swagger_tag, versionid)
+   (swagger_path, swagger_tag, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'Indexing', 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'Indexing', 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_TAGS
-   (swagger_path, swagger_http_method, swagger_tag, versionid)
+   (swagger_path, swagger_tag, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'Event Discovery', 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'Event Discovery', 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_TAGS
-   (swagger_path, swagger_http_method, swagger_tag, versionid)
+   (swagger_path, swagger_tag, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'Navigation', 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'Navigation', 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_PATH_RESP */
 Insert into DZ_SWAGGER_PATH_RESP
    (swagger_path, swagger_http_method, swagger_response, response_schema_def, response_schema_type, 
     response_description, response_desc_updated, response_desc_author, versionid)
@@ -947,258 +951,272 @@ Insert into DZ_SWAGGER_PATH_RESP
    ('/UpstreamDownstreamSearchV3.Service', 'get', '200', 'UpstreamDownstreamSearchV3.Service.root', 'object', 
     'Returns a standardized object containing a status message and a data container.', TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_PATH_PARM */
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pNavigationType', 10, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pNavigationType', 10, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pStartComID', 20, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pStartComID', 20, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pStartPermanentIdentifier', 30, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pStartPermanentIdentifier', 30, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pStartReachcode', 40, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pStartReachcode', 40, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pStartMeasure', 50, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pStartMeasure', 50, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pStopComID', 60, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pStopComID', 60, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pStopPermanentIdentifier', 70, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pStopPermanentIdentifier', 70, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pStopReachcode', 80, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pStopReachcode', 80, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pStopMeasure', 90, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pStopMeasure', 90, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pMaxDistanceKm', 100, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pMaxDistanceKm', 100, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'pMaxFlowTimeHour', 110, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'pMaxFlowTimeHour', 110, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'optOutPrettyPrint', 120, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'optOutPrettyPrint', 120, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'optOutPruneNumber', 130, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'optOutPruneNumber', 130, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'optJSONPCallback', 140, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'optJSONPCallback', 140, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'optCache', 150, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'optCache', 150, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'optGEOJSONbbox', 160, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'optGEOJSONbbox', 160, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/Navigation20.ServiceGeoJSON', 'get', 'callback', 170, 'SAMPLE');
+   ('/Navigation20.ServiceGeoJSON', 'get', 'query', 'callback', 170, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pGeometry', 10, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pGeometry', 10, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pGeometryMod', 20, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pGeometryMod', 20, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pIndexingMethod', 30, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pIndexingMethod', 30, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pFcodeAllow', 40, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pFcodeAllow', 40, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pFcodeAllowMod', 50, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pFcodeAllowMod', 50, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pFcodeDeny', 60, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pFcodeDeny', 60, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pFcodeDenyMod', 70, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pFcodeDenyMod', 70, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pDistanceMaxDistKM', 80, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pDistanceMaxDistKm', 80, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pRaindropPathMaxDistKM', 90, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pRaindropPathMaxDistKm', 90, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'pRaindropSnapMaxDistKM', 100, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'pRaindropSnapMaxDistKm', 100, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'optOutPrettyPrint', 110, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'optOutPrettyPrint', 110, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'optOutPruneNumber', 120, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'optOutPruneNumber', 120, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'optClientRef', 130, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'optClientRef', 130, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/PointIndexing.ServiceGeoJSON', 'get', 'optJSONPCallback', 140, 'SAMPLE');
+   ('/PointIndexing.ServiceGeoJSON', 'get', 'query', 'optJSONPCallback', 140, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pNavigationType', 10, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pNavigationType', 10, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pStartComID', 20, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pStartComID', 20, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pStartPermanentIdentifier', 30, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pStartPermanentIdentifier', 30, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pStartReachcode', 40, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pStartReachcode', 40, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pStartMeasure', 50, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pStartMeasure', 50, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pStopComID', 60, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pStopComID', 60, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pStopPermanentIdentifier', 70, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pStopPermanentIdentifier', 70, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pStopReachcode', 80, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pStopReachcode', 80, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pStopMeasure', 90, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pStopMeasure', 90, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pMaxDistanceKm', 100, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pMaxDistanceKm', 100, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pMaxFlowTimeHour', 110, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pMaxFlowTimeHour', 110, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pEventTypeList', 120, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pEventTypeList', 120, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pEventTypeListMod', 130, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pEventTypeListMod', 130, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pArchiveCycleList', 140, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pArchiveCycleList', 140, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pArchiveCycleListMod', 150, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pArchiveCycleListMod', 150, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pReturnNavigationResults', 160, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pReturnNavigationResults', 160, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pAddFlowlineAttributes', 170, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pAddFlowlineAttributes', 170, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pAddFlowlineGeometry', 180, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pAddFlowlineGeometry', 180, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pAddEventGeometry', 190, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pAddEventGeometry', 190, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'pReturnProgramAttributes', 200, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'pReturnProgramAttributes', 200, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'optOutPrettyPrint', 210, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'optOutPrettyPrint', 210, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'optOutPruneNumber', 220, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'optOutPruneNumber', 220, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'optJSONPCallback', 230, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'optJSONPCallback', 230, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'optCache', 240, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'optCache', 240, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'optClientRef', 250, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'optClientRef', 250, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'optGEOJSONbbox', 260, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'optGEOJSONbbox', 260, 'SAMPLE');
 Insert into DZ_SWAGGER_PATH_PARM
-   (swagger_path, swagger_http_method, swagger_parm_id, path_param_sort, versionid)
+   (swagger_path, swagger_http_method, parameter_in_type, swagger_parm_id, path_param_sort, versionid)
  Values
-   ('/UpstreamDownstreamSearchV3.Service', 'get', 'callback', 270, 'SAMPLE');
+   ('/UpstreamDownstreamSearchV3.Service', 'get', 'query', 'callback', 270, 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_PATH */
 Insert into DZ_SWAGGER_PATH
-   (path_group_id, swagger_path, swagger_http_method, path_summary, path_description, 
-    path_order, path_desc_updated, path_desc_author, versionid)
+   (path_group_id, swagger_path, path_summary, path_description, path_order, path_desc_updated, path_desc_author, versionid)
  Values
-   ('WATERS', '/Navigation20.ServiceGeoJSON', 'get', 'NHDPlus Navigation - Alternative Service', 'This service provides navigation on the NHDPlus network utilizing the Oracle network data model.', 
+   ('WATERS', '/Navigation20.ServiceGeoJSON', 'NHDPlus Navigation - Alternative Service', 'This service provides navigation on the NHDPlus network utilizing the Oracle network data model.', 
     20, TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
 Insert into DZ_SWAGGER_PATH
-   (path_group_id, swagger_path, swagger_http_method, path_summary, path_description, 
-    path_order, path_desc_updated, path_desc_author, versionid)
+   (path_group_id, swagger_path, path_summary, path_description, path_order, path_desc_updated, path_desc_author, versionid)
  Values
-   ('WATERS', '/PointIndexing.ServiceGeoJSON', 'get', 'NHDPlus Point Indexing', 'This service provides point indexing to NHDPlus using either distance or raindrop association.', 
+   ('WATERS', '/PointIndexing.ServiceGeoJSON', 'NHDPlus Point Indexing', 'This service provides point indexing to NHDPlus using either distance or raindrop association.', 
     10, TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
 Insert into DZ_SWAGGER_PATH
-   (path_group_id, swagger_path, swagger_http_method, path_summary, path_description, 
-    path_order, path_desc_updated, path_desc_author, versionid)
+   (path_group_id, swagger_path, path_summary, path_description, path_order, path_desc_updated, path_desc_author, versionid)
  Values
-   ('WATERS', '/UpstreamDownstreamSearchV3.Service', 'get', 'Upstream Downstream Search V3 Service', 'This service provides navigation and discovery of Reach Address Database events on the NHDPlus network providing detailed program attributes with results.', 
+   ('WATERS', '/UpstreamDownstreamSearchV3.Service', 'Upstream Downstream Search V3 Service', 'This service provides navigation and discovery of Reach Address Database events on the NHDPlus network providing detailed program attributes with results.', 
     30, TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_PATH_METHOD */
+Insert into DZ_SWAGGER_PATH_METHOD
+   (swagger_path, swagger_http_method, consumes_json, consumes_xml, consumes_form, produces_json, produces_xml, versionid)
+ Values
+   ('/Navigation20.ServiceGeoJSON', 'get', NULL, NULL, NULL, NULL, NULL, 'SAMPLE');
+Insert into DZ_SWAGGER_PATH_METHOD
+   (swagger_path, swagger_http_method, consumes_json, consumes_xml, consumes_form, produces_json, produces_xml, versionid)
+ Values
+   ('/PointIndexing.ServiceGeoJSON', 'get', NULL, NULL, NULL, NULL, NULL, 'SAMPLE');
+Insert into DZ_SWAGGER_PATH_METHOD
+   (swagger_path, swagger_http_method, consumes_json, consumes_xml, consumes_form, produces_json, produces_xml, versionid)
+ Values
+   ('/UpstreamDownstreamSearchV3.Service', 'get', NULL, NULL, NULL, NULL, NULL, 'SAMPLE');
+COMMIT;
+/* DZ_SWAGGER_PARM_ENUM */
 Insert into DZ_SWAGGER_PARM_ENUM
    (swagger_parm_id, enum_value_string, enum_value_order, versionid)
  Values
@@ -1276,6 +1294,7 @@ Insert into DZ_SWAGGER_PARM_ENUM
  Values
    ('optGEOJSONbbox', 'FALSE', 20, 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_PARM */
 Insert into DZ_SWAGGER_PARM
    (swagger_parm_id, swagger_parm, parm_description, parm_type, parm_required, 
     parm_undocumented, param_sort, parm_desc_updated, parm_desc_author, versionid)
@@ -1504,17 +1523,18 @@ Insert into DZ_SWAGGER_PARM
    ('callback', 'callback', 'Optional feature for enclosing results in a JSONP wrapper.  Use a valid JavaScript function string.', 'string', 'FALSE', 
     'FALSE', 270, TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_HEAD */
 Insert into DZ_SWAGGER_HEAD
    (header_id, info_title, info_description, info_contact_name, info_contact_url, 
     info_license_name, info_license_url, info_version, swagger_host, swagger_basepath, 
-    schemes_https, consumes_json, consumes_xml, produces_json, produces_xml, 
+    schemes_https, consumes_json, consumes_xml, consumes_form, produces_json, produces_xml, 
     info_desc_updated, info_desc_author, versionid)
  Values
-   ('WATERS', 'U.S. EPA Office of Water WATERS Services', 'The Watershed Assessment, Tracking & Environmental Results System (WATERS) unites water quality information previously available only from several independent and unconnected databases.  WATERS provides a suite of interoperable services that expose components that perform complex analysis and supporting strategic datasets.', 'US EPA Office of Water', 'https://www.epa.gov/aboutepa/about-office-water', 
+   ('WATERS', 'U.S. EPA Office of Water WATERS Services', 'The Watershed Assessment, Tracking ' || CHR(38) || ' Environmental Results System (WATERS) unites water quality information previously available only from several independent and unconnected databases.  WATERS provides a suite of interoperable services that expose components that perform complex analysis and supporting strategic datasets.', 'US EPA Office of Water', 'https://www.epa.gov/aboutepa/about-office-water', 
     'Creative Commons Zero Public Domain Dedication', 'https://creativecommons.org/publicdomain/zero/1.0/', '0.0.0', 'ofmpub.epa.gov', '/waters10', 
-    'TRUE', 'TRUE', 'FALSE', 'TRUE', 'FALSE', 
-    TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
+    'TRUE', NULL, NULL, 'TRUE', 'TRUE', NULL, TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_DEF_PROP */
 Insert into DZ_SWAGGER_DEF_PROP
    (definition, definition_type, property_id, property_order, property_required, 
     versionid)
@@ -3052,6 +3072,7 @@ Insert into DZ_SWAGGER_DEF_PROP
    ('UpstreamDownstreamSearchV3.Service.event_point_results.properties', 'object', 'reachcode', 50, 'TRUE', 
     'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_DEFINITION */
 Insert into DZ_SWAGGER_DEFINITION
    (definition, definition_type, definition_desc_updated, definition_desc_author, versionid)
  Values
@@ -3205,6 +3226,7 @@ Insert into DZ_SWAGGER_DEFINITION
  Values
    ('UpstreamDownstreamSearchV3.Service.navigation_results.features', 'object', TO_DATE('1/14/2017', 'MM/DD/YYYY'), 'PDZIEMIE', 'SAMPLE');
 COMMIT;
+/* DZ_SWAGGER_CONDENSE */
 Insert into DZ_SWAGGER_CONDENSE
    (condense_key, condense_value, versionid)
  Values
