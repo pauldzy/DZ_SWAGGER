@@ -17,8 +17,8 @@ AS
    /*
    Header: DZ_SWAGGER
      
-   - Build ID: 19
-   - Change Set: 16c33c167a8252e85c450484419f951f9d2f57e6
+   - Build ID: 25
+   - Change Set: 1d251a21c93b9920f301fc770f798c03883297d4
    
    PLSQL module for the creation, storage and production of Open API service 
    definitions.   Support for the unloading of Swagger JSON specifications into
@@ -94,17 +94,15 @@ AS
       -- Step 10
       -- Check that user is qualified to create tables in schema
       --------------------------------------------------------------------------
-   
+      
       --------------------------------------------------------------------------
       -- Step 20
-      -- Build VERS table
+      -- Build CONDENSE table
       --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_vers('
-              || '    versionid            VARCHAR2(40 Char) NOT NULL '
-              || '   ,is_default           VARCHAR2(5 Char) NOT NULL '
-              || '   ,version_owner        VARCHAR2(255 Char) '
-              || '   ,version_created      DATE '
-              || '   ,version_notes        VARCHAR2(255 Char)  '
+      str_sql := 'CREATE TABLE dz_swagger_condense('
+              || '    condense_key         VARCHAR2(255 Char) NOT NULL '
+              || '   ,condense_value       VARCHAR2(255 Char) NOT NULL '
+              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
       IF p_table_tablespace IS NOT NULL
@@ -115,9 +113,79 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_vers '
-              || 'ADD CONSTRAINT dz_swagger_vers_pk '
-              || 'PRIMARY KEY(versionid) ';
+      str_sql := 'ALTER TABLE dz_swagger_condense '
+              || 'ADD ( '
+              || '    CONSTRAINT dz_swagger_condense_pk '
+              || '    PRIMARY KEY(versionid,condense_key,condense_value) ';
+              
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || '    USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+      
+      str_sql := str_sql 
+              || '   ,CONSTRAINT dz_swagger_condense_u01 '
+              || '    UNIQUE(versionid,condense_value) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || '    USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+       
+      str_sql := str_sql || ') ';
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_condense '
+              || 'ADD( '
+              || '    CONSTRAINT dz_swagger_condense_c01 '
+              || '    CHECK (condense_key = TRIM(condense_key)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_condense_c02 '
+              || '    CHECK (condense_value = TRIM(condense_value)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_condense_c03 '
+              || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || ') ';
+              
+      EXECUTE IMMEDIATE str_sql;
+      
+      --------------------------------------------------------------------------
+      -- Step 30
+      -- Build DEF ATTR table
+      --------------------------------------------------------------------------
+      str_sql := 'CREATE TABLE dz_swagger_definition('
+              || '    definition              VARCHAR2(255 Char) NOT NULL '
+              || '   ,definition_type         VARCHAR2(255 Char) NOT NULL '
+              || '   ,definition_desc         VARCHAR2(4000 Char) '
+              || '   ,definition_desc_updated DATE '
+              || '   ,definition_desc_author  VARCHAR2(30 Char) '
+              || '   ,definition_desc_notes   VARCHAR2(255 Char) '
+              || '   ,xml_name                VARCHAR2(255 Char) '
+              || '   ,xml_namespace           VARCHAR2(2000 Char) '
+              || '   ,xml_prefix              VARCHAR2(255 Char) '
+              || '   ,xml_wrapped             VARCHAR2(5 Char) '
+              || '   ,table_owner             VARCHAR2(30 Char) '
+              || '   ,table_name              VARCHAR2(30 Char) '
+              || '   ,table_mapping           VARCHAR2(30 Char) '
+              || '   ,versionid               VARCHAR2(40 Char) NOT NULL '
+              || ') ';
+              
+      IF p_table_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_definition '
+              || 'ADD CONSTRAINT dz_swagger_definition_pk '
+              || 'PRIMARY KEY(versionid,definition,definition_type) ';
               
       IF p_index_tablespace IS NOT NULL
       THEN
@@ -127,12 +195,12 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_vers '
+      str_sql := 'ALTER TABLE dz_swagger_definition '
               || 'ADD( '
-              || '    CONSTRAINT dz_swagger_vers_c01 '
-              || '    CHECK (is_default IN (''TRUE'',''FALSE'')) '
+              || '    CONSTRAINT dz_swagger_definition_c01 '
+              || '    CHECK (definition = TRIM(definition)) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_vers_c02 '
+              || '   ,CONSTRAINT dz_swagger_definition_c03 '
               || '    CHECK (versionid = TRIM(versionid)) '
               || '    ENABLE VALIDATE '
               || ') ';
@@ -140,7 +208,7 @@ AS
       EXECUTE IMMEDIATE str_sql;
    
       --------------------------------------------------------------------------
-      -- Step 30
+      -- Step 40
       -- Build DEF table
       --------------------------------------------------------------------------
       str_sql := 'CREATE TABLE dz_swagger_def_prop('
@@ -192,23 +260,32 @@ AS
       EXECUTE IMMEDIATE str_sql;
       
       --------------------------------------------------------------------------
-      -- Step 40
-      -- Build DEF ATTR table
+      -- Step 50
+      -- Build HEAD table
       --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_definition('
-              || '    definition              VARCHAR2(255 Char) NOT NULL '
-              || '   ,definition_type         VARCHAR2(255 Char) NOT NULL '
-              || '   ,definition_desc         VARCHAR2(4000 Char) '
-              || '   ,definition_desc_updated DATE '
-              || '   ,definition_desc_author  VARCHAR2(30 Char) '
-              || '   ,definition_desc_notes   VARCHAR2(255 Char) '
-              || '   ,xml_name                VARCHAR2(255 Char) '
-              || '   ,xml_namespace           VARCHAR2(2000 Char) '
-              || '   ,xml_prefix              VARCHAR2(255 Char) '
-              || '   ,table_owner             VARCHAR2(30 Char) '
-              || '   ,table_name              VARCHAR2(30 Char) '
-              || '   ,table_mapping           VARCHAR2(30 Char) '
-              || '   ,versionid               VARCHAR2(40 Char) NOT NULL '
+      str_sql := 'CREATE TABLE dz_swagger_head('
+              || '    header_id           VARCHAR2(255 Char) NOT NULL '
+              || '   ,info_title          VARCHAR2(255 Char) NOT NULL '
+              || '   ,info_description    VARCHAR2(4000 Char) '
+              || '   ,info_termsofservice VARCHAR2(255 Char) '
+              || '   ,info_contact_name   VARCHAR2(255 Char) '
+              || '   ,info_contact_url    VARCHAR2(255 Char) '
+              || '   ,info_contact_email  VARCHAR2(255 Char) '
+              || '   ,info_license_name   VARCHAR2(255 Char) '
+              || '   ,info_license_url    VARCHAR2(255 Char) '
+              || '   ,info_version        VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_host        VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_basepath    VARCHAR2(255 Char) NOT NULL '
+              || '   ,schemes_https       VARCHAR2(5 Char) '
+              || '   ,consumes_json       VARCHAR2(5 Char) '
+              || '   ,consumes_xml        VARCHAR2(5 Char) '
+              || '   ,consumes_form       VARCHAR2(5 Char) '
+              || '   ,produces_json       VARCHAR2(5 Char) '
+              || '   ,produces_xml        VARCHAR2(5 Char) '
+              || '   ,info_desc_updated   DATE '
+              || '   ,info_desc_author    VARCHAR2(30 Char) '
+              || '   ,info_desc_notes     VARCHAR2(255 Char) '
+              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
               || ') ';
               
       IF p_table_tablespace IS NOT NULL
@@ -219,9 +296,9 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_definition '
-              || 'ADD CONSTRAINT dz_swagger_definition_pk '
-              || 'PRIMARY KEY(versionid,definition,definition_type) ';
+      str_sql := 'ALTER TABLE dz_swagger_head '
+              || 'ADD CONSTRAINT dz_swagger_head_pk '
+              || 'PRIMARY KEY(versionid,header_id) ';
               
       IF p_index_tablespace IS NOT NULL
       THEN
@@ -231,12 +308,30 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_definition '
+      str_sql := 'ALTER TABLE dz_swagger_head '
               || 'ADD( '
-              || '    CONSTRAINT dz_swagger_definition_c01 '
-              || '    CHECK (definition = TRIM(definition)) '
+              || '    CONSTRAINT dz_swagger_head_c01 '
+              || '    CHECK (schemes_https IN (''TRUE'',''FALSE'')) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_definition_c03 '
+              || '   ,CONSTRAINT dz_swagger_head_c02 '
+              || '    CHECK (consumes_json IN (''TRUE'',''FALSE'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_head_c03 '
+              || '    CHECK (consumes_xml IN (''TRUE'',''FALSE'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_head_c04 '
+              || '    CHECK (consumes_form IN (''TRUE'',''FALSE'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_head_c05 '
+              || '    CHECK (produces_json IN (''TRUE'',''FALSE'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_head_c06 '
+              || '    CHECK (produces_xml IN (''TRUE'',''FALSE'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_head_c07 '
+              || '    CHECK (header_id = TRIM(header_id)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_head_c08 '
               || '    CHECK (versionid = TRIM(versionid)) '
               || '    ENABLE VALIDATE '
               || ') ';
@@ -244,7 +339,371 @@ AS
       EXECUTE IMMEDIATE str_sql;
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 60
+      -- Build PARM table
+      --------------------------------------------------------------------------
+      str_sql := 'CREATE TABLE dz_swagger_parm('
+              || '    swagger_parm_id     VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_parm        VARCHAR2(255 Char) NOT NULL '
+              || '   ,parm_description    VARCHAR2(4000 Char) '
+              || '   ,parm_type           VARCHAR2(255 Char) '
+              || '   ,parm_default_string VARCHAR2(255 Char) '
+              || '   ,parm_default_number NUMBER '
+              || '   ,parm_required       VARCHAR2(5 Char) NOT NULL '
+              || '   ,parm_undocumented   VARCHAR2(5 Char) NOT NULL '
+              || '   ,param_sort          INTEGER NOT NULL '
+              || '   ,parm_desc_updated   DATE '
+              || '   ,parm_desc_author    VARCHAR2(30 Char) '
+              || '   ,parm_desc_notes     VARCHAR2(255 Char) '
+              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
+              || ') ';
+              
+      IF p_table_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_parm '
+              || 'ADD CONSTRAINT dz_swagger_parm_pk '
+              || 'PRIMARY KEY(versionid,swagger_parm_id) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_parm '
+              || 'ADD( '
+              || '    CONSTRAINT dz_swagger_parm_c01 '
+              || '    CHECK (parm_required IN (''TRUE'',''FALSE'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_parm_c02 '
+              || '    CHECK (parm_undocumented IN (''TRUE'',''FALSE'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_parm_c03 '
+              || '    CHECK (swagger_parm_id = TRIM(swagger_parm_id)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_parm_c04 '
+              || '    CHECK (swagger_parm = TRIM(swagger_parm)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_parm_c05 '
+              || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_parm_c06 '
+              || '    CHECK (SUBSTR(swagger_parm,2,1) <> ''.'') '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_parm_c07 '
+              || '    CHECK (parm_type IN (''number'',''string'')) '
+              || '    ENABLE VALIDATE '
+              || ') ';
+              
+      EXECUTE IMMEDIATE str_sql;
+      
+      --------------------------------------------------------------------------
+      -- Step 70
+      -- Build PARM ENUM table
+      --------------------------------------------------------------------------
+      str_sql := 'CREATE TABLE dz_swagger_parm_enum('
+              || '    swagger_parm_id    VARCHAR2(255 Char) NOT NULL '
+              || '   ,enum_value_string  VARCHAR2(255 Char) '
+              || '   ,enum_value_number  NUMBER '
+              || '   ,enum_value_order   INTEGER NOT NULL '
+              || '   ,versionid          VARCHAR2(40 Char) NOT NULL '
+              || ') ';
+              
+      IF p_table_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_parm_enum '
+              || 'ADD CONSTRAINT dz_swagger_parm_enum_pk '
+              || 'PRIMARY KEY(versionid,swagger_parm_id,enum_value_order) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_parm_enum '
+              || 'ADD( '
+              || '    CONSTRAINT dz_swagger_parm_enum_c01 '
+              || '    CHECK (swagger_parm_id = TRIM(swagger_parm_id)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_parm_enum_c02 '
+              || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || ') ';
+              
+      EXECUTE IMMEDIATE str_sql;
+      
+      --------------------------------------------------------------------------
+      -- Step 80
+      -- Build PATH table
+      --------------------------------------------------------------------------
+      str_sql := 'CREATE TABLE dz_swagger_path('
+              || '    path_group_id       VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_path        VARCHAR2(255 Char) NOT NULL '
+              || '   ,path_summary        VARCHAR2(4000 Char) '
+              || '   ,path_description    VARCHAR2(4000 Char) '
+              || '   ,path_order          INTEGER NOT NULL '
+              || '   ,object_owner        VARCHAR2(30 Char) '
+              || '   ,object_name         VARCHAR2(30 Char) '
+              || '   ,procedure_name      VARCHAR2(30 Char) '
+              || '   ,object_overload     INTEGER '
+              || '   ,path_desc_updated   DATE '
+              || '   ,path_desc_author    VARCHAR2(30 Char) '
+              || '   ,path_desc_notes     VARCHAR2(255 Char) '
+              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
+              || ') ';
+              
+      IF p_table_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path '
+              || 'ADD CONSTRAINT dz_swagger_path_pk '
+              || 'PRIMARY KEY(versionid,path_group_id,swagger_path) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path '
+              || 'ADD( '
+              || '    CONSTRAINT dz_swagger_path_c01 '
+              || '    CHECK (path_group_id = TRIM(path_group_id)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_c02 '
+              || '    CHECK (swagger_path = TRIM(swagger_path)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_c03 '
+              || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || ') ';
+              
+      EXECUTE IMMEDIATE str_sql;
+      
+      --------------------------------------------------------------------------
+      -- Step 90
+      -- Build PATH METHOD table
+      --------------------------------------------------------------------------
+      str_sql := 'CREATE TABLE dz_swagger_path_method('
+              || '    swagger_path        VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_http_method VARCHAR2(255 Char) NOT NULL '
+              || '   ,consumes_json       VARCHAR2(5 Char) '
+              || '   ,consumes_xml        VARCHAR2(5 Char) '
+              || '   ,consumes_form       VARCHAR2(5 Char) '
+              || '   ,produces_json       VARCHAR2(5 Char) '
+              || '   ,produces_xml        VARCHAR2(5 Char) '
+              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
+              || ') ';
+              
+      IF p_table_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path_method '
+              || 'ADD CONSTRAINT dz_swagger_path_method_pk '
+              || 'PRIMARY KEY(versionid,swagger_path,swagger_http_method) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path_method '
+              || 'ADD( '
+              || '    CONSTRAINT dz_swagger_path_method_c01 '
+              || '    CHECK (swagger_http_method IN (''get'',''post'',''put'',''delete'',''patch'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_method_c02 '
+              || '    CHECK (swagger_path = TRIM(swagger_path)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_method_c03 '
+              || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || ') ';
+              
+      EXECUTE IMMEDIATE str_sql;
+      
+      --------------------------------------------------------------------------
+      -- Step 100
+      -- Build PATH PARM table
+      --------------------------------------------------------------------------
+      str_sql := 'CREATE TABLE dz_swagger_path_parm('
+              || '    swagger_path        VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_http_method VARCHAR2(255 Char) NOT NULL '
+              || '   ,parameter_in_type   VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_parm_id     VARCHAR2(255 Char) NOT NULL '
+              || '   ,path_param_sort     INTEGER NOT NULL '
+              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
+              || ') ';
+              
+      IF p_table_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path_parm '
+              || 'ADD CONSTRAINT dz_swagger_path_parm_pk '
+              || 'PRIMARY KEY(versionid,swagger_path,swagger_http_method,swagger_parm_id) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path_parm '
+              || 'ADD( '
+              || '    CONSTRAINT dz_swagger_path_parm_c01 '
+              || '    CHECK (swagger_http_method IN (''get'',''post'',''put'',''delete'',''patch'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_parm_c02 '
+              || '    CHECK (swagger_path = TRIM(swagger_path)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_parm_c03 '
+              || '    CHECK (swagger_parm_id = TRIM(swagger_parm_id)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_parm_c04 '
+              || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || ') ';
+              
+      EXECUTE IMMEDIATE str_sql;
+      
+      --------------------------------------------------------------------------
+      -- Step 110
+      -- Build PATH RESP table
+      --------------------------------------------------------------------------
+      str_sql := 'CREATE TABLE dz_swagger_path_resp('
+              || '    swagger_path          VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_http_method   VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_response      VARCHAR2(255 Char) NOT NULL '
+              || '   ,response_schema_def   VARCHAR2(255 Char) NOT NULL '
+              || '   ,response_schema_type  VARCHAR2(255 Char) NOT NULL '
+              || '   ,response_description  VARCHAR2(4000 Char) '
+              || '   ,response_desc_updated DATE '
+              || '   ,response_desc_author  VARCHAR2(30 Char) '
+              || '   ,response_desc_notes   VARCHAR2(255 Char) '
+              || '   ,versionid             VARCHAR2(40 Char) NOT NULL '
+              || ') ';
+              
+      IF p_table_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path_resp '
+              || 'ADD CONSTRAINT dz_swagger_path_resp_pk '
+              || 'PRIMARY KEY(versionid,swagger_path,swagger_http_method) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path_resp '
+              || 'ADD( '
+              || '    CONSTRAINT dz_swagger_path_resp_c01 '
+              || '    CHECK (swagger_http_method IN (''get'',''post'',''put'',''delete'',''patch'')) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_resp_c02 '
+              || '    CHECK (swagger_path = TRIM(swagger_path)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_resp_c03 '
+              || '    CHECK (response_schema_def = TRIM(response_schema_def)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_resp_c04 '
+              || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || ') ';
+              
+      EXECUTE IMMEDIATE str_sql;
+      
+      --------------------------------------------------------------------------
+      -- Step 120
+      -- Build PATH TAGS table
+      --------------------------------------------------------------------------
+      str_sql := 'CREATE TABLE dz_swagger_path_tags('
+              || '    swagger_path         VARCHAR2(255 Char) NOT NULL '
+              || '   ,swagger_tag          VARCHAR2(255 Char) NOT NULL '
+              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
+              || ') ';
+              
+      IF p_table_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path_tags '
+              || 'ADD CONSTRAINT dz_swagger_path_tags_pk '
+              || 'PRIMARY KEY(versionid,swagger_path,swagger_tag) ';
+              
+      IF p_index_tablespace IS NOT NULL
+      THEN
+         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
+      
+      END IF;
+      
+      EXECUTE IMMEDIATE str_sql;
+      
+      str_sql := 'ALTER TABLE dz_swagger_path_tags '
+              || 'ADD( '
+              || '    CONSTRAINT dz_swagger_path_tags_c01 '
+              || '    CHECK (swagger_path = TRIM(swagger_path)) '
+              || '    ENABLE VALIDATE '
+              || '   ,CONSTRAINT dz_swagger_path_tags_c02 '
+              || '    CHECK (versionid = TRIM(versionid)) '
+              || '    ENABLE VALIDATE '
+              || ') ';
+              
+      EXECUTE IMMEDIATE str_sql;
+      
+      --------------------------------------------------------------------------
+      -- Step 130
       -- Build PROPERTIES table
       --------------------------------------------------------------------------
       str_sql := 'CREATE TABLE dz_swagger_property('
@@ -312,31 +771,15 @@ AS
       EXECUTE IMMEDIATE str_sql;
       
       --------------------------------------------------------------------------
-      -- Step 60
-      -- Build HEAD table
+      -- Step 140
+      -- Build VERS table
       --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_head('
-              || '    header_id           VARCHAR2(255 Char) NOT NULL '
-              || '   ,info_title          VARCHAR2(255 Char) NOT NULL '
-              || '   ,info_description    VARCHAR2(4000 Char) '
-              || '   ,info_termsofservice VARCHAR2(255 Char) '
-              || '   ,info_contact_name   VARCHAR2(255 Char) '
-              || '   ,info_contact_url    VARCHAR2(255 Char) '
-              || '   ,info_contact_email  VARCHAR2(255 Char) '
-              || '   ,info_license_name   VARCHAR2(255 Char) '
-              || '   ,info_license_url   VARCHAR2(255 Char) '
-              || '   ,info_version        VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_host        VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_basepath    VARCHAR2(255 Char) NOT NULL '
-              || '   ,schemes_https       VARCHAR2(5 Char) NOT NULL '
-              || '   ,consumes_json       VARCHAR2(5 Char) NOT NULL '
-              || '   ,consumes_xml        VARCHAR2(5 Char) NOT NULL '
-              || '   ,produces_json       VARCHAR2(5 Char) NOT NULL '
-              || '   ,produces_xml        VARCHAR2(5 Char) NOT NULL '
-              || '   ,info_desc_updated   DATE '
-              || '   ,info_desc_author    VARCHAR2(30 Char) '
-              || '   ,info_desc_notes     VARCHAR2(255 Char) '
-              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
+      str_sql := 'CREATE TABLE dz_swagger_vers('
+              || '    versionid            VARCHAR2(40 Char) NOT NULL '
+              || '   ,is_default           VARCHAR2(5 Char) NOT NULL '
+              || '   ,version_owner        VARCHAR2(255 Char) '
+              || '   ,version_created      DATE '
+              || '   ,version_notes        VARCHAR2(255 Char)  '
               || ') ';
               
       IF p_table_tablespace IS NOT NULL
@@ -347,9 +790,9 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_head '
-              || 'ADD CONSTRAINT dz_swagger_head_pk '
-              || 'PRIMARY KEY(versionid,header_id) ';
+      str_sql := 'ALTER TABLE dz_swagger_vers '
+              || 'ADD CONSTRAINT dz_swagger_vers_pk '
+              || 'PRIMARY KEY(versionid) ';
               
       IF p_index_tablespace IS NOT NULL
       THEN
@@ -359,404 +802,12 @@ AS
       
       EXECUTE IMMEDIATE str_sql;
       
-      str_sql := 'ALTER TABLE dz_swagger_head '
+      str_sql := 'ALTER TABLE dz_swagger_vers '
               || 'ADD( '
-              || '    CONSTRAINT dz_swagger_head_c01 '
-              || '    CHECK (schemes_https IN (''TRUE'',''FALSE'')) '
+              || '    CONSTRAINT dz_swagger_vers_c01 '
+              || '    CHECK (is_default IN (''TRUE'',''FALSE'')) '
               || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_head_c02 '
-              || '    CHECK (consumes_json IN (''TRUE'',''FALSE'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_head_c03 '
-              || '    CHECK (consumes_xml IN (''TRUE'',''FALSE'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_head_c04 '
-              || '    CHECK (produces_json IN (''TRUE'',''FALSE'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_head_c05 '
-              || '    CHECK (produces_xml IN (''TRUE'',''FALSE'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_head_c06 '
-              || '    CHECK (header_id = TRIM(header_id)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_head_c07 '
-              || '    CHECK (versionid = TRIM(versionid)) '
-              || '    ENABLE VALIDATE '
-              || ') ';
-              
-      EXECUTE IMMEDIATE str_sql;
-      
-      --------------------------------------------------------------------------
-      -- Step 70
-      -- Build PARM table
-      --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_parm('
-              || '    swagger_parm_id     VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_parm        VARCHAR2(255 Char) NOT NULL '
-              || '   ,parm_description    VARCHAR2(4000 Char) '
-              || '   ,parm_type           VARCHAR2(255 Char) '
-              || '   ,parm_default_string VARCHAR2(255 Char) '
-              || '   ,parm_default_number NUMBER '
-              || '   ,parm_required       VARCHAR2(5 Char) NOT NULL '
-              || '   ,parm_undocumented   VARCHAR2(5 Char) NOT NULL '
-              || '   ,param_sort          INTEGER NOT NULL '
-              || '   ,parm_desc_updated   DATE '
-              || '   ,parm_desc_author    VARCHAR2(30 Char) '
-              || '   ,parm_desc_notes     VARCHAR2(255 Char) '
-              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
-              || ') ';
-              
-      IF p_table_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_parm '
-              || 'ADD CONSTRAINT dz_swagger_parm_pk '
-              || 'PRIMARY KEY(versionid,swagger_parm_id) ';
-              
-      IF p_index_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_parm '
-              || 'ADD( '
-              || '    CONSTRAINT dz_swagger_parm_c01 '
-              || '    CHECK (parm_required IN (''TRUE'',''FALSE'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_parm_c02 '
-              || '    CHECK (parm_undocumented IN (''TRUE'',''FALSE'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_parm_c03 '
-              || '    CHECK (swagger_parm_id = TRIM(swagger_parm_id)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_parm_c04 '
-              || '    CHECK (swagger_parm = TRIM(swagger_parm)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_parm_c05 '
-              || '    CHECK (versionid = TRIM(versionid)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_parm_c06 '
-              || '    CHECK (parm_type IN (''number'',''string'')) '
-              || '    ENABLE VALIDATE '
-              || ') ';
-              
-      EXECUTE IMMEDIATE str_sql;
-      
-      --------------------------------------------------------------------------
-      -- Step 80
-      -- Build PARM ENUM table
-      --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_parm_enum('
-              || '    swagger_parm_id    VARCHAR2(255 Char) NOT NULL '
-              || '   ,enum_value_string  VARCHAR2(255 Char) '
-              || '   ,enum_value_number  NUMBER '
-              || '   ,enum_value_order   INTEGER NOT NULL '
-              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
-              || ') ';
-              
-      IF p_table_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_parm_enum '
-              || 'ADD CONSTRAINT dz_swagger_parm_enum_pk '
-              || 'PRIMARY KEY(versionid,swagger_parm_id,enum_value_order) ';
-              
-      IF p_index_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_parm_enum '
-              || 'ADD( '
-              || '    CONSTRAINT dz_swagger_parm_enum_c01 '
-              || '    CHECK (swagger_parm_id = TRIM(swagger_parm_id)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_parm_enum_c02 '
-              || '    CHECK (versionid = TRIM(versionid)) '
-              || '    ENABLE VALIDATE '
-              || ') ';
-              
-      EXECUTE IMMEDIATE str_sql;
-      
-      --------------------------------------------------------------------------
-      -- Step 90
-      -- Build PATH table
-      --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_path('
-              || '    path_group_id       VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_path        VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_http_method VARCHAR2(255 Char) NOT NULL '
-              || '   ,path_summary        VARCHAR2(4000 Char) '
-              || '   ,path_description    VARCHAR2(4000 Char) '
-              || '   ,path_order          INTEGER NOT NULL '
-              || '   ,object_owner        VARCHAR2(30 Char) '
-              || '   ,object_name         VARCHAR2(30 Char) '
-              || '   ,procedure_name      VARCHAR2(30 Char) '
-              || '   ,object_overload     INTEGER '
-              || '   ,path_desc_updated   DATE '
-              || '   ,path_desc_author    VARCHAR2(30 Char) '
-              || '   ,path_desc_notes     VARCHAR2(255 Char) '
-              || '   ,versionid           VARCHAR2(40 Char) NOT NULL '
-              || ') ';
-              
-      IF p_table_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_path '
-              || 'ADD CONSTRAINT dz_swagger_path_pk '
-              || 'PRIMARY KEY(versionid,path_group_id,swagger_path,swagger_http_method) ';
-              
-      IF p_index_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_path '
-              || 'ADD( '
-              || '    CONSTRAINT dz_swagger_path_c01 '
-              || '    CHECK (swagger_http_method IN (''get'',''post'',''get/post'',''put'',''delete'',''patch'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_c02 '
-              || '    CHECK (path_group_id = TRIM(path_group_id)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_c03 '
-              || '    CHECK (swagger_path = TRIM(swagger_path)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_c04 '
-              || '    CHECK (versionid = TRIM(versionid)) '
-              || '    ENABLE VALIDATE '
-              || ') ';
-              
-      EXECUTE IMMEDIATE str_sql;
-      
-      --------------------------------------------------------------------------
-      -- Step 100
-      -- Build PATH PARM table
-      --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_path_parm('
-              || '    swagger_path        VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_http_method VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_parm_id     VARCHAR2(255 Char) NOT NULL '
-              || '   ,path_param_sort     NUMBER NOT NULL '
-              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
-              || ') ';
-              
-      IF p_table_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_path_parm '
-              || 'ADD CONSTRAINT dz_swagger_path_parm_pk '
-              || 'PRIMARY KEY(versionid,swagger_path,swagger_http_method,swagger_parm_id) ';
-              
-      IF p_index_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_path_parm '
-              || 'ADD( '
-              || '    CONSTRAINT dz_swagger_path_parm_c01 '
-              || '    CHECK (swagger_http_method IN (''get'',''post'',''get/post'',''put'',''delete'',''patch'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_parm_c02 '
-              || '    CHECK (swagger_path = TRIM(swagger_path)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_parm_c03 '
-              || '    CHECK (swagger_parm_id = TRIM(swagger_parm_id)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_parm_c04 '
-              || '    CHECK (versionid = TRIM(versionid)) '
-              || '    ENABLE VALIDATE '
-              || ') ';
-              
-      EXECUTE IMMEDIATE str_sql;
-      
-      --------------------------------------------------------------------------
-      -- Step 110
-      -- Build PATH RESP table
-      --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_path_resp('
-              || '    swagger_path          VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_http_method   VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_response      VARCHAR2(255 Char) NOT NULL '
-              || '   ,response_schema_def   VARCHAR2(255 Char) NOT NULL '
-              || '   ,response_schema_type  VARCHAR2(255 Char) NOT NULL '
-              || '   ,response_description  VARCHAR2(4000 Char) '
-              || '   ,response_desc_updated DATE '
-              || '   ,response_desc_author  VARCHAR2(30 Char) '
-              || '   ,response_desc_notes   VARCHAR2(255 Char) '
-              || '   ,versionid             VARCHAR2(40 Char) NOT NULL '
-              || ') ';
-              
-      IF p_table_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_path_resp '
-              || 'ADD CONSTRAINT dz_swagger_path_resp_pk '
-              || 'PRIMARY KEY(versionid,swagger_path,swagger_http_method) ';
-              
-      IF p_index_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_path_resp '
-              || 'ADD( '
-              || '    CONSTRAINT dz_swagger_path_resp_c01 '
-              || '    CHECK (swagger_http_method IN (''get'',''post'',''get/post'',''put'',''delete'',''patch'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_resp_c02 '
-              || '    CHECK (swagger_path = TRIM(swagger_path)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_resp_c03 '
-              || '    CHECK (response_schema_def = TRIM(response_schema_def)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_resp_c04 '
-              || '    CHECK (versionid = TRIM(versionid)) '
-              || '    ENABLE VALIDATE '
-              || ') ';
-              
-      EXECUTE IMMEDIATE str_sql;
-      
-      --------------------------------------------------------------------------
-      -- Step 120
-      -- Build PATH TAGS table
-      --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_path_tags('
-              || '    swagger_path         VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_http_method  VARCHAR2(255 Char) NOT NULL '
-              || '   ,swagger_tag          VARCHAR2(255 Char) NOT NULL '
-              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
-              || ') ';
-              
-      IF p_table_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_path_tags '
-              || 'ADD CONSTRAINT dz_swagger_path_tags_pk '
-              || 'PRIMARY KEY(versionid,swagger_path,swagger_http_method,swagger_tag) ';
-              
-      IF p_index_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'USING INDEX TABLESPACE ' || p_index_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_path_tags '
-              || 'ADD( '
-              || '    CONSTRAINT dz_swagger_path_tags_c01 '
-              || '    CHECK (swagger_http_method IN (''get'',''post'',''get/post'',''put'',''delete'',''patch'')) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_tags_c02 '
-              || '    CHECK (swagger_path = TRIM(swagger_path)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_path_tags_c03 '
-              || '    CHECK (versionid = TRIM(versionid)) '
-              || '    ENABLE VALIDATE '
-              || ') ';
-              
-      EXECUTE IMMEDIATE str_sql;
-      
-      --------------------------------------------------------------------------
-      -- Step 130
-      -- Build CONDENSE table
-      --------------------------------------------------------------------------
-      str_sql := 'CREATE TABLE dz_swagger_condense('
-              || '    condense_key         VARCHAR2(255 Char) NOT NULL '
-              || '   ,condense_value       VARCHAR2(255 Char) NOT NULL '
-              || '   ,versionid            VARCHAR2(40 Char) NOT NULL '
-              || ') ';
-              
-      IF p_table_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || 'TABLESPACE ' || p_table_tablespace;
-      
-      END IF;
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_condense '
-              || 'ADD ( '
-              || '    CONSTRAINT dz_swagger_condense_pk '
-              || '    PRIMARY KEY(versionid,condense_key,condense_value) ';
-              
-              
-      IF p_index_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || '    USING INDEX TABLESPACE ' || p_index_tablespace;
-      
-      END IF;
-      
-      str_sql := str_sql 
-              || '   ,CONSTRAINT dz_swagger_condense_u01 '
-              || '    UNIQUE(versionid,condense_value) ';
-              
-      IF p_index_tablespace IS NOT NULL
-      THEN
-         str_sql := str_sql || '    USING INDEX TABLESPACE ' || p_index_tablespace;
-      
-      END IF;
-       
-      str_sql := str_sql || ') ';
-      
-      EXECUTE IMMEDIATE str_sql;
-      
-      str_sql := 'ALTER TABLE dz_swagger_condense '
-              || 'ADD( '
-              || '    CONSTRAINT dz_swagger_condense_c01 '
-              || '    CHECK (condense_key = TRIM(condense_key)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_condense_c02 '
-              || '    CHECK (condense_value = TRIM(condense_value)) '
-              || '    ENABLE VALIDATE '
-              || '   ,CONSTRAINT dz_swagger_condense_c03 '
+              || '   ,CONSTRAINT dz_swagger_vers_c02 '
               || '    CHECK (versionid = TRIM(versionid)) '
               || '    ENABLE VALIDATE '
               || ') ';
@@ -1459,13 +1510,9 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 70
-      -- Cough it out without final line feed
+      -- Cough it out 
       --------------------------------------------------------------------------
-      RETURN REGEXP_REPLACE(
-          clb_output
-         ,'\n$'
-         ,''
-      );
+      RETURN clb_output;
       
    END toYAML;
    
@@ -3112,6 +3159,7 @@ AS OBJECT (
    ,xml_name             VARCHAR2(255 Char)
    ,xml_namespace        VARCHAR2(2000 Char)
    ,xml_prefix           VARCHAR2(255 Char)
+   ,xml_wrapped          VARCHAR2(5 Char)
    ,dummy                INTEGER
 
    -----------------------------------------------------------------------------
@@ -3129,6 +3177,7 @@ AS OBJECT (
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT
    
@@ -3142,6 +3191,7 @@ AS OBJECT (
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
       ,p_swagger_properties   IN  dz_swagger_property_list
    ) RETURN SELF AS RESULT
@@ -3191,6 +3241,7 @@ AS
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
    ) RETURN SELF AS RESULT 
    AS 
@@ -3203,6 +3254,7 @@ AS
       self.xml_name             := TRIM(p_xml_name);
       self.xml_namespace        := TRIM(p_xml_namespace);
       self.xml_prefix           := TRIM(p_xml_prefix);
+      self.xml_wrapped          := p_xml_wrapped;
       self.versionid            := p_versionid;
       
       RETURN; 
@@ -3219,6 +3271,7 @@ AS
       ,p_xml_name             IN  VARCHAR2
       ,p_xml_namespace        IN  VARCHAR2
       ,p_xml_prefix           IN  VARCHAR2
+      ,p_xml_wrapped          IN  VARCHAR2
       ,p_versionid            IN  VARCHAR2
       ,p_swagger_properties   IN  dz_swagger_property_list
    ) RETURN SELF AS RESULT 
@@ -3232,6 +3285,7 @@ AS
       self.xml_name             := TRIM(p_xml_name);
       self.xml_namespace        := TRIM(p_xml_namespace);
       self.xml_prefix           := TRIM(p_xml_prefix);
+      self.xml_wrapped          := p_xml_wrapped;
       self.versionid            := p_versionid;
       self.swagger_properties   := p_swagger_properties;
       
@@ -3334,6 +3388,7 @@ AS
                       p_xml_name      => self.xml_name
                      ,p_xml_namespace => self.xml_namespace
                      ,p_xml_prefix    => self.xml_prefix
+                     ,p_xml_wrapped   => self.xml_wrapped
                    ).toJSON(
                      p_pretty_print => num_pretty_print + 1
                    )
@@ -3489,6 +3544,7 @@ AS
              p_xml_name      => self.xml_name
             ,p_xml_namespace => self.xml_namespace
             ,p_xml_prefix    => self.xml_prefix
+            ,p_xml_wrapped   => self.xml_wrapped
          ).toYAML(
             num_pretty_print + 1
          );
@@ -3664,6 +3720,7 @@ AS
          ,p_xml_name            => a.xml_name
          ,p_xml_namespace       => a.xml_namespace
          ,p_xml_prefix          => a.xml_prefix
+         ,p_xml_wrapped         => a.xml_wrapped
          ,p_versionid           => a.versionid
       )
       BULK COLLECT INTO def_pool
@@ -3675,6 +3732,7 @@ AS
          ,aa.xml_name
          ,aa.xml_namespace
          ,aa.xml_prefix
+         ,aa.xml_wrapped
          ,aa.versionid
          FROM (
             SELECT
@@ -3684,6 +3742,7 @@ AS
             ,aaa.xml_name
             ,aaa.xml_namespace
             ,aaa.xml_prefix
+            ,aaa.xml_wrapped
             ,aaa.versionid
             FROM
             dz_swagger_definition aaa
@@ -3805,6 +3864,7 @@ AS
             ,p_xml_name            => a.xml_name
             ,p_xml_namespace       => a.xml_namespace
             ,p_xml_prefix          => a.xml_prefix
+            ,p_xml_wrapped         => a.xml_wrapped
             ,p_versionid           => a.versionid
             ,p_swagger_properties  => a.swagger_properties
          )
@@ -3847,6 +3907,7 @@ AS
          ,p_xml_name            => a.xml_name
          ,p_xml_namespace       => a.xml_namespace
          ,p_xml_prefix          => a.xml_prefix
+         ,p_xml_wrapped         => a.xml_wrapped
          ,p_versionid           => a.versionid
          ,p_swagger_properties  => a.swagger_properties
       )
@@ -4102,6 +4163,7 @@ AS OBJECT (
     versionid           VARCHAR2(40 Char)
    ,swagger_parm_id     VARCHAR2(255 Char)
    ,swagger_parm	      VARCHAR2(255 Char)
+   ,parameter_ref_id    VARCHAR2(255 Char)
    ,parm_description    VARCHAR2(4000 Char)
    ,parm_type           VARCHAR2(255 Char)
    ,parm_default_string VARCHAR2(255 Char)
@@ -4110,6 +4172,7 @@ AS OBJECT (
    ,parm_undocumented   VARCHAR2(5 Char)
    ,swagger_path        VARCHAR2(255 Char)
    ,swagger_http_method VARCHAR2(255 Char)
+   ,parameter_in_type   VARCHAR2(255 Char)
    ,path_param_sort     NUMBER
    ,param_sort          NUMBER
    ,inline_parm         VARCHAR2(5 Char)
@@ -4134,6 +4197,7 @@ AS OBJECT (
       ,p_parm_undocumented    IN  VARCHAR2
       ,p_swagger_path         IN  VARCHAR2
       ,p_swagger_http_method  IN  VARCHAR2
+      ,p_parameter_in_type    IN  VARCHAR2
       ,p_path_param_sort      IN  NUMBER
       ,p_param_sort           IN  NUMBER
       ,p_inline_parm          IN  VARCHAR2
@@ -4188,6 +4252,7 @@ AS
       ,p_parm_undocumented    IN  VARCHAR2
       ,p_swagger_path         IN  VARCHAR2
       ,p_swagger_http_method  IN  VARCHAR2
+      ,p_parameter_in_type    IN  VARCHAR2
       ,p_path_param_sort      IN  NUMBER
       ,p_param_sort           IN  NUMBER
       ,p_inline_parm          IN  VARCHAR2
@@ -4206,10 +4271,24 @@ AS
       self.parm_undocumented    := p_parm_undocumented;
       self.swagger_path         := p_swagger_path;
       self.swagger_http_method  := p_swagger_http_method;
+      self.parameter_in_type    := p_parameter_in_type;
       self.path_param_sort      := p_path_param_sort;
       self.param_sort           := p_param_sort;
       self.inline_parm          := p_inline_parm;
       self.versionid            := p_versionid;
+      
+      IF self.parameter_in_type = 'query'
+      THEN
+         self.parameter_ref_id := 'q.' || self.swagger_parm;
+         
+      ELSIF self.parameter_in_type = 'formData'
+      THEN
+         self.parameter_ref_id := 'f.' || self.swagger_parm;
+         
+      ELSE
+         self.parameter_ref_id := self.swagger_parm;
+         
+      END IF;
       
       SELECT
        a.enum_value_string
@@ -4269,8 +4348,8 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 40
-      -- Add base attributes
+      -- Step 30
+      -- Add name attribute
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           ' ' || dz_json_main.value2json(
@@ -4279,15 +4358,25 @@ AS
             ,num_pretty_print + 1
          )
          ,p_pretty_print + 1
-      ) || dz_json_util.pretty(
-          ',' || dz_json_main.value2json(
+      );
+      
+      --------------------------------------------------------------------------
+      -- Step 40
+      -- Add in attribute
+      --------------------------------------------------------------------------
+      clb_output := clb_output || dz_json_util.pretty(
+         ',' || dz_json_main.value2json(
               'in'
-             ,'query'
+             ,self.parameter_in_type
              ,num_pretty_print + 1
           )
          ,p_pretty_print + 1
       );
       
+      --------------------------------------------------------------------------
+      -- Step 50
+      -- Add optional description
+      --------------------------------------------------------------------------     
       IF self.parm_description IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty(
@@ -4302,7 +4391,7 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 60
       -- Add optional enum array
       --------------------------------------------------------------------------
       IF self.parm_enums_string IS NOT NULL
@@ -4360,8 +4449,8 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 70
-      -- Add base attributes
+      -- Step 80
+      -- Add type attributes
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           ',' || dz_json_main.value2json(
@@ -4373,8 +4462,8 @@ AS
       );
       
       --------------------------------------------------------------------------
-      -- Step 70
-      -- Add base attributes
+      -- Step 90
+      -- Add required attribute
       --------------------------------------------------------------------------
       IF LOWER(self.parm_required) = 'true'
       THEN
@@ -4440,14 +4529,20 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 20
-      -- Write the yaml name to description
+      -- Write the yaml name attribute
       --------------------------------------------------------------------------
       clb_output := dz_json_util.pretty_str(
           str_pad || 'name: ' || dz_swagger_util.yaml_text(self.swagger_parm,num_pretty_print)
          ,p_pretty_print
          ,'  '
-      ) || dz_json_util.pretty_str(
-          'in: query'
+      );
+      
+      --------------------------------------------------------------------------
+      -- Step 30
+      -- Write the yaml in attribute 
+      --------------------------------------------------------------------------
+      clb_output := clb_output || dz_json_util.pretty_str(
+          'in: ' || dz_swagger_util.yaml_text(self.parameter_in_type,num_pretty_print)
          ,num_pretty_print
          ,'  '
       );
@@ -4958,6 +5053,11 @@ AS OBJECT (
    ,swagger_http_method VARCHAR2(255 Char)
    ,path_summary        VARCHAR2(4000 Char)
    ,path_description    VARCHAR2(4000 Char)
+   ,consumes_json       VARCHAR2(5 Char)
+   ,consumes_xml        VARCHAR2(5 Char)
+   ,consumes_form       VARCHAR2(5 Char)
+   ,produces_json       VARCHAR2(5 Char)
+   ,produces_xml        VARCHAR2(5 Char)
    ,method_path_parms   dz_swagger_parm_list
    ,method_tags         MDSYS.SDO_STRING2_ARRAY
    ,method_responses    dz_swagger_response_list
@@ -4974,6 +5074,11 @@ AS OBJECT (
       ,p_swagger_http_method IN  VARCHAR2
       ,p_path_summary        IN  VARCHAR2
       ,p_path_description    IN  VARCHAR2
+      ,p_consumes_json       IN  VARCHAR2
+      ,p_consumes_xml        IN  VARCHAR2
+      ,p_consumes_form       IN  VARCHAR2
+      ,p_produces_json       IN  VARCHAR2
+      ,p_produces_xml        IN  VARCHAR2
       ,p_versionid           IN  VARCHAR2
    ) RETURN SELF AS RESULT
     
@@ -5018,6 +5123,11 @@ AS
       ,p_swagger_http_method IN  VARCHAR2
       ,p_path_summary        IN  VARCHAR2
       ,p_path_description    IN  VARCHAR2
+      ,p_consumes_json       IN  VARCHAR2
+      ,p_consumes_xml        IN  VARCHAR2
+      ,p_consumes_form       IN  VARCHAR2
+      ,p_produces_json       IN  VARCHAR2
+      ,p_produces_xml        IN  VARCHAR2
       ,p_versionid           IN  VARCHAR2
    ) RETURN SELF AS RESULT 
    AS 
@@ -5027,6 +5137,11 @@ AS
       self.swagger_http_method := p_swagger_http_method;
       self.path_summary        := p_path_summary;
       self.path_description    := p_path_description;
+      self.consumes_json       := p_consumes_json;
+      self.consumes_xml        := p_consumes_xml;
+      self.consumes_form       := p_consumes_form;
+      self.produces_json       := p_produces_json;
+      self.produces_xml        := p_produces_xml;
       self.versionid           := p_versionid;
 
       RETURN; 
@@ -5039,14 +5154,18 @@ AS
        p_pretty_print     IN  NUMBER   DEFAULT NULL
    ) RETURN CLOB
    AS
-      num_pretty_print NUMBER := p_pretty_print;
-      clb_output       CLOB;
-      str_pad          VARCHAR2(1 Char);
-      str_pad1         VARCHAR2(1 Char);
-      str_pad2         VARCHAR2(1 Char);
-      str_pad3         VARCHAR2(1 Char);
-      str_parms        VARCHAR2(32000 Char);
-      str_temp         VARCHAR2(32000 Char);
+      num_pretty_print  NUMBER := p_pretty_print;
+      clb_output        CLOB;
+      str_pad           VARCHAR2(1 Char);
+      str_pad1          VARCHAR2(1 Char);
+      str_pad2          VARCHAR2(1 Char);
+      str_pad3          VARCHAR2(1 Char);
+      str_parms         VARCHAR2(32000 Char);
+      str_temp          VARCHAR2(32000 Char);
+      str_summary       VARCHAR2(32000 Char);
+      ary_consumes      MDSYS.SDO_STRING2_ARRAY;
+      ary_produces      MDSYS.SDO_STRING2_ARRAY;
+      int_index         PLS_INTEGER;
       
    BEGIN
       
@@ -5071,21 +5190,34 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 60
-      -- Add base attributes
+      -- Step 30
+      -- Add Summary attribute, note summary is required
       --------------------------------------------------------------------------
       str_pad1 := str_pad;
+      
+      IF self.path_summary IS NOT NULL
+      THEN
+         str_summary := self.path_summary;
+         
+      ELSE
+         str_summary := 'Placeholder';
+         
+      END IF;
       
       clb_output := clb_output || dz_json_util.pretty(
           str_pad1 || dz_json_main.value2json(
              'summary'
-            ,self.path_summary
+            ,str_summary
             ,num_pretty_print + 1
          )
          ,num_pretty_print + 1
       );
       str_pad1 := ',';
       
+      --------------------------------------------------------------------------
+      -- Step 40
+      -- Add optional description attribute
+      --------------------------------------------------------------------------
       IF self.path_description IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty(
@@ -5101,7 +5233,89 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 30
+      -- Step 50
+      -- Add optional consumes attribute
+      --------------------------------------------------------------------------
+      int_index := 0;
+      ary_consumes := MDSYS.SDO_STRING2_ARRAY();
+      IF self.consumes_json = 'TRUE'
+      THEN
+         int_index := int_index + 1;
+         ary_consumes.EXTEND();
+         ary_consumes(int_index) := 'application/json';
+
+      END IF;
+
+      IF self.consumes_xml = 'TRUE'
+      THEN
+         int_index := int_index + 1;
+         ary_consumes.EXTEND();
+         ary_consumes(int_index) := 'application/xml';
+
+      END IF;
+      
+      IF self.consumes_form = 'TRUE'
+      THEN
+         int_index := int_index + 1;
+         ary_consumes.EXTEND();
+         ary_consumes(int_index) := 'application/x-www-form-urlencoded';
+
+      END IF;
+
+      IF ary_consumes IS NOT NULL
+      AND ary_consumes.COUNT > 0
+      THEN
+         clb_output := clb_output || dz_json_util.pretty(
+             str_pad1 || dz_json_main.value2json(
+                 'consumes'
+                ,ary_consumes
+                ,num_pretty_print + 1
+             )
+            ,num_pretty_print + 1
+         );
+         str_pad1 := ',';
+
+      END IF;
+
+      --------------------------------------------------------------------------
+      -- Step 60
+      -- Add the optional produces array
+      --------------------------------------------------------------------------
+      int_index := 0;
+      ary_produces := MDSYS.SDO_STRING2_ARRAY();
+      IF self.produces_json = 'TRUE'
+      THEN
+         int_index := int_index + 1;
+         ary_produces.EXTEND();
+         ary_produces(int_index) := 'application/json';
+
+      END IF;
+
+      IF self.produces_xml = 'TRUE'
+      THEN
+         int_index := int_index + 1;
+         ary_produces.EXTEND();
+         ary_produces(int_index) := 'application/xml';
+
+      END IF;
+
+      IF ary_produces IS NOT NULL
+      AND ary_produces.COUNT > 0
+      THEN
+         clb_output := clb_output ||  dz_json_util.pretty(
+             str_pad1 || dz_json_main.value2json(
+                 'produces'
+                ,ary_produces
+                ,num_pretty_print + 1
+             )
+            ,num_pretty_print + 1
+         );
+         str_pad1 := ',';
+
+      END IF;
+      
+      --------------------------------------------------------------------------
+      -- Step 70
       -- Add parms array
       --------------------------------------------------------------------------
       IF self.method_path_parms IS NULL
@@ -5124,7 +5338,7 @@ AS
          FOR i IN 1 .. self.method_path_parms.COUNT
          LOOP
          
-            IF  self.method_path_parms(i).parm_undocumented = 'FALSE'
+            IF self.method_path_parms(i).parm_undocumented = 'FALSE'
             THEN
                IF self.method_path_parms(i).inline_parm = 'TRUE'
                THEN
@@ -5147,7 +5361,7 @@ AS
                   str_temp := str_temp || dz_json_util.pretty(
                      str_pad3 || dz_json_main.value2json(
                          '$ref'
-                        ,'#/parameters/' || self.method_path_parms(i).swagger_parm
+                        ,'#/parameters/' || self.method_path_parms(i).parameter_ref_id
                         ,num_pretty_print + 3
                      )
                      ,num_pretty_print + 3
@@ -5189,7 +5403,7 @@ AS
       END IF;
 
       --------------------------------------------------------------------------
-      -- Step 70
+      -- Step 80
       -- Add the optional tags
       --------------------------------------------------------------------------
       IF self.method_tags IS NOT NULL
@@ -5208,7 +5422,7 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 80
+      -- Step 90
       -- Add responses
       --------------------------------------------------------------------------
       IF self.method_responses IS NULL
@@ -5271,6 +5485,7 @@ AS
    AS
       clb_output        CLOB;
       num_pretty_print  NUMBER := p_pretty_print;
+      str_summary       VARCHAR2(32000 Char);
       
    BEGIN
       
@@ -5278,22 +5493,31 @@ AS
       -- Step 10
       -- Check incoming parameters
       --------------------------------------------------------------------------
+      clb_output := '';
       
       --------------------------------------------------------------------------
       -- Step 20
-      -- Do the optional elements
+      -- Add the required Summary attribute
       --------------------------------------------------------------------------
-      clb_output := '';
       IF self.path_summary IS NOT NULL
       THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             'summary: ' || dz_swagger_util.yaml_text(self.path_summary,num_pretty_print)
-            ,num_pretty_print
-            ,'  '
-         );
+         str_summary := self.path_summary;
+         
+      ELSE
+         str_summary := 'Placeholder';
          
       END IF;
-      
+ 
+      clb_output := clb_output || dz_json_util.pretty_str(
+          'summary: ' || dz_swagger_util.yaml_text(self.path_summary,num_pretty_print)
+         ,num_pretty_print
+         ,'  '
+      );
+
+      --------------------------------------------------------------------------
+      -- Step 30
+      -- Add the optional description attribute
+      --------------------------------------------------------------------------
       IF self.path_description IS NOT NULL
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
@@ -5305,7 +5529,88 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 30
+      -- Step 40
+      -- Add the consumes array
+      --------------------------------------------------------------------------
+      IF self.consumes_json = 'TRUE'
+      OR self.consumes_xml = 'TRUE'
+      OR self.consumes_form = 'TRUE'
+      THEN
+         clb_output := clb_output || dz_json_util.pretty_str(
+             'consumes: '
+            ,0
+            ,'  '
+         );
+
+         IF self.consumes_json = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/json'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+
+         IF self.consumes_xml = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/xml'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
+         IF self.consumes_form = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/x-www-form-urlencoded'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
+      END IF;
+
+      --------------------------------------------------------------------------
+      -- Step 50
+      -- Add the produces array
+      --------------------------------------------------------------------------
+      IF self.produces_json = 'TRUE'
+      OR self.produces_xml  = 'TRUE'
+      THEN
+         clb_output := clb_output || dz_json_util.pretty_str(
+             'produces: '
+            ,0
+            ,'  '
+         );
+
+         IF self.produces_json = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/json'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+
+         IF self.produces_xml = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/xml'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
+      END IF;
+      
+      --------------------------------------------------------------------------
+      -- Step 60
       -- Do the parameter array
       --------------------------------------------------------------------------
       IF  self.method_path_parms IS NOT NULL
@@ -5330,7 +5635,7 @@ AS
                   
                ELSE
                   clb_output := clb_output || dz_json_util.pretty(
-                      '- "$ref": "#/parameters/' || self.method_path_parms(i).swagger_parm || '"'
+                      '- "$ref": "#/parameters/' || self.method_path_parms(i).parameter_ref_id || '"'
                      ,num_pretty_print
                      ,'  '
                   );
@@ -5344,7 +5649,7 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 40
+      -- Step 70
       -- Do the tags array
       --------------------------------------------------------------------------
       IF  self.method_tags IS NOT NULL
@@ -5369,7 +5674,7 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 80
       -- Do the responses array
       --------------------------------------------------------------------------
       IF  self.method_responses IS NOT NULL
@@ -5396,7 +5701,7 @@ AS
       END IF;
           
       --------------------------------------------------------------------------
-      -- Step 110
+      -- Step 90
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN clb_output;
@@ -5424,9 +5729,11 @@ PROMPT DZ_SWAGGER_PATH_TYP.tps;
 CREATE OR REPLACE TYPE dz_swagger_path_typ FORCE
 AUTHID DEFINER 
 AS OBJECT (
-    versionid         VARCHAR2(40 Char)
-   ,swagger_path      VARCHAR2(255 Char)
-   ,swagger_methods   dz_swagger_method_list
+    versionid           VARCHAR2(40 Char)
+   ,swagger_path        VARCHAR2(255 Char)
+   ,path_summary        VARCHAR2(4000 Char)
+   ,path_description    VARCHAR2(4000 Char)
+   ,swagger_methods     dz_swagger_method_list
   
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
@@ -5436,8 +5743,10 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,CONSTRUCTOR FUNCTION dz_swagger_path_typ(
-       p_swagger_path        IN VARCHAR2
-      ,p_versionid          IN  VARCHAR2
+       p_swagger_path        IN  VARCHAR2
+      ,p_path_summary        IN  VARCHAR2
+      ,p_path_description    IN  VARCHAR2
+      ,p_versionid           IN  VARCHAR2
    ) RETURN SELF AS RESULT
     
    -----------------------------------------------------------------------------
@@ -5478,14 +5787,18 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    CONSTRUCTOR FUNCTION dz_swagger_path_typ(
-       p_swagger_path        IN VARCHAR2
-      ,p_versionid          IN  VARCHAR2
+       p_swagger_path        IN  VARCHAR2
+      ,p_path_summary        IN  VARCHAR2
+      ,p_path_description    IN  VARCHAR2
+      ,p_versionid           IN  VARCHAR2
    ) RETURN SELF AS RESULT 
    AS 
    BEGIN 
    
-      self.swagger_path := p_swagger_path;
-      self.versionid    := p_versionid;
+      self.swagger_path     := p_swagger_path;
+      self.path_summary     := p_path_summary;
+      self.path_description := p_path_description;
+      self.versionid        := p_versionid;
       
       RETURN; 
       
@@ -5544,36 +5857,15 @@ AS
       ELSE
          FOR i IN 1 .. self.swagger_methods.COUNT
          LOOP
-            IF self.swagger_methods(i).swagger_http_method = 'get/post'
-            THEN
-               clb_output := clb_output || dz_json_util.pretty(
-                   str_pad1 || '"get": ' || self.swagger_methods(i).toJSON(
-                     p_pretty_print => num_pretty_print + 1
-                  )
-                  ,num_pretty_print + 1
-               );     
-               str_pad1 := ',';
-               
-               clb_output := clb_output || dz_json_util.pretty(
-                   str_pad1 || '"post": ' || self.swagger_methods(i).toJSON(
-                      p_pretty_print => num_pretty_print + 1
-                  )
-                  ,num_pretty_print + 1
-               );     
-               str_pad1 := ',';
-         
-            ELSE
-               clb_output := clb_output || dz_json_util.pretty(
-                   str_pad1 || dz_json_main.json_format(
-                     self.swagger_methods(i).swagger_http_method
-                  ) || ': ' || self.swagger_methods(i).toJSON(
-                     p_pretty_print => num_pretty_print + 1
-                  )
-                  ,num_pretty_print + 1
-               );     
-               str_pad1 := ',';
-               
-            END IF;
+            clb_output := clb_output || dz_json_util.pretty(
+                str_pad1 || dz_json_main.json_format(
+                  self.swagger_methods(i).swagger_http_method
+               ) || ': ' || self.swagger_methods(i).toJSON(
+                  p_pretty_print => num_pretty_print + 1
+               )
+               ,num_pretty_print + 1
+            );     
+            str_pad1 := ',';
 
          END LOOP;
 
@@ -5625,32 +5917,11 @@ AS
       ELSE
          FOR i IN 1 .. self.swagger_methods.COUNT
          LOOP
-            IF self.swagger_methods(i).swagger_http_method = 'get/post'
-            THEN
-               clb_output := clb_output || dz_json_util.pretty(
-                   'get: '
-                  ,num_pretty_print
-                  ,'  '
-               ) || self.swagger_methods(i).toYAML(
-                  p_pretty_print => num_pretty_print + 1   
-               );
-               
-               clb_output := clb_output || dz_json_util.pretty(
-                   'post: '
-                  ,num_pretty_print
-                  ,'  '
-               ) || self.swagger_methods(i).toYAML(
-                  p_pretty_print => num_pretty_print + 1
-               );
-            
-            ELSE
-               clb_output := clb_output || dz_json_util.pretty(
-                   self.swagger_methods(i).swagger_http_method || ': '
-                  ,num_pretty_print
-                  ,'  '
-               ) || self.swagger_methods(i).toYAML(num_pretty_print + 1);
-               
-            END IF;
+            clb_output := clb_output || dz_json_util.pretty(
+                self.swagger_methods(i).swagger_http_method || ': '
+               ,num_pretty_print
+               ,'  '
+            ) || self.swagger_methods(i).toYAML(num_pretty_print + 1);
             
          END LOOP;
 
@@ -5887,6 +6158,7 @@ AS OBJECT (
    ,schemes_https       VARCHAR2(5 Char)
    ,consumes_json       VARCHAR2(5 Char)
    ,consumes_xml        VARCHAR2(5 Char)
+   ,consumes_form       VARCHAR2(5 Char)
    ,produces_json       VARCHAR2(5 Char)
    ,produces_xml        VARCHAR2(5 Char)
    ,swagger_paths       dz_swagger_path_list
@@ -5916,6 +6188,7 @@ AS OBJECT (
       ,p_schemes_https       IN  VARCHAR2
       ,p_consumes_json       IN  VARCHAR2
       ,p_consumes_xml        IN  VARCHAR2
+      ,p_consumes_form       IN  VARCHAR2
       ,p_produces_json       IN  VARCHAR2
       ,p_produces_xml        IN  VARCHAR2
       ,p_versionid           IN  VARCHAR2
@@ -6025,7 +6298,7 @@ AS
           p_path_group_id       => str_path_group_id
          ,p_swagger_info        => dz_swagger_info(
              p_info_title          => a.info_title
-            ,p_info_description    => a.info_description
+            ,p_info_description    => REGEXP_REPLACE(a.info_description,'(' || CHR(10) || '|' || CHR(13) || ')$','')
             ,p_info_termsofservice => a.info_termsofservice
             ,p_info_contact        => dz_swagger_info_contact(
                 p_contact_name     => a.info_contact_name
@@ -6043,6 +6316,7 @@ AS
          ,p_schemes_https       => a.schemes_https
          ,p_consumes_json       => a.consumes_json
          ,p_consumes_xml        => a.consumes_xml
+         ,p_consumes_form       => a.consumes_form
          ,p_produces_json       => a.produces_json
          ,p_produces_xml        => a.produces_xml
          ,p_versionid           => a.versionid
@@ -6068,6 +6342,7 @@ AS
       ,p_schemes_https       IN  VARCHAR2
       ,p_consumes_json       IN  VARCHAR2
       ,p_consumes_xml        IN  VARCHAR2
+      ,p_consumes_form       IN  VARCHAR2
       ,p_produces_json       IN  VARCHAR2
       ,p_produces_xml        IN  VARCHAR2
       ,p_versionid           IN  VARCHAR2
@@ -6095,6 +6370,7 @@ AS
       self.schemes_https       := p_schemes_https;
       self.consumes_json       := p_consumes_json;
       self.consumes_xml        := p_consumes_xml;
+      self.consumes_form       := p_consumes_form;
       self.produces_json       := p_produces_json;
       self.produces_xml        := p_produces_xml;
       self.versionid           := p_versionid;
@@ -6124,8 +6400,10 @@ AS
       -- Pull the list of paths
       --------------------------------------------------------------------------
       SELECT dz_swagger_path_typ(
-          p_swagger_path => a.swagger_path
-         ,p_versionid    => a.versionid
+          p_swagger_path     => a.swagger_path
+         ,p_path_summary     => MAX(a.path_summary)
+         ,p_path_description => MAX(a.path_description)
+         ,p_versionid        => a.versionid
       )
       BULK COLLECT INTO
       self.swagger_paths
@@ -6159,8 +6437,13 @@ AS
          SELECT dz_swagger_method_typ(
              p_swagger_path        => a.swagger_path
             ,p_swagger_http_method => a.swagger_http_method
-            ,p_path_summary        => a.path_summary
-            ,p_path_description    => a.path_description
+            ,p_path_summary        => self.swagger_paths(i).path_summary
+            ,p_path_description    => self.swagger_paths(i).path_description
+            ,p_consumes_json       => a.consumes_json
+            ,p_consumes_xml        => a.consumes_xml
+            ,p_consumes_form       => a.consumes_form
+            ,p_produces_json       => a.produces_json
+            ,p_produces_xml        => a.produces_xml
             ,p_versionid           => a.versionid
          )
          BULK COLLECT INTO
@@ -6170,24 +6453,19 @@ AS
              aa.versionid
             ,aa.swagger_path
             ,aa.swagger_http_method
-            ,aa.path_summary
-            ,aa.path_description
-            ,ROW_NUMBER() OVER (
-               PARTITION BY
-                aa.versionid
-               ,aa.swagger_path
-               ,aa.swagger_http_method
-               ORDER BY
-                aa.path_order
-            ) AS rn
+            ,aa.consumes_json
+            ,aa.consumes_xml
+            ,aa.consumes_form
+            ,aa.produces_json
+            ,aa.produces_xml
             FROM
-            dz_swagger_path aa
+            dz_swagger_path_method aa
             WHERE
                 aa.versionid    = self.swagger_paths(i).versionid
             AND aa.swagger_path = self.swagger_paths(i).swagger_path
          ) a
-         WHERE
-         a.rn = 1;
+         ORDER BY
+         a.swagger_http_method;
 
       END LOOP;
 
@@ -6198,7 +6476,7 @@ AS
       SELECT dz_swagger_parm_typ(
           p_swagger_parm_id      => a.swagger_parm_id
          ,p_swagger_parm         => a.swagger_parm
-         ,p_parm_description     => a.parm_description
+         ,p_parm_description     => REGEXP_REPLACE(a.parm_description,'(' || CHR(10) || '|' || CHR(13) || ')$','')
          ,p_parm_type            => a.parm_type
          ,p_parm_default_string  => a.parm_default_string
          ,p_parm_default_number  => a.parm_default_number
@@ -6206,6 +6484,7 @@ AS
          ,p_parm_undocumented    => a.parm_undocumented
          ,p_swagger_path         => a.swagger_path
          ,p_swagger_http_method  => a.swagger_http_method
+         ,p_parameter_in_type    => a.parameter_in_type
          ,p_path_param_sort      => a.path_param_sort
          ,p_param_sort           => a.param_sort
          ,p_inline_parm          => a.parm_move_inline
@@ -6225,6 +6504,7 @@ AS
             ,bb.parm_undocumented
             ,aa.swagger_path
             ,aa.swagger_http_method
+            ,aa.parameter_in_type
             ,aa.path_param_sort
             ,bb.param_sort
             ,bb.versionid
@@ -6255,6 +6535,7 @@ AS
          ,bb.parm_undocumented
          ,bb.swagger_path
          ,bb.swagger_http_method
+         ,bb.parameter_in_type
          ,bb.path_param_sort
          ,bb.param_sort
          ,CASE WHEN cc.parm_count > 1
@@ -6269,22 +6550,27 @@ AS
          JOIN (
             SELECT
              ccc.swagger_parm
+            ,ccc.swagger_http_method
             ,COUNT(*) AS parm_count
             FROM (
                SELECT
                 cccc.swagger_parm_id
                ,cccc.swagger_parm
+               ,cccc.swagger_http_method
                FROM
                parms cccc
                GROUP BY
                 cccc.swagger_parm_id
                ,cccc.swagger_parm
+               ,cccc.swagger_http_method
             ) ccc
             GROUP BY
-            ccc.swagger_parm
+             ccc.swagger_parm
+            ,ccc.swagger_http_method
          ) cc
          ON
-         bb.swagger_parm = cc.swagger_parm
+             bb.swagger_parm        = cc.swagger_parm
+         AND bb.swagger_http_method = cc.swagger_http_method
       ) a;
 
       --------------------------------------------------------------------------
@@ -6306,6 +6592,7 @@ AS
                ,p_parm_undocumented    => a.parm_undocumented
                ,p_swagger_path         => a.swagger_path
                ,p_swagger_http_method  => a.swagger_http_method
+               ,p_parameter_in_type    => a.parameter_in_type
                ,p_path_param_sort      => a.path_param_sort
                ,p_param_sort           => a.param_sort
                ,p_inline_parm          => a.inline_parm
@@ -6329,8 +6616,7 @@ AS
             dz_swagger_path_tags a
             WHERE
                 a.versionid           = self.swagger_paths(i).swagger_methods(j).versionid
-            AND a.swagger_path        = self.swagger_paths(i).swagger_methods(j).swagger_path
-            AND a.swagger_http_method = self.swagger_paths(i).swagger_methods(j).swagger_http_method;
+            AND a.swagger_path        = self.swagger_paths(i).swagger_methods(j).swagger_path;
 
             SELECT dz_swagger_response_typ(
                 p_swagger_path         => a.swagger_path
@@ -6369,6 +6655,7 @@ AS
          ,p_parm_undocumented    => MAX(a.parm_undocumented)
          ,p_swagger_path         => NULL
          ,p_swagger_http_method  => NULL
+         ,p_parameter_in_type    => a.parameter_in_type
          ,p_path_param_sort      => NULL
          ,p_param_sort           => MAX(a.param_sort)
          ,p_inline_parm          => 'FALSE'
@@ -6382,6 +6669,7 @@ AS
       GROUP BY
        a.versionid
       ,a.swagger_parm_id
+      ,a.parameter_in_type
       ORDER BY
       MAX(a.param_sort);
 
@@ -6399,6 +6687,7 @@ AS
          ,p_xml_name            => a.xml_name
          ,p_xml_namespace       => a.xml_namespace
          ,p_xml_prefix          => a.xml_prefix
+         ,p_xml_wrapped         => a.xml_wrapped
          ,p_versionid           => a.versionid
       )
       BULK COLLECT INTO def_pool
@@ -6411,6 +6700,7 @@ AS
          ,aa.xml_name
          ,aa.xml_namespace
          ,aa.xml_prefix
+         ,aa.xml_wrapped
          ,aa.versionid
          FROM (
             SELECT
@@ -6421,6 +6711,7 @@ AS
             ,aaa.xml_name
             ,aaa.xml_namespace
             ,aaa.xml_prefix
+            ,aaa.xml_wrapped
             ,aaa.versionid
             FROM
             dz_swagger_definition aaa
@@ -6441,6 +6732,7 @@ AS
             ,aaa.xml_name
             ,aaa.xml_namespace
             ,aaa.xml_prefix
+            ,aaa.xml_wrapped
             ,aaa.versionid
             FROM
             dz_swagger_definition aaa
@@ -6491,7 +6783,7 @@ AS
             ,p_property_type	      => b.property_type
             ,p_property_format      => b.property_format
             ,p_property_allow_null  => b.property_allow_null
-            ,p_property_title       => b.property_title
+            ,p_property_title       => REGEXP_REPLACE(b.property_title,'(' || CHR(10) || '|' || CHR(13) || ')$','')
             ,p_property_exp_string  => b.property_exp_string
             ,p_property_exp_number  => b.property_exp_number
             ,p_property_description => b.property_description
@@ -6549,6 +6841,7 @@ AS
                      ,p_xml_name            => a.xml_name
                      ,p_xml_namespace       => a.xml_namespace
                      ,p_xml_prefix          => a.xml_prefix
+                     ,p_xml_wrapped         => a.xml_wrapped
                      ,p_versionid           => a.versionid
                      ,p_swagger_properties  => a.swagger_properties
                   )
@@ -6586,6 +6879,7 @@ AS
          ,p_xml_name            => a.xml_name
          ,p_xml_namespace       => a.xml_namespace
          ,p_xml_prefix          => a.xml_prefix
+         ,p_xml_wrapped         => a.xml_wrapped
          ,p_versionid           => a.versionid
          ,p_swagger_properties  => a.swagger_properties
       )
@@ -6852,6 +7146,14 @@ AS
          ary_consumes(int_index) := 'application/xml';
 
       END IF;
+      
+      IF self.consumes_form = 'TRUE'
+      THEN
+         int_index := int_index + 1;
+         ary_consumes.EXTEND();
+         ary_consumes(int_index) := 'application/x-www-form-urlencoded';
+
+      END IF;
 
       IF ary_consumes IS NOT NULL
       AND ary_consumes.COUNT > 0
@@ -6928,7 +7230,7 @@ AS
             AND self.swagger_parms(i).parm_undocumented = 'FALSE'
             THEN
                clb_output := clb_output || dz_json_util.pretty(
-                   str_pad2 || '"' || self.swagger_parms(i).swagger_parm || '": ' || self.swagger_parms(i).toJSON(
+                   str_pad2 || '"' || self.swagger_parms(i).parameter_ref_id || '": ' || self.swagger_parms(i).toJSON(
                       p_pretty_print => num_pretty_print + 2
                    )
                   ,num_pretty_print + 2
@@ -7119,14 +7421,14 @@ AS
       -- Step 50
       -- Add the schemes array
       --------------------------------------------------------------------------
-      clb_output := clb_output || dz_json_util.pretty_str(
-          'schemes: '
-         ,0
-         ,'  '
-      );
-
       IF self.schemes_https = 'TRUE'
       THEN
+         clb_output := clb_output || dz_json_util.pretty_str(
+             'schemes: '
+            ,0
+            ,'  '
+         );
+         
          clb_output := clb_output || dz_json_util.pretty_str(
              '- https'
             ,0
@@ -7139,60 +7441,81 @@ AS
       -- Step 60
       -- Add the consumes array
       --------------------------------------------------------------------------
-      clb_output := clb_output || dz_json_util.pretty_str(
-          'consumes: '
-         ,0
-         ,'  '
-      );
-
       IF self.consumes_json = 'TRUE'
+      OR self.consumes_xml = 'TRUE'
+      OR self.consumes_form = 'TRUE'
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
-             '- application/json'
+             'consumes: '
             ,0
             ,'  '
          );
 
-      END IF;
+         IF self.consumes_json = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/json'
+               ,0
+               ,'  '
+            );
 
-      IF self.consumes_xml = 'TRUE'
-      THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             '- application/xml'
-            ,0
-            ,'  '
-         );
+         END IF;
 
+         IF self.consumes_xml = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/xml'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
+         IF self.consumes_form = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/x-www-form-urlencoded'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
       END IF;
 
       --------------------------------------------------------------------------
       -- Step 70
       -- Add the produces array
       --------------------------------------------------------------------------
-      clb_output := clb_output || dz_json_util.pretty_str(
-          'produces: '
-         ,0
-         ,'  '
-      );
-
       IF self.produces_json = 'TRUE'
+      OR self.produces_xml  = 'TRUE'
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
-             '- application/json'
+             'produces: '
             ,0
             ,'  '
          );
 
-      END IF;
+         IF self.produces_json = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/json'
+               ,0
+               ,'  '
+            );
 
-      IF self.produces_xml = 'TRUE'
-      THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             '- application/xml'
-            ,0
-            ,'  '
-         );
+         END IF;
 
+         IF self.produces_xml = 'TRUE'
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                '- application/xml'
+               ,0
+               ,'  '
+            );
+
+         END IF;
+         
       END IF;
 
       --------------------------------------------------------------------------
@@ -7214,7 +7537,7 @@ AS
             AND self.swagger_parms(i).parm_undocumented = 'FALSE'
             THEN
                clb_output := clb_output || dz_json_util.pretty(
-                   self.swagger_parms(i).swagger_parm || ': '
+                   self.swagger_parms(i).parameter_ref_id || ': '
                   ,1
                   ,'  '
                ) || self.swagger_parms(i).toYAML(2);
@@ -8526,10 +8849,10 @@ CREATE OR REPLACE PACKAGE dz_swagger_test
 AUTHID DEFINER
 AS
 
-   C_CHANGESET CONSTANT VARCHAR2(255 Char) := '16c33c167a8252e85c450484419f951f9d2f57e6';
+   C_CHANGESET CONSTANT VARCHAR2(255 Char) := '1d251a21c93b9920f301fc770f798c03883297d4';
    C_JENKINS_JOBNM CONSTANT VARCHAR2(255 Char) := 'DZ_SWAGGER';
-   C_JENKINS_BUILD CONSTANT NUMBER := 19;
-   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '19';
+   C_JENKINS_BUILD CONSTANT NUMBER := 25;
+   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '25';
    
    C_PREREQUISITES CONSTANT MDSYS.SDO_STRING2_ARRAY := MDSYS.SDO_STRING2_ARRAY(
       'DZ_JSON'
