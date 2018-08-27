@@ -16,6 +16,7 @@ AS
    CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
+      ,p_definition_title     IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_xml_name             IN  VARCHAR2
@@ -29,6 +30,7 @@ AS
    
       self.definition           := p_definition;
       self.definition_type      := p_definition_type;
+      self.definition_title     := p_definition_title;
       self.definition_desc      := p_definition_desc;
       self.inline_def           := p_inline_def;
       self.xml_name             := TRIM(p_xml_name);
@@ -46,6 +48,7 @@ AS
    CONSTRUCTOR FUNCTION dz_swagger_definition_typ(
        p_definition           IN  VARCHAR2
       ,p_definition_type      IN  VARCHAR2
+      ,p_definition_title     IN  VARCHAR2
       ,p_definition_desc      IN  VARCHAR2
       ,p_inline_def           IN  VARCHAR2
       ,p_xml_name             IN  VARCHAR2
@@ -60,6 +63,7 @@ AS
    
       self.definition           := p_definition;
       self.definition_type      := p_definition_type;
+      self.definition_title     := p_definition_title;
       self.definition_desc      := p_definition_desc;
       self.inline_def           := p_inline_def;
       self.xml_name             := TRIM(p_xml_name);
@@ -135,6 +139,24 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 40
+      -- Add optional title object
+      --------------------------------------------------------------------------
+      IF self.definition_title IS NOT NULL
+      THEN
+         clb_output := clb_output || dz_json_util.pretty(
+             str_pad1 || dz_json_main.value2json(
+                'title'
+               ,self.definition_title
+               ,num_pretty_print + 1
+            )
+            ,num_pretty_print + 1
+         );
+         str_pad1 := ',';
+      
+      END IF;
+      
+      --------------------------------------------------------------------------
+      -- Step 50
       -- Add optional description object
       --------------------------------------------------------------------------
       IF self.definition_desc IS NOT NULL
@@ -152,7 +174,7 @@ AS
       END IF;
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 60
       -- Add optional xml object
       --------------------------------------------------------------------------
       IF str_jsonschema = 'FALSE'
@@ -183,7 +205,7 @@ AS
       END IF;
   
       --------------------------------------------------------------------------
-      -- Step 60
+      -- Step 70
       -- Add properties
       --------------------------------------------------------------------------
       IF self.swagger_properties IS NULL
@@ -230,7 +252,7 @@ AS
          str_pad1 := ',';
          
       --------------------------------------------------------------------------
-      -- Step 70
+      -- Step 80
       -- Add properties required array
       --------------------------------------------------------------------------
          IF ary_required IS NOT NULL
@@ -251,7 +273,7 @@ AS
       END IF;
         
       --------------------------------------------------------------------------
-      -- Step 80
+      -- Step 90
       -- Add the left bracket
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
@@ -260,7 +282,7 @@ AS
       );
       
       --------------------------------------------------------------------------
-      -- Step 90
+      -- Step 100
       -- Cough it out
       --------------------------------------------------------------------------
       RETURN clb_output;
@@ -296,6 +318,20 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 30
+      -- Add optional title object
+      --------------------------------------------------------------------------
+      IF self.definition_title IS NOT NULL
+      THEN
+         clb_output := dz_json_util.pretty_str(
+             'title: ' || self.definition_title
+            ,num_pretty_print
+            ,'  '
+         );
+      
+      END IF;
+      
+      --------------------------------------------------------------------------
+      -- Step 40
       -- Add optional description object
       --------------------------------------------------------------------------
       IF self.definition_desc IS NOT NULL
@@ -307,9 +343,9 @@ AS
          );
       
       END IF;
-      
+
       --------------------------------------------------------------------------
-      -- Step 40
+      -- Step 50
       -- Add optional xml object
       --------------------------------------------------------------------------
       IF self.xml_name      IS NOT NULL
@@ -332,7 +368,7 @@ AS
       END IF; 
       
       --------------------------------------------------------------------------
-      -- Step 50
+      -- Step 60
       -- Add the properties
       --------------------------------------------------------------------------
       boo_required := FALSE;

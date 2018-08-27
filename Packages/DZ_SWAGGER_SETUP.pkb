@@ -78,11 +78,12 @@ AS
       
       --------------------------------------------------------------------------
       -- Step 30
-      -- Build DEF ATTR table
+      -- Build DEFINITION table
       --------------------------------------------------------------------------
       str_sql := 'CREATE TABLE dz_swagger_definition('
               || '    definition              VARCHAR2(255 Char) NOT NULL '
               || '   ,definition_type         VARCHAR2(255 Char) NOT NULL '
+              || '   ,definition_title        VARCHAR2(255 Char) '
               || '   ,definition_desc         VARCHAR2(4000 Char) '
               || '   ,definition_desc_updated DATE '
               || '   ,definition_desc_author  VARCHAR2(30 Char) '
@@ -131,7 +132,7 @@ AS
    
       --------------------------------------------------------------------------
       -- Step 40
-      -- Build DEF table
+      -- Build DEF_PROP table
       --------------------------------------------------------------------------
       str_sql := 'CREATE TABLE dz_swagger_def_prop('
               || '    definition          VARCHAR2(255 Char) NOT NULL '

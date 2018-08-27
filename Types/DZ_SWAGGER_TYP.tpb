@@ -454,6 +454,7 @@ AS
       SELECT dz_swagger_definition_typ(
           p_definition          => a.definition
          ,p_definition_type     => a.definition_type
+         ,p_definition_title    => a.definition_title
          ,p_definition_desc     => a.definition_desc
          ,p_inline_def          => a.inline_def
          ,p_xml_name            => a.xml_name
@@ -467,6 +468,7 @@ AS
          SELECT
           aa.definition
          ,aa.definition_type
+         ,aa.definition_title
          ,aa.definition_desc
          ,aa.inline_def
          ,aa.xml_name
@@ -478,6 +480,7 @@ AS
             SELECT
              aaa.definition
             ,aaa.definition_type
+            ,aaa.definition_title
             ,aaa.definition_desc
             ,'TRUE' AS inline_def
             ,aaa.xml_name
@@ -499,6 +502,7 @@ AS
             UNION ALL SELECT
              aaa.definition
             ,aaa.definition_type
+            ,aaa.definition_title
             ,aaa.definition_desc
             ,'FALSE' AS inline_def
             ,aaa.xml_name
@@ -608,6 +612,7 @@ AS
                   SELECT dz_swagger_definition_typ(
                       p_definition          => a.definition
                      ,p_definition_type     => a.definition_type
+                     ,p_definition_title    => a.definition_title
                      ,p_definition_desc     => a.definition_desc
                      ,p_inline_def          => a.inline_def
                      ,p_xml_name            => a.xml_name
@@ -646,6 +651,7 @@ AS
       dz_swagger_definition_typ(
           p_definition          => a.definition
          ,p_definition_type     => a.definition_type
+         ,p_definition_title    => a.definition_title
          ,p_definition_desc     => a.definition_desc
          ,p_inline_def          => a.inline_def
          ,p_xml_name            => a.xml_name
