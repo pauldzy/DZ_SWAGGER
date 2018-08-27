@@ -17,8 +17,8 @@ AS
    /*
    Header: DZ_SWAGGER
      
-   - Build ID: 25
-   - Change Set: 1d251a21c93b9920f301fc770f798c03883297d4
+   - Build ID: 26
+   - Change Set: 6623efb806c042b085ec602724479a90527ee1e7
    
    PLSQL module for the creation, storage and production of Open API service 
    definitions.   Support for the unloading of Swagger JSON specifications into
@@ -8440,17 +8440,22 @@ $END
           aa.versionid
          ,MAX(aa.path_group_id) AS path_group_id
          ,aa.swagger_path
-         ,aa.swagger_http_method
+         ,bb.swagger_http_method
          ,aa.object_owner
          ,aa.object_name
          ,aa.procedure_name
          ,aa.object_overload
          FROM
          dz_swagger_path aa
+         JOIN
+         dz_swagger_path_method bb
+         ON
+             aa.versionid = bb.versionid
+         AND aa.swagger_path = bb.swagger_path
          GROUP BY
           aa.versionid
          ,aa.swagger_path
-         ,aa.swagger_http_method
+         ,bb.swagger_http_method
          ,aa.object_owner
          ,aa.object_name
          ,aa.procedure_name
@@ -8849,10 +8854,10 @@ CREATE OR REPLACE PACKAGE dz_swagger_test
 AUTHID DEFINER
 AS
 
-   C_CHANGESET CONSTANT VARCHAR2(255 Char) := '1d251a21c93b9920f301fc770f798c03883297d4';
+   C_CHANGESET CONSTANT VARCHAR2(255 Char) := '6623efb806c042b085ec602724479a90527ee1e7';
    C_JENKINS_JOBNM CONSTANT VARCHAR2(255 Char) := 'DZ_SWAGGER';
-   C_JENKINS_BUILD CONSTANT NUMBER := 25;
-   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '25';
+   C_JENKINS_BUILD CONSTANT NUMBER := 26;
+   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '26';
    
    C_PREREQUISITES CONSTANT MDSYS.SDO_STRING2_ARRAY := MDSYS.SDO_STRING2_ARRAY(
       'DZ_JSON'
