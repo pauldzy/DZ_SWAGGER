@@ -756,6 +756,7 @@ AS
          ,'DZ_SWAGGER_PARM'
          ,'DZ_SWAGGER_PARM_ENUM'
          ,'DZ_SWAGGER_PATH'
+         ,'DZ_SWAGGER_PATH_METHOD'
          ,'DZ_SWAGGER_PATH_PARM'
          ,'DZ_SWAGGER_PATH_RESP'
          ,'DZ_SWAGGER_PATH_TAGS'
