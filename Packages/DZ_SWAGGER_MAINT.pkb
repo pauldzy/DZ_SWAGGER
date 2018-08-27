@@ -754,17 +754,22 @@ $END
           aa.versionid
          ,MAX(aa.path_group_id) AS path_group_id
          ,aa.swagger_path
-         ,aa.swagger_http_method
+         ,bb.swagger_http_method
          ,aa.object_owner
          ,aa.object_name
          ,aa.procedure_name
          ,aa.object_overload
          FROM
          dz_swagger_path aa
+         JOIN
+         dz_swagger_path_method bb
+         ON
+             aa.versionid = bb.versionid
+         AND aa.swagger_path = bb.swagger_path
          GROUP BY
           aa.versionid
          ,aa.swagger_path
-         ,aa.swagger_http_method
+         ,bb.swagger_http_method
          ,aa.object_owner
          ,aa.object_name
          ,aa.procedure_name
