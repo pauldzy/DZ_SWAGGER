@@ -404,7 +404,7 @@ AS
       END IF;
  
       clb_output := clb_output || dz_json_util.pretty_str(
-          'summary: ' || dz_swagger_util.yaml_text(self.path_summary,num_pretty_print)
+          'summary: ' || dz_swagger_util.yaml_text(str_summary,num_pretty_print)
          ,num_pretty_print
          ,'  '
       );
