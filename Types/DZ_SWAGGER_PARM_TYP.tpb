@@ -346,7 +346,7 @@ AS
          LOOP
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- ' || dz_swagger_util.yaml_text(self.parm_enums_string(i),num_pretty_print)
-               ,num_pretty_print
+               ,num_pretty_print + 1
                ,'  '
             );
          

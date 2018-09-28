@@ -419,7 +419,7 @@ AS
                THEN
                   clb_output := clb_output || dz_json_util.pretty_str(
                       '- ' || self.swagger_properties(i).property
-                     ,num_pretty_print
+                     ,num_pretty_print + 1
                      ,'  '
                   );
                   

@@ -441,7 +441,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/json'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -451,7 +451,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/xml'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -461,7 +461,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/x-www-form-urlencoded'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -486,7 +486,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/json'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -496,7 +496,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/xml'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -524,14 +524,14 @@ AS
                IF self.method_path_parms(i).inline_parm = 'TRUE'
                THEN
                   clb_output := clb_output || self.method_path_parms(i).toYAML(
-                      num_pretty_print
+                      num_pretty_print + 1
                      ,'TRUE'
                   );
                   
                ELSE
                   clb_output := clb_output || dz_json_util.pretty(
                       '- "$ref": "#/parameters/' || self.method_path_parms(i).parameter_ref_id || '"'
-                     ,num_pretty_print
+                     ,num_pretty_print + 1
                      ,'  '
                   );
                
@@ -560,7 +560,7 @@ AS
          LOOP 
             clb_output := clb_output || dz_json_util.pretty(
                 '- ' || dz_swagger_util.yaml_text(self.method_tags(i),num_pretty_print)
-               ,num_pretty_print
+               ,num_pretty_print + 1
                ,'  '
             );
          

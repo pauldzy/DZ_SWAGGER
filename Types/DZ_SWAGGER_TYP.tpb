@@ -1209,7 +1209,7 @@ AS
          
          clb_output := clb_output || dz_json_util.pretty_str(
              '- https'
-            ,0
+            ,1
             ,'  '
          );
 
@@ -1233,7 +1233,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/json'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -1243,7 +1243,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/xml'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -1253,7 +1253,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/x-www-form-urlencoded'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -1278,7 +1278,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/json'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -1288,7 +1288,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/xml'
-               ,0
+               ,1
                ,'  '
             );
 
