@@ -1,13 +1,9 @@
---
---*************************--
-PROMPT sqlplus_header.sql;
-
 WHENEVER SQLERROR EXIT -99;
 WHENEVER OSERROR  EXIT -98;
 SET DEFINE OFF;
---
---*************************--
-PROMPT DZ_SWAGGER_CONSTANTS.pks;
+
+--******************************--
+PROMPT Packages/DZ_SWAGGER_CONSTANTS.pks 
 
 CREATE OR REPLACE PACKAGE dz_swagger_constants
 AUTHID DEFINER
@@ -17,8 +13,8 @@ AS
    /*
    Header: DZ_SWAGGER
      
-   - Build ID: 28
-   - Change Set: c52f543f37b511ff62667ff8f9fd3a50f671d0b1
+   - Release: 2.2
+   - Commit Date: Fri Sep 28 15:17:26 2018 -0400
    
    PLSQL module for the creation, storage and production of Open API service 
    definitions.   Support for the unloading of Swagger JSON specifications into
@@ -49,9 +45,8 @@ END dz_swagger_constants;
 
 GRANT EXECUTE ON dz_swagger_constants TO PUBLIC;
 
---
---*************************--
-PROMPT DZ_SWAGGER_SETUP.pks;
+--******************************--
+PROMPT Packages/DZ_SWAGGER_SETUP.pks 
 
 CREATE OR REPLACE PACKAGE dz_swagger_setup
 AUTHID DEFINER
@@ -72,9 +67,8 @@ AS
  END dz_swagger_setup;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_SETUP.pkb;
+--******************************--
+PROMPT Packages/DZ_SWAGGER_SETUP.pkb 
 
 CREATE OR REPLACE PACKAGE BODY dz_swagger_setup
 AS
@@ -834,6 +828,7 @@ AS
          ,'DZ_SWAGGER_PARM'
          ,'DZ_SWAGGER_PARM_ENUM'
          ,'DZ_SWAGGER_PATH'
+         ,'DZ_SWAGGER_PATH_METHOD'
          ,'DZ_SWAGGER_PATH_PARM'
          ,'DZ_SWAGGER_PATH_RESP'
          ,'DZ_SWAGGER_PATH_TAGS'
@@ -845,9 +840,8 @@ AS
 END dz_swagger_setup;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_SETUP.sql;
+--******************************--
+PROMPT Actions/DZ_SWAGGER_SETUP.sql 
 
 DECLARE
    int_count NUMBER;
@@ -874,9 +868,8 @@ BEGIN
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_UTIL.pks;
+--******************************--
+PROMPT Packages/DZ_SWAGGER_UTIL.pks 
 
 CREATE OR REPLACE PACKAGE dz_swagger_util
 AUTHID DEFINER
@@ -920,9 +913,8 @@ AS
 
 GRANT EXECUTE ON dz_swagger_util TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_UTIL.pkb;
+--******************************--
+PROMPT Packages/DZ_SWAGGER_UTIL.pkb 
 
 CREATE OR REPLACE PACKAGE BODY dz_swagger_util
 AS
@@ -1185,9 +1177,8 @@ AS
 END dz_swagger_util;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_XML.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_XML.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_xml FORCE
 AUTHID DEFINER 
@@ -1230,9 +1221,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_xml TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_XML.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_XML.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_xml
 AS 
@@ -1520,9 +1510,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_ARGUMENT.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_ARGUMENT.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_argument FORCE
 AUTHID DEFINER 
@@ -1558,9 +1547,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_argument TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_ARGUMENT.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_ARGUMENT.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_argument
 AS 
@@ -1604,9 +1592,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_ARGUMENT_LIST.tps;
+--******************************--
+PROMPT Collections/DZ_SWAGGER_ARGUMENT_LIST.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_argument_list FORCE                                       
 AS 
@@ -1615,9 +1602,8 @@ TABLE OF dz_swagger_argument;
 
 GRANT EXECUTE ON dz_swagger_argument_list TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_PROPERTY_TYP.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_PROPERTY_TYP.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_property_typ FORCE
 AUTHID DEFINER 
@@ -1688,9 +1674,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_property_typ TO PUBLIC;
 
---
---*************************--
-PROMPT DZ_SWAGGER_PROPERTY_TYP.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_PROPERTY_TYP.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_property_typ
 AS 
@@ -2240,9 +2225,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_PROPERTY_LIST.tps;
+--******************************--
+PROMPT Collections/DZ_SWAGGER_PROPERTY_LIST.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_property_list FORCE                                       
 AS 
@@ -2251,9 +2235,8 @@ TABLE OF dz_swagger_property_typ;
 
 GRANT EXECUTE ON dz_swagger_property_list TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_INFO_CONTACT.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_INFO_CONTACT.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_info_contact FORCE
 AUTHID DEFINER 
@@ -2297,9 +2280,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_info_contact TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_INFO_CONTACT.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_INFO_CONTACT.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_info_contact
 AS 
@@ -2542,9 +2524,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_INFO_LICENSE.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_INFO_LICENSE.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_info_license FORCE
 AUTHID DEFINER 
@@ -2586,9 +2567,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_info_license TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_INFO_LICENSE.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_INFO_LICENSE.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_info_license
 AS 
@@ -2770,9 +2750,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_INFO.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_INFO.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_info FORCE
 AUTHID DEFINER 
@@ -2822,9 +2801,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_info TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_INFO.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_INFO.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_info
 AS 
@@ -3144,9 +3122,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_DEFINITION_TYP.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_DEFINITION_TYP.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_definition_typ FORCE
 AUTHID DEFINER 
@@ -3218,9 +3195,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_definition_typ TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_DEFINITION_TYP.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_DEFINITION_TYP.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_definition_typ
 AS 
@@ -3643,7 +3619,7 @@ AS
                THEN
                   clb_output := clb_output || dz_json_util.pretty_str(
                       '- ' || self.swagger_properties(i).property
-                     ,num_pretty_print
+                     ,num_pretty_print + 1
                      ,'  '
                   );
                   
@@ -3664,9 +3640,8 @@ AS
    END toYAML;
    
 END;
-/--
---*************************--
-PROMPT DZ_SWAGGER_DEFINITION_LIST.tps;
+/--******************************--
+PROMPT Collections/DZ_SWAGGER_DEFINITION_LIST.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_definition_list FORCE                                       
 AS 
@@ -3675,9 +3650,8 @@ TABLE OF dz_swagger_definition_typ;
 
 GRANT EXECUTE ON dz_swagger_definition_list TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_JSONSCH_TYP.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_JSONSCH_TYP.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_jsonsch_typ FORCE
 AUTHID DEFINER 
@@ -3714,9 +3688,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_jsonsch_typ TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_JSONSCH_TYP.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_JSONSCH_TYP.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_jsonsch_typ
 AS 
@@ -4198,9 +4171,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_PARM_TYP.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_PARM_TYP.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_parm_typ FORCE
 AUTHID DEFINER 
@@ -4267,9 +4239,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_parm_typ TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_PARM_TYP.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_PARM_TYP.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_parm_typ
 AS 
@@ -4619,7 +4590,7 @@ AS
          LOOP
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- ' || dz_swagger_util.yaml_text(self.parm_enums_string(i),num_pretty_print)
-               ,num_pretty_print
+               ,num_pretty_print + 1
                ,'  '
             );
          
@@ -4707,9 +4678,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_PARM_LIST.tps;
+--******************************--
+PROMPT Collections/DZ_SWAGGER_PARM_LIST.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_parm_list FORCE                                       
 AS 
@@ -4718,9 +4688,8 @@ TABLE OF dz_swagger_parm_typ;
 
 GRANT EXECUTE ON dz_swagger_parm_list TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_RESPONSE_TYP.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_RESPONSE_TYP.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_response_typ FORCE
 AUTHID DEFINER 
@@ -4768,9 +4737,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_response_typ TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_RESPONSE_TYP.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_RESPONSE_TYP.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_response_typ
 AS 
@@ -5075,9 +5043,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_RESPONSE_LIST.tps;
+--******************************--
+PROMPT Collections/DZ_SWAGGER_RESPONSE_LIST.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_response_list FORCE                                       
 AS 
@@ -5086,9 +5053,8 @@ TABLE OF dz_swagger_response_typ;
 
 GRANT EXECUTE ON dz_swagger_response_list TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_METHOD_TYP.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_METHOD_TYP.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_method_typ FORCE
 AUTHID DEFINER 
@@ -5144,9 +5110,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_method_typ TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_METHOD_TYP.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_METHOD_TYP.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_method_typ
 AS 
@@ -5554,7 +5519,7 @@ AS
       END IF;
  
       clb_output := clb_output || dz_json_util.pretty_str(
-          'summary: ' || dz_swagger_util.yaml_text(self.path_summary,num_pretty_print)
+          'summary: ' || dz_swagger_util.yaml_text(str_summary,num_pretty_print)
          ,num_pretty_print
          ,'  '
       );
@@ -5591,7 +5556,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/json'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -5601,7 +5566,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/xml'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -5611,7 +5576,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/x-www-form-urlencoded'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -5636,7 +5601,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/json'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -5646,7 +5611,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/xml'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -5674,14 +5639,14 @@ AS
                IF self.method_path_parms(i).inline_parm = 'TRUE'
                THEN
                   clb_output := clb_output || self.method_path_parms(i).toYAML(
-                      num_pretty_print
+                      num_pretty_print + 1
                      ,'TRUE'
                   );
                   
                ELSE
                   clb_output := clb_output || dz_json_util.pretty(
                       '- "$ref": "#/parameters/' || self.method_path_parms(i).parameter_ref_id || '"'
-                     ,num_pretty_print
+                     ,num_pretty_print + 1
                      ,'  '
                   );
                
@@ -5710,7 +5675,7 @@ AS
          LOOP 
             clb_output := clb_output || dz_json_util.pretty(
                 '- ' || dz_swagger_util.yaml_text(self.method_tags(i),num_pretty_print)
-               ,num_pretty_print
+               ,num_pretty_print + 1
                ,'  '
             );
          
@@ -5756,9 +5721,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_METHOD_LIST.tps;
+--******************************--
+PROMPT Collections/DZ_SWAGGER_METHOD_LIST.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_method_list FORCE                                       
 AS 
@@ -5767,9 +5731,8 @@ TABLE OF dz_swagger_method_typ;
 
 GRANT EXECUTE ON dz_swagger_method_list TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_PATH_TYP.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_PATH_TYP.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_path_typ FORCE
 AUTHID DEFINER 
@@ -5812,9 +5775,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_path_typ TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_PATH_TYP.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_PATH_TYP.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_path_typ
 AS 
@@ -5983,9 +5945,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_PATH_LIST.tps;
+--******************************--
+PROMPT Collections/DZ_SWAGGER_PATH_LIST.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_path_list FORCE                                       
 AS 
@@ -5994,9 +5955,8 @@ TABLE OF dz_swagger_path_typ;
 
 GRANT EXECUTE ON dz_swagger_path_list TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_TABLE_DEF.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_TABLE_DEF.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_table_def FORCE
 AUTHID DEFINER 
@@ -6060,9 +6020,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_table_def TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_TABLE_DEF.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_TABLE_DEF.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_table_def
 AS 
@@ -6177,9 +6136,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_TABLE_DEF_LIST.tps;
+--******************************--
+PROMPT Collections/DZ_SWAGGER_TABLE_DEF_LIST.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_table_def_list FORCE                                       
 AS 
@@ -6188,9 +6146,8 @@ TABLE OF dz_swagger_table_def;
 
 GRANT EXECUTE ON dz_swagger_table_def_list TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_TYP.tps;
+--******************************--
+PROMPT Types/DZ_SWAGGER_TYP.tps 
 
 CREATE OR REPLACE TYPE dz_swagger_typ FORCE
 AUTHID DEFINER 
@@ -6267,9 +6224,8 @@ AS OBJECT (
 
 GRANT EXECUTE ON dz_swagger_typ TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_TYP.tpb;
+--******************************--
+PROMPT Types/DZ_SWAGGER_TYP.tpb 
 
 CREATE OR REPLACE TYPE BODY dz_swagger_typ
 AS
@@ -7482,7 +7438,7 @@ AS
          
          clb_output := clb_output || dz_json_util.pretty_str(
              '- https'
-            ,0
+            ,1
             ,'  '
          );
 
@@ -7506,7 +7462,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/json'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -7516,7 +7472,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/xml'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -7526,7 +7482,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/x-www-form-urlencoded'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -7551,7 +7507,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/json'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -7561,7 +7517,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 '- application/xml'
-               ,0
+               ,1
                ,'  '
             );
 
@@ -7677,9 +7633,8 @@ AS
 END;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_MAINT.pks;
+--******************************--
+PROMPT Packages/DZ_SWAGGER_MAINT.pks 
 
 CREATE OR REPLACE PACKAGE dz_swagger_maint
 AUTHID DEFINER
@@ -7731,9 +7686,8 @@ AS
 END dz_swagger_maint;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_MAINT.pkb;
+--******************************--
+PROMPT Packages/DZ_SWAGGER_MAINT.pkb 
 
 CREATE OR REPLACE PACKAGE BODY dz_swagger_maint
 AS
@@ -8897,18 +8851,17 @@ $END
 END dz_swagger_maint;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_TEST.pks;
+--******************************--
+PROMPT Packages/DZ_SWAGGER_TEST.pks 
 
 CREATE OR REPLACE PACKAGE dz_swagger_test
 AUTHID DEFINER
 AS
 
-   C_CHANGESET CONSTANT VARCHAR2(255 Char) := 'c52f543f37b511ff62667ff8f9fd3a50f671d0b1';
-   C_JENKINS_JOBNM CONSTANT VARCHAR2(255 Char) := 'DZ_SWAGGER';
-   C_JENKINS_BUILD CONSTANT NUMBER := 28;
-   C_JENKINS_BLDID CONSTANT VARCHAR2(255 Char) := '28';
+   C_GITRELEASE    CONSTANT VARCHAR2(255 Char) := '2.2';
+   C_GITCOMMIT     CONSTANT VARCHAR2(255 Char) := '4400f06b34f4b0a12052c20a2cca41528158cb3d';
+   C_GITCOMMITDATE CONSTANT VARCHAR2(255 Char) := 'Fri Sep 28 15:17:26 2018 -0400';
+   C_GITCOMMITAUTH CONSTANT VARCHAR2(255 Char) := 'Paul Dziemiela';
    
    C_PREREQUISITES CONSTANT MDSYS.SDO_STRING2_ARRAY := MDSYS.SDO_STRING2_ARRAY(
       'DZ_JSON'
@@ -8939,9 +8892,8 @@ END dz_swagger_test;
 
 GRANT EXECUTE ON dz_swagger_test TO public;
 
---
---*************************--
-PROMPT DZ_SWAGGER_TEST.pkb;
+--******************************--
+PROMPT Packages/DZ_SWAGGER_TEST.pkb 
 
 CREATE OR REPLACE PACKAGE BODY dz_swagger_test
 AS
@@ -8984,10 +8936,12 @@ AS
    RETURN VARCHAR2
    AS
    BEGIN
-      RETURN '{"CHANGESET":' || C_CHANGESET || ','
-      || '"JOBN":"' || C_JENKINS_JOBNM || '",'   
-      || '"BUILD":' || C_JENKINS_BUILD || ','
-      || '"BUILDID":"' || C_JENKINS_BLDID || '"}';
+      RETURN '{'
+      || ' "GITRELEASE":"'    || C_GITRELEASE    || '"'
+      || ',"GITCOMMIT":"'     || C_GITCOMMIT     || '"'
+      || ',"GITCOMMITDATE":"' || C_GITCOMMITDATE || '"'
+      || ',"GITCOMMITAUTH":"' || C_GITCOMMITAUTH || '"'
+      || '}';
       
    END version;
    
@@ -9014,9 +8968,8 @@ AS
 END dz_swagger_test;
 /
 
---
---*************************--
-PROMPT DZ_SWAGGER_ISSUES_TRUNK.vw;
+--******************************--
+PROMPT Views/DZ_SWAGGER_ISSUES_TRUNK.vw 
 
 CREATE OR REPLACE FORCE VIEW dz_swagger_issues_trunk(
    issue_type
@@ -9035,9 +8988,8 @@ SELECT
 FROM 
 TABLE (dz_swagger_maint.validate_def_tables()) b;
 
---
---*************************--
-PROMPT DZ_SWAGGER_DEFS_TRUNK.vw;
+--******************************--
+PROMPT Views/DZ_SWAGGER_DEFS_TRUNK.vw 
 
 CREATE OR REPLACE VIEW dz_swagger_defs_trunk(
    csv_output
@@ -9165,9 +9117,8 @@ FROM (
    ,bb.property_order
 ) a;
 
---
---*************************--
-PROMPT DZ_SWAGGER_HEADS_TRUNK.vw;
+--******************************--
+PROMPT Views/DZ_SWAGGER_HEADS_TRUNK.vw 
 
 CREATE OR REPLACE VIEW dz_swagger_heads_trunk(
    csv_output
@@ -9247,9 +9198,8 @@ FROM (
    ,aa.swagger_path
 ) a;
 
---
---*************************--
-PROMPT DZ_SWAGGER_PARMS_TRUNK.vw;
+--******************************--
+PROMPT Views/DZ_SWAGGER_PARMS_TRUNK.vw 
 
 CREATE OR REPLACE VIEW dz_swagger_parms_trunk(
    csv_output
@@ -9353,9 +9303,8 @@ FROM (
    ,2
 ) a;
 
---
---*************************--
-PROMPT DZ_SWAGGER_PATHS_TRUNK.vw;
+--******************************--
+PROMPT Views/DZ_SWAGGER_PATHS_TRUNK.vw 
 
 CREATE OR REPLACE VIEW dz_swagger_paths_trunk(
    csv_output
@@ -9391,9 +9340,8 @@ FROM (
     aa.swagger_path
 ) a;
 
---
---*************************--
-PROMPT DZ_SWAGGER_RESP_TRUNK.vw;
+--******************************--
+PROMPT Views/DZ_SWAGGER_RESP_TRUNK.vw 
 
 CREATE OR REPLACE VIEW dz_swagger_resp_trunk(
    csv_output
@@ -9422,10 +9370,6 @@ FROM (
    ORDER BY
    aa.swagger_path
 ) a;
-
---
---*************************--
-PROMPT sqlplus_footer.sql;
 
 SHOW ERROR;
 
@@ -9460,3 +9404,5 @@ END;
 /
 
 EXIT;
+SET DEFINE OFF;
+

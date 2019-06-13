@@ -1,0 +1,180 @@
+{
+    "constants": [
+       {
+          "key":   "JOBNAME"
+         ,"value": "DZ_SWAGGER"
+       }
+      ,{
+          "key": "GITRELEASE"
+         ,"cmd": "git describe --abbrev=0 --tags"
+       }
+      ,{
+          "key": "GITCOMMIT"
+         ,"cmd": "git rev-parse master"
+       }
+      ,{
+          "key": "GITCOMMITDATE"
+         ,"cmd": "git show -s --format=%cd"
+       }
+      ,{
+          "key": "GITCOMMITAUTH"
+         ,"cmd": "git show -s --format=%an"
+       }
+    ]
+   ,"tasks": [
+       {
+          "id": "concatenate"
+         ,"output": "dz_swagger_deploy.sql"
+         ,"includes": [
+             "%%SQLHEADER%%"
+            ,"Packages/DZ_SWAGGER_CONSTANTS.pks"
+            ,"Packages/DZ_SWAGGER_SETUP.pks"
+            ,"Packages/DZ_SWAGGER_SETUP.pkb"
+            ,"Actions/DZ_SWAGGER_SETUP.sql"
+            ,"Packages/DZ_SWAGGER_UTIL.pks"
+            ,"Packages/DZ_SWAGGER_UTIL.pkb"
+            ,"Types/DZ_SWAGGER_XML.tps"
+            ,"Types/DZ_SWAGGER_XML.tpb"
+            ,"Types/DZ_SWAGGER_ARGUMENT.tps"
+            ,"Types/DZ_SWAGGER_ARGUMENT.tpb"
+            ,"Collections/DZ_SWAGGER_ARGUMENT_LIST.tps"
+            ,"Types/DZ_SWAGGER_PROPERTY_TYP.tps"
+            ,"Types/DZ_SWAGGER_PROPERTY_TYP.tpb"
+            ,"Collections/DZ_SWAGGER_PROPERTY_LIST.tps"
+            ,"Types/DZ_SWAGGER_INFO_CONTACT.tps"
+            ,"Types/DZ_SWAGGER_INFO_CONTACT.tpb"
+            ,"Types/DZ_SWAGGER_INFO_LICENSE.tps"
+            ,"Types/DZ_SWAGGER_INFO_LICENSE.tpb"
+            ,"Types/DZ_SWAGGER_INFO.tps"
+            ,"Types/DZ_SWAGGER_INFO.tpb"
+            ,"Types/DZ_SWAGGER_DEFINITION_TYP.tps"
+            ,"Types/DZ_SWAGGER_DEFINITION_TYP.tpb"
+            ,"Collections/DZ_SWAGGER_DEFINITION_LIST.tps"
+            ,"Types/DZ_SWAGGER_JSONSCH_TYP.tps"
+            ,"Types/DZ_SWAGGER_JSONSCH_TYP.tpb"
+            ,"Types/DZ_SWAGGER_PARM_TYP.tps"
+            ,"Types/DZ_SWAGGER_PARM_TYP.tpb"
+            ,"Collections/DZ_SWAGGER_PARM_LIST.tps"
+            ,"Types/DZ_SWAGGER_RESPONSE_TYP.tps"
+            ,"Types/DZ_SWAGGER_RESPONSE_TYP.tpb"
+            ,"Collections/DZ_SWAGGER_RESPONSE_LIST.tps"
+            ,"Types/DZ_SWAGGER_METHOD_TYP.tps"
+            ,"Types/DZ_SWAGGER_METHOD_TYP.tpb"
+            ,"Collections/DZ_SWAGGER_METHOD_LIST.tps"
+            ,"Types/DZ_SWAGGER_PATH_TYP.tps"
+            ,"Types/DZ_SWAGGER_PATH_TYP.tpb"
+            ,"Collections/DZ_SWAGGER_PATH_LIST.tps"
+            ,"Types/DZ_SWAGGER_TABLE_DEF.tps"
+            ,"Types/DZ_SWAGGER_TABLE_DEF.tpb"
+            ,"Collections/DZ_SWAGGER_TABLE_DEF_LIST.tps"
+            ,"Types/DZ_SWAGGER_TYP.tps"
+            ,"Types/DZ_SWAGGER_TYP.tpb"
+            ,"Packages/DZ_SWAGGER_MAINT.pks"
+            ,"Packages/DZ_SWAGGER_MAINT.pkb"
+            ,"Packages/DZ_SWAGGER_TEST.pks"
+            ,"Packages/DZ_SWAGGER_TEST.pkb"
+            ,"Views/DZ_SWAGGER_ISSUES_TRUNK.vw"
+            ,"Views/DZ_SWAGGER_DEFS_TRUNK.vw"
+            ,"Views/DZ_SWAGGER_HEADS_TRUNK.vw"
+            ,"Views/DZ_SWAGGER_PARMS_TRUNK.vw"
+            ,"Views/DZ_SWAGGER_PATHS_TRUNK.vw"
+            ,"Views/DZ_SWAGGER_RESP_TRUNK.vw"
+            ,"%%SQLFOOTER%%"
+          ]
+         ,"separator": "--******************************--\nPROMPT %%FILENAME%% \n\n"
+         ,"components": [
+             {
+                "identifier": "SQLHEADER"
+               ,"content": [
+                   "WHENEVER SQLERROR EXIT -99;"
+                  ,"WHENEVER OSERROR  EXIT -98;"
+                  ,"SET DEFINE OFF;"
+                  ,""
+                ]
+             }
+            ,{
+                "identifier": "SQLFOOTER"
+               ,"content": [
+                   "SHOW ERROR;"
+                  ,""
+                  ,"DECLARE"
+                  ,"   l_num_errors PLS_INTEGER;"
+                  ,""
+                  ,"BEGIN"
+                  ,""
+                  ,"   SELECT"
+                  ,"   COUNT(*)"
+                  ,"   INTO l_num_errors"
+                  ,"   FROM"
+                  ,"   user_errors a"
+                  ,"   WHERE"
+                  ,"   a.name LIKE '%JOBNAME%%';"
+                  ,""
+                  ,"   IF l_num_errors <> 0"
+                  ,"   THEN"
+                  ,"      RAISE_APPLICATION_ERROR(-20001,'COMPILE ERROR');"
+                  ,""
+                  ,"   END IF;"
+                  ,""
+                  ,"   l_num_errors := %JOBNAME%_TEST.inmemory_test();"
+                  ,""
+                  ,"   IF l_num_errors <> 0"
+                  ,"   THEN"
+                  ,"      RAISE_APPLICATION_ERROR(-20001,'INMEMORY TEST ERROR');"
+                  ,""
+                  ,"   END IF;"
+                  ,""
+                  ,"END;"
+                  ,"/"
+                  ,""
+                  ,"EXIT;"
+                  ,"SET DEFINE OFF;"
+                  ,""
+                ]
+             }
+          ]
+         ,"configurations": [
+            {
+                "id": 1
+               ,"file": "Packages/DZ_SWAGGER_TEST.pks"
+               ,"replacements": [
+                   {
+                      "string": "C_GITRELEASE    CONSTANT VARCHAR2(255 Char) := 'NULL';"
+                     ,"value":  "C_GITRELEASE    CONSTANT VARCHAR2(255 Char) := '%GITRELEASE%';"
+                   }
+                  ,{
+                      "string": "C_GITCOMMIT     CONSTANT VARCHAR2(255 Char) := 'NULL';"
+                     ,"value":  "C_GITCOMMIT     CONSTANT VARCHAR2(255 Char) := '%GITCOMMIT%';"
+                   }
+                  ,{
+                      "string": "C_GITCOMMITDATE CONSTANT VARCHAR2(255 Char) := 'NULL';"
+                     ,"value":  "C_GITCOMMITDATE CONSTANT VARCHAR2(255 Char) := '%GITCOMMITDATE%';"
+                   }
+                  ,{
+                      "string": "C_GITCOMMITAUTH CONSTANT VARCHAR2(255 Char) := 'NULL';"
+                     ,"value":  "C_GITCOMMITAUTH CONSTANT VARCHAR2(255 Char) := '%GITCOMMITAUTH%';"
+                   }
+                ]
+            }
+          ]
+       }
+      ,{
+          "id": "naturaldocs"
+         ,"input":  "dz_swagger_deploy.sql"
+         ,"output_dir": "stage1"
+       }
+      ,{
+          "id": "wkhtmltopdf"
+         ,"input_dir": "stage1"
+         ,"output": "dz_swagger_deploy.pdf"
+       }
+      ,{
+          "id": "artifacts"
+         ,"targets": [
+             "dz_swagger_deploy.sql"
+            ,"dz_swagger_deploy.pdf"
+         ]
+       }
+   ]
+}
+
