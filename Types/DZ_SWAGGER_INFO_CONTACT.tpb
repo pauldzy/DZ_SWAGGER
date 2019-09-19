@@ -58,10 +58,10 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print     IN  NUMBER   DEFAULT NULL
+       p_pretty_print     IN  INTEGER  DEFAULT NULL
    ) RETURN CLOB
    AS
-      num_pretty_print NUMBER := p_pretty_print;
+      int_pretty_print PLS_INTEGER := p_pretty_print;
       clb_output       CLOB;
       str_pad          VARCHAR2(1 Char);
       
@@ -76,7 +76,7 @@ AS
       -- Step 20
       -- Build the wrapper
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty('{',NULL);
          
@@ -97,9 +97,9 @@ AS
              str_pad || dz_json_main.value2json(
                 'name'
                ,self.contact_name
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          
          str_pad := ',';
@@ -116,9 +116,9 @@ AS
              str_pad || dz_json_main.value2json(
                 'url'
                ,self.contact_url
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          
          str_pad := ',';
@@ -135,9 +135,9 @@ AS
              str_pad || dz_json_main.value2json(
                 'email'
                ,self.contact_email
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          
          str_pad := ',';
@@ -150,7 +150,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
       
       --------------------------------------------------------------------------
@@ -164,11 +164,11 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
-      p_pretty_print      IN  NUMBER   DEFAULT 0
+      p_pretty_print      IN  INTEGER  DEFAULT 0
    ) RETURN CLOB
    AS
       clb_output        CLOB;
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       
    BEGIN
    
@@ -186,9 +186,9 @@ AS
          clb_output := clb_output || dz_json_util.pretty_str(
              'name: ' || dz_swagger_util.yaml_text(
                 self.contact_name
-               ,num_pretty_print
+               ,int_pretty_print
             )
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
@@ -203,9 +203,9 @@ AS
          clb_output := clb_output || dz_json_util.pretty_str(
              'url: ' || dz_swagger_util.yaml_text(
                 self.contact_url
-               ,num_pretty_print
+               ,int_pretty_print
             )
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
@@ -220,9 +220,9 @@ AS
          clb_output := clb_output || dz_json_util.pretty_str(
              'email: ' || dz_swagger_util.yaml_text(
                 self.contact_email
-               ,num_pretty_print
+               ,int_pretty_print
             )
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          

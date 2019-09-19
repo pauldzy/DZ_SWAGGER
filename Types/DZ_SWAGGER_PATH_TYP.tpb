@@ -34,10 +34,11 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print     IN  NUMBER   DEFAULT NULL
+       p_pretty_print        IN  INTEGER  DEFAULT NULL
+      ,p_zap_override        IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
-      num_pretty_print NUMBER := p_pretty_print;
+      int_pretty_print PLS_INTEGER := p_pretty_print;
       clb_output       CLOB;
       str_pad          VARCHAR2(1 Char);
       str_pad1         VARCHAR2(1 Char);
@@ -53,7 +54,7 @@ AS
       -- Step 20
       -- Build the wrapper
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty(
              dz_json_main.json_format(self.swagger_path) || ': {'
@@ -88,9 +89,10 @@ AS
                 str_pad1 || dz_json_main.json_format(
                   self.swagger_methods(i).swagger_http_method
                ) || ': ' || self.swagger_methods(i).toJSON(
-                  p_pretty_print => num_pretty_print + 1
+                   p_pretty_print => int_pretty_print + 1
+                  ,p_zap_override => p_zap_override
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );     
             str_pad1 := ',';
 
@@ -104,7 +106,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
       
       --------------------------------------------------------------------------
@@ -118,12 +120,13 @@ AS
    ----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
-       p_pretty_print     IN  NUMBER   DEFAULT 0
-      ,p_array_marker     IN  VARCHAR  DEFAULT 'FALSE'
+       p_pretty_print        IN  INTEGER  DEFAULT 0
+      ,p_array_marker        IN  VARCHAR  DEFAULT 'FALSE'
+      ,p_zap_override        IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
       clb_output        CLOB := '';
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       
    BEGIN
       
@@ -146,9 +149,12 @@ AS
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
                 self.swagger_methods(i).swagger_http_method || ': '
-               ,num_pretty_print
+               ,int_pretty_print
                ,'  '
-            ) || self.swagger_methods(i).toYAML(num_pretty_print + 1);
+            ) || self.swagger_methods(i).toYAML(
+                p_pretty_print => int_pretty_print + 1
+               ,p_zap_override => p_zap_override    
+            );
             
          END LOOP;
 

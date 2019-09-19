@@ -259,10 +259,10 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print      IN  NUMBER   DEFAULT NULL
+       p_pretty_print      IN  INTEGER  DEFAULT NULL
    ) RETURN CLOB
    AS
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       clb_output        CLOB;
       str_pad           VARCHAR2(1 Char);
       str_pad1          VARCHAR2(1 Char);
@@ -286,7 +286,7 @@ AS
       -- Step 20
       -- Add the left bracket
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output := dz_json_util.pretty('{',NULL);
          str_pad := '';
@@ -307,9 +307,9 @@ AS
           str_pad1 || dz_json_main.value2json(
              '$schema'
             ,'http://json-schema.org/draft-04/schema#'
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
       str_pad1 := ',';
       
@@ -320,9 +320,9 @@ AS
              || self.swagger_http_method || ' ' 
              || self.swagger_response || ' - ' 
              || self.versionid
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
       str_pad1 := ',';
 
@@ -330,9 +330,9 @@ AS
           str_pad1 || dz_json_main.value2json(
              'type'
             ,'object'
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
       str_pad1 := ',';
       
@@ -349,18 +349,18 @@ AS
          int_counter := 1;
       
          clb_output := clb_output || dz_json_util.pretty(
-             str_pad1 || dz_json_main.fastname('properties',num_pretty_print) || '{'
-            ,num_pretty_print + 1
+             str_pad1 || dz_json_main.fastname('properties',int_pretty_print) || '{'
+            ,int_pretty_print + 1
          );
          
          FOR i IN 1 .. self.response_schema_obj.swagger_properties.COUNT
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
                 str_pad2 || self.response_schema_obj.swagger_properties(i).toJSON(
-                   p_pretty_print => num_pretty_print + 2
+                   p_pretty_print => int_pretty_print + 2
                   ,p_jsonschema   => 'TRUE'
                 )
-               ,num_pretty_print + 2
+               ,int_pretty_print + 2
             );
             str_pad2 := ',';
             
@@ -376,7 +376,7 @@ AS
 
          clb_output := clb_output || dz_json_util.pretty(
              '}'
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
             
@@ -391,9 +391,9 @@ AS
                 str_pad1 || dz_json_main.value2json(
                    'required'
                   ,ary_required
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );
             str_pad1 := ',';
          
@@ -412,8 +412,8 @@ AS
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
-             str_pad1 || dz_json_main.fastname('definitions',num_pretty_print) || '{'
-            ,num_pretty_print + 1
+             str_pad1 || dz_json_main.fastname('definitions',int_pretty_print) || '{'
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
          
@@ -427,10 +427,10 @@ AS
                       self.swagger_defs(i).versionid
                      ,self.swagger_defs(i).definition
                    ) || '": ' || self.swagger_defs(i).toJSON(
-                      p_pretty_print => num_pretty_print + 2
+                      p_pretty_print => int_pretty_print + 2
                      ,p_jsonschema   => 'TRUE'
                    )
-                  ,num_pretty_print + 2
+                  ,int_pretty_print + 2
                );
                str_pad2 := ',';
                
@@ -440,7 +440,7 @@ AS
 
          clb_output := clb_output || dz_json_util.pretty(
              '}'
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -452,9 +452,9 @@ AS
           str_pad1 || dz_json_main.value2json(
              'additionalProperties'
             ,FALSE
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
       str_pad1 := ',';
    
@@ -464,7 +464,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
       
       --------------------------------------------------------------------------

@@ -62,11 +62,12 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print     IN  NUMBER   DEFAULT NULL
-      ,p_jsonschema       IN  VARCHAR2 DEFAULT 'FALSE'
+       p_pretty_print      IN  INTEGER  DEFAULT NULL
+      ,p_jsonschema        IN  VARCHAR2 DEFAULT 'FALSE'
+      ,p_zap_override      IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
-      num_pretty_print NUMBER := p_pretty_print;
+      int_pretty_print PLS_INTEGER := p_pretty_print;
       str_jsonschema   VARCHAR2(4000 Char) := UPPER(p_jsonschema);
       clb_output       CLOB;
       str_pad          VARCHAR2(1 Char);
@@ -90,7 +91,7 @@ AS
       -- Step 20
       -- Build the wrapper
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty(
              dz_json_main.json_format(self.property) || ':{'
@@ -122,9 +123,9 @@ AS
                   self.versionid 
                  ,self.property_target
                 )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad := ',';
          
@@ -141,9 +142,9 @@ AS
                 str_pad || dz_json_main.value2json(
                    'type'
                   ,ary_types
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );
             str_pad := ',';
             
@@ -152,9 +153,9 @@ AS
                 str_pad || dz_json_main.value2json(
                    'type'
                   ,self.property_type
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );
             str_pad := ',';
             
@@ -170,9 +171,9 @@ AS
                 str_pad || dz_json_main.value2json(
                    'format'
                   ,self.property_format
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );
 
          END IF;
@@ -187,9 +188,9 @@ AS
                 str_pad || dz_json_main.value2json(
                    'title'
                   ,self.property_title
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );
 
          END IF;
@@ -198,29 +199,33 @@ AS
       -- Step 60
       -- Add optional example 
       --------------------------------------------------------------------------
-         IF  str_jsonschema = 'FALSE'
-         AND self.property_exp_string IS NOT NULL
+         IF p_zap_override = 'FALSE'
          THEN
-            clb_output := clb_output || dz_json_util.pretty(
-                str_pad || dz_json_main.value2json(
-                   'example'
-                  ,self.property_exp_string
-                  ,num_pretty_print + 1
-               )
-               ,num_pretty_print + 1
-            );
+            IF  str_jsonschema = 'FALSE'
+            AND self.property_exp_string IS NOT NULL
+            THEN
+               clb_output := clb_output || dz_json_util.pretty(
+                   str_pad || dz_json_main.value2json(
+                      'example'
+                     ,self.property_exp_string
+                     ,int_pretty_print + 1
+                  )
+                  ,int_pretty_print + 1
+               );
 
-         ELSIF str_jsonschema = 'FALSE'
-         AND   self.property_exp_number IS NOT NULL
-         THEN
-            clb_output := clb_output || dz_json_util.pretty(
-                str_pad || dz_json_main.value2json(
-                   'example'
-                  ,self.property_exp_number
-                  ,num_pretty_print + 1
-               )
-               ,num_pretty_print + 1
-            );
+            ELSIF str_jsonschema = 'FALSE'
+            AND   self.property_exp_number IS NOT NULL
+            THEN
+               clb_output := clb_output || dz_json_util.pretty(
+                   str_pad || dz_json_main.value2json(
+                      'example'
+                     ,self.property_exp_number
+                     ,int_pretty_print + 1
+                  )
+                  ,int_pretty_print + 1
+               );
+               
+            END IF;
             
          END IF;
       
@@ -228,15 +233,16 @@ AS
       -- Step 70
       -- Add optional description
       --------------------------------------------------------------------------
-         IF self.property_description IS NOT NULL
+         IF  self.property_description IS NOT NULL
+         AND p_zap_override = 'FALSE'
          THEN
             clb_output := clb_output || dz_json_util.pretty(
                 str_pad || dz_json_main.value2json(
                    'description'
                   ,self.property_description
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );
 
          END IF;
@@ -248,8 +254,8 @@ AS
          IF self.property_type = 'array' 
          THEN
             clb_output := clb_output || dz_json_util.pretty(
-                str_pad || dz_json_main.fastname('items',num_pretty_print) || '{'
-               ,num_pretty_print + 1
+                str_pad || dz_json_main.fastname('items',int_pretty_print) || '{'
+               ,int_pretty_print + 1
             );
             
             IF LOWER(self.property_target) IN ('string','number','integer','boolean')
@@ -258,9 +264,9 @@ AS
                   str_pad2 || dz_json_main.value2json(
                       'type'
                      ,LOWER(self.property_target)
-                     ,num_pretty_print + 2
+                     ,int_pretty_print + 2
                   )
-                  ,num_pretty_print + 2
+                  ,int_pretty_print + 2
                );
                str_pad2 := ',';
                   
@@ -272,10 +278,10 @@ AS
                          'xml'
                         ,dz_swagger_xml(
                            p_xml_name => self.xml_array_name
-                         ).toJSON(num_pretty_print + 2)
-                        ,num_pretty_print + 2
+                         ).toJSON(int_pretty_print + 2)
+                        ,int_pretty_print + 2
                       )
-                     ,num_pretty_print + 2
+                     ,int_pretty_print + 2
                   );
                   str_pad2 := ',';
                   
@@ -289,9 +295,9 @@ AS
                          self.versionid
                         ,self.property_target
                       )
-                     ,num_pretty_print + 2
+                     ,int_pretty_print + 2
                   )
-                  ,num_pretty_print + 2
+                  ,int_pretty_print + 2
                );
                str_pad2 := ',';
                
@@ -299,7 +305,7 @@ AS
             
             clb_output := clb_output || dz_json_util.pretty(
                 '}'
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );
 
          END IF;
@@ -326,11 +332,11 @@ AS
                         ,p_xml_attribute => self.xml_attribute
                         ,p_xml_wrapped   => self.xml_wrapped
                       ).toJSON(
-                        p_pretty_print => num_pretty_print + 1
+                        p_pretty_print => int_pretty_print + 1
                       )
-                     ,num_pretty_print + 1
+                     ,int_pretty_print + 1
                    )
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                );
                
             END IF;
@@ -345,7 +351,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
       
       --------------------------------------------------------------------------
@@ -359,11 +365,12 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
-      p_pretty_print      IN  NUMBER   DEFAULT 0
+       p_pretty_print      IN  INTEGER  DEFAULT 0
+      ,p_zap_override      IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
       clb_output        CLOB;
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       
    BEGIN
    
@@ -383,14 +390,14 @@ AS
                  self.versionid
                 ,self.property_target
              ) || '" '
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
             ,'  '
          );
          
       ELSE       
          clb_output := clb_output || dz_json_util.pretty_str(
              'type: ' || self.property_type
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
             ,'  '
          );
          
@@ -398,7 +405,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 'format: ' || self.property_format
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
                ,'  '
             );
 
@@ -409,36 +416,40 @@ AS
             clb_output := clb_output || dz_json_util.pretty_str(
                 'title: ' || dz_swagger_util.yaml_text(
                    self.property_title
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
                ,'  '
             );
 
          END IF;
          
          -----------------------------------------------------------------------
-         IF self.property_exp_string IS NOT NULL
+         IF p_zap_override = 'FALSE'
          THEN
-            clb_output := clb_output || dz_json_util.pretty_str(
-                'example: ' || dz_swagger_util.yaml_text(
-                   self.property_exp_string
-                  ,num_pretty_print + 1
-               )
-               ,num_pretty_print + 1
-               ,'  '
-            );
+            IF self.property_exp_string IS NOT NULL
+            THEN
+               clb_output := clb_output || dz_json_util.pretty_str(
+                   'example: ' || dz_swagger_util.yaml_text(
+                      self.property_exp_string
+                     ,int_pretty_print + 1
+                  )
+                  ,int_pretty_print + 1
+                  ,'  '
+               );
 
-         ELSIF self.property_exp_number IS NOT NULL
-         THEN
-            clb_output := clb_output || dz_json_util.pretty_str(
-                'example: ' || dz_swagger_util.yaml_text(
-                   self.property_exp_number
-                  ,num_pretty_print + 1
-               )
-               ,num_pretty_print + 1
-               ,'  '
-            );
+            ELSIF self.property_exp_number IS NOT NULL
+            THEN
+               clb_output := clb_output || dz_json_util.pretty_str(
+                   'example: ' || dz_swagger_util.yaml_text(
+                      self.property_exp_number
+                     ,int_pretty_print + 1
+                  )
+                  ,int_pretty_print + 1
+                  ,'  '
+               );
+               
+            END IF;
             
          END IF;
       
@@ -446,14 +457,15 @@ AS
       -- Step 70
       -- Add optional description
       --------------------------------------------------------------------------
-         IF self.property_description IS NOT NULL
+         IF  self.property_description IS NOT NULL
+         AND p_zap_override = 'FALSE'
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 'description: ' || dz_swagger_util.yaml_text(
                    self.property_description
-                  ,num_pretty_print + 1
+                  ,int_pretty_print + 1
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
                ,'  '
             );
 
@@ -467,7 +479,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 'items: '
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
                ,'  '
             );
 
@@ -475,7 +487,7 @@ AS
             THEN
                clb_output := clb_output || dz_json_util.pretty_str(
                    'type: ' || LOWER(self.property_target) || ' '
-                  ,num_pretty_print + 2
+                  ,int_pretty_print + 2
                   ,'  '
                );
                
@@ -483,12 +495,12 @@ AS
                THEN
                   clb_output := clb_output || dz_json_util.pretty_str(
                       'xml: '
-                     ,num_pretty_print + 2
+                     ,int_pretty_print + 2
                      ,'  '
                   ) || dz_swagger_xml(
                      p_xml_name => self.xml_array_name
                   ).toYAML(
-                     num_pretty_print + 3
+                     int_pretty_print + 3
                   );
                
                END IF;
@@ -499,7 +511,7 @@ AS
                        self.versionid
                       ,self.property_target
                    ) || '" '
-                  ,num_pretty_print + 2
+                  ,int_pretty_print + 2
                   ,'  '
                );
             
@@ -519,7 +531,7 @@ AS
          THEN
             clb_output := clb_output || dz_json_util.pretty_str(
                 'xml: '
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
                ,'  '
             ) || dz_swagger_xml(
                 p_xml_name      => self.xml_name
@@ -528,7 +540,7 @@ AS
                ,p_xml_attribute => self.xml_attribute
                ,p_xml_wrapped   => self.xml_wrapped
             ).toYAML(
-               num_pretty_print + 2
+               int_pretty_print + 2
             );
          
          END IF;

@@ -56,10 +56,10 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print     IN  NUMBER   DEFAULT NULL
+       p_pretty_print     IN  INTEGER  DEFAULT NULL
    ) RETURN CLOB
    AS
-      num_pretty_print NUMBER := p_pretty_print;
+      int_pretty_print PLS_INTEGER := p_pretty_print;
       clb_output       CLOB;
       
    BEGIN
@@ -73,7 +73,7 @@ AS
       -- Step 20
       -- Build the wrapper
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty('{',NULL);
          
@@ -90,9 +90,9 @@ AS
           ' ' || dz_json_main.value2json(
              'title'
             ,self.info_title
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
          
       --------------------------------------------------------------------------
@@ -105,9 +105,9 @@ AS
              ',' || dz_json_main.value2json(
                 'description'
                ,self.info_description
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -122,9 +122,9 @@ AS
              ',' || dz_json_main.value2json(
                 'termsOfService'
                ,self.info_termsOfService
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -138,10 +138,10 @@ AS
          clb_output := clb_output || dz_json_util.pretty(
              ',' || dz_json_main.formatted2json(
                 'contact'
-               ,self.info_contact.toJSON(num_pretty_print + 1)
-               ,num_pretty_print + 1
+               ,self.info_contact.toJSON(int_pretty_print + 1)
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -155,10 +155,10 @@ AS
          clb_output := clb_output || dz_json_util.pretty(
              ',' || dz_json_main.formatted2json(
                 'license'
-               ,self.info_license.toJSON(num_pretty_print + 1)
-               ,num_pretty_print + 1
+               ,self.info_license.toJSON(int_pretty_print + 1)
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -173,9 +173,9 @@ AS
              ',' || dz_json_main.value2json(
                 'version'
                ,self.info_version
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -186,7 +186,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
       
       --------------------------------------------------------------------------
@@ -200,11 +200,11 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
-      p_pretty_print      IN  NUMBER   DEFAULT 0
+      p_pretty_print      IN  INTEGER  DEFAULT 0
    ) RETURN CLOB
    AS
       clb_output        CLOB;
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       
    BEGIN
    
@@ -220,9 +220,9 @@ AS
       clb_output := clb_output || dz_json_util.pretty_str(
           'title: ' || dz_swagger_util.yaml_text(
              self.info_title
-            ,num_pretty_print
+            ,int_pretty_print
          )
-         ,num_pretty_print
+         ,int_pretty_print
          ,'  '
       );
       
@@ -235,9 +235,9 @@ AS
          clb_output := clb_output || dz_json_util.pretty_str(
              'description: ' || dz_swagger_util.yaml_text(
                 self.info_description
-               ,num_pretty_print
+               ,int_pretty_print
             )
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
@@ -252,9 +252,9 @@ AS
          clb_output := clb_output || dz_json_util.pretty_str(
              'termsOfService: ' || dz_swagger_util.yaml_text(
                 self.info_termsOfService
-               ,num_pretty_print
+               ,int_pretty_print
             )
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
@@ -268,10 +268,10 @@ AS
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'contact: ' 
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          ) || self.info_contact.toYAML(
-            num_pretty_print + 1
+            int_pretty_print + 1
          );
          
       END IF;
@@ -284,10 +284,10 @@ AS
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'license: '
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          ) || self.info_license.toYAML(
-            num_pretty_print + 1
+            int_pretty_print + 1
          );
          
       END IF;
@@ -299,9 +299,9 @@ AS
       clb_output := clb_output || dz_json_util.pretty_str(
           'version: ' || dz_swagger_util.yaml_text(
              self.info_version
-            ,num_pretty_print
+            ,int_pretty_print
          )
-         ,num_pretty_print
+         ,int_pretty_print
          ,'  '
       );
       

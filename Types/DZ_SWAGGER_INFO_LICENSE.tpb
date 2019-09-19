@@ -48,10 +48,10 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print     IN  NUMBER   DEFAULT NULL
+       p_pretty_print     IN  INTEGER  DEFAULT NULL
    ) RETURN CLOB
    AS
-      num_pretty_print NUMBER := p_pretty_print;
+      int_pretty_print PLS_INTEGER := p_pretty_print;
       clb_output       CLOB;
       
    BEGIN
@@ -65,7 +65,7 @@ AS
       -- Step 20
       -- Build the wrapper
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty('{',NULL);
          
@@ -82,9 +82,9 @@ AS
           ' ' || dz_json_main.value2json(
              'name'
             ,self.license_name
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
          
       --------------------------------------------------------------------------
@@ -97,9 +97,9 @@ AS
              ',' || dz_json_main.value2json(
                 'url'
                ,self.license_url
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -110,7 +110,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
       
       --------------------------------------------------------------------------
@@ -124,11 +124,11 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
-      p_pretty_print      IN  NUMBER   DEFAULT 0
+      p_pretty_print      IN  INTEGER  DEFAULT 0
    ) RETURN CLOB
    AS
       clb_output        CLOB;
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       
    BEGIN
    
@@ -144,9 +144,9 @@ AS
       clb_output := clb_output || dz_json_util.pretty_str(
           'name: ' || dz_swagger_util.yaml_text(
              self.license_name
-            ,num_pretty_print
+            ,int_pretty_print
          )
-         ,num_pretty_print
+         ,int_pretty_print
          ,'  '
       );
       
@@ -159,9 +159,9 @@ AS
          clb_output := clb_output || dz_json_util.pretty_str(
              'url: ' || dz_swagger_util.yaml_text(
                 self.license_url
-               ,num_pretty_print
+               ,int_pretty_print
             )
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          

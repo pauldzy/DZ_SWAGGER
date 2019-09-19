@@ -765,11 +765,12 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print      IN  NUMBER   DEFAULT NULL
+       p_pretty_print      IN  INTEGER  DEFAULT NULL
       ,p_host_override_val IN  VARCHAR2 DEFAULT NULL
+      ,p_zap_override      IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       clb_output        CLOB;
       str_host          VARCHAR2(4000 Char);
       str_pad           VARCHAR2(1 Char);
@@ -792,7 +793,7 @@ AS
       -- Step 20
       -- Add the left bracket
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output := dz_json_util.pretty('{',NULL);
          str_pad := '';
@@ -813,19 +814,19 @@ AS
           str_pad1 || dz_json_main.value2json(
              'swagger'
             ,c_swagger_version
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
       str_pad1 := ',';
 
       clb_output := clb_output || dz_json_util.pretty(
           str_pad1 || dz_json_main.formatted2json(
               'info'
-             ,self.swagger_info.toJSON(num_pretty_print + 1)
-             ,num_pretty_print + 1
+             ,self.swagger_info.toJSON(int_pretty_print + 1)
+             ,int_pretty_print + 1
           )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
       str_pad1 := ',';
 
@@ -848,9 +849,9 @@ AS
              str_pad1 || dz_json_main.value2json(
                  'host'
                 ,str_host
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -866,9 +867,9 @@ AS
              str_pad1 || dz_json_main.value2json(
                  'basePath'
                 ,self.swagger_basepath
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -895,9 +896,9 @@ AS
              str_pad1 || dz_json_main.value2json(
                  'schemes'
                 ,ary_schemes
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -940,9 +941,9 @@ AS
              str_pad1 || dz_json_main.value2json(
                  'consumes'
                 ,ary_consumes
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -977,9 +978,9 @@ AS
              str_pad1 || dz_json_main.value2json(
                  'produces'
                 ,ary_produces
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -996,8 +997,8 @@ AS
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
-             str_pad1 || dz_json_main.fastname('parameters',num_pretty_print) || '{'
-            ,num_pretty_print + 1
+             str_pad1 || dz_json_main.fastname('parameters',int_pretty_print) || '{'
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -1009,9 +1010,10 @@ AS
             THEN
                clb_output := clb_output || dz_json_util.pretty(
                    str_pad2 || '"' || self.swagger_parms(i).parameter_ref_id || '": ' || self.swagger_parms(i).toJSON(
-                      p_pretty_print => num_pretty_print + 2
+                      p_pretty_print => int_pretty_print + 2
+                     ,p_zap_override => p_zap_override
                    )
-                  ,num_pretty_print + 2
+                  ,int_pretty_print + 2
                );
                str_pad2 := ',';
 
@@ -1021,7 +1023,7 @@ AS
 
          clb_output := clb_output || dz_json_util.pretty(
              '}'
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -1037,8 +1039,8 @@ AS
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
-             str_pad1 || dz_json_main.fastname('paths',num_pretty_print) || '{'
-            ,num_pretty_print + 1
+             str_pad1 || dz_json_main.fastname('paths',int_pretty_print) || '{'
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -1047,9 +1049,10 @@ AS
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
                 str_pad2 || self.swagger_paths(i).toJSON(
-                   p_pretty_print => num_pretty_print + 2
+                   p_pretty_print => int_pretty_print + 2
+                  ,p_zap_override => p_zap_override
                 )
-               ,num_pretty_print + 2
+               ,int_pretty_print + 2
             );
             str_pad2 := ',';
 
@@ -1057,7 +1060,7 @@ AS
 
          clb_output := clb_output || dz_json_util.pretty(
              '}'
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -1073,8 +1076,8 @@ AS
 
       ELSE
          clb_output := clb_output || dz_json_util.pretty(
-             str_pad1 || dz_json_main.fastname('definitions',num_pretty_print) || '{'
-            ,num_pretty_print + 1
+             str_pad1 || dz_json_main.fastname('definitions',int_pretty_print) || '{'
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -1088,9 +1091,9 @@ AS
                       self.swagger_defs(i).versionid
                      ,self.swagger_defs(i).definition
                    ) || '": ' || self.swagger_defs(i).toJSON(
-                      p_pretty_print => num_pretty_print + 2
+                      p_pretty_print => int_pretty_print + 2
                    )
-                  ,num_pretty_print + 2
+                  ,int_pretty_print + 2
                );
                str_pad2 := ',';
 
@@ -1100,7 +1103,7 @@ AS
 
          clb_output := clb_output || dz_json_util.pretty(
              '}'
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
 
       END IF;
@@ -1111,7 +1114,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
 
       --------------------------------------------------------------------------
@@ -1125,7 +1128,8 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
-      p_host_override_val IN  VARCHAR2 DEFAULT NULL
+       p_host_override_val IN  VARCHAR2 DEFAULT NULL
+      ,p_zap_override      IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
       clb_output        CLOB;
@@ -1312,13 +1316,18 @@ AS
          FOR i IN 1 .. self.swagger_parms.COUNT
          LOOP
             IF  self.swagger_parms(i).inline_parm = 'FALSE'
-            AND self.swagger_parms(i).parm_undocumented = 'FALSE'
+            AND (
+               self.swagger_parms(i).parm_undocumented = 'FALSE' OR p_zap_override = 'TRUE'
+            )
             THEN
                clb_output := clb_output || dz_json_util.pretty(
                    self.swagger_parms(i).parameter_ref_id || ': '
                   ,1
                   ,'  '
-               ) || self.swagger_parms(i).toYAML(2);
+               ) || self.swagger_parms(i).toYAML(
+                   p_pretty_print => 2
+                  ,p_zap_override => p_zap_override
+               );
 
             END IF;
 
@@ -1342,7 +1351,10 @@ AS
              '"' || self.swagger_paths(i).swagger_path || '": '
             ,1
             ,'  '
-         ) || self.swagger_paths(i).toYAML(2);
+         ) || self.swagger_paths(i).toYAML(
+             p_pretty_print => 2
+            ,p_zap_override => p_zap_override
+         );
 
       END LOOP;
 
@@ -1383,7 +1395,9 @@ AS
                      ) || ': '
                      ,1
                      ,'  '
-                  ) || self.swagger_defs(i).toYAML(2);
+                  ) || self.swagger_defs(i).toYAML(
+                     p_pretty_print => 2
+                  );
 
                END IF;
 

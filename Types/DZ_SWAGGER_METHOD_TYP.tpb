@@ -46,10 +46,11 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print     IN  NUMBER   DEFAULT NULL
+       p_pretty_print        IN  INTEGER  DEFAULT NULL
+      ,p_zap_override        IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       clb_output        CLOB;
       str_pad           VARCHAR2(1 Char);
       str_pad1          VARCHAR2(1 Char);
@@ -73,7 +74,7 @@ AS
       -- Step 20
       -- Build the wrapper
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty('{',NULL);
          str_pad  := '';
@@ -103,9 +104,9 @@ AS
           str_pad1 || dz_json_main.value2json(
              'summary'
             ,str_summary
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
       str_pad1 := ',';
       
@@ -113,15 +114,16 @@ AS
       -- Step 40
       -- Add optional description attribute
       --------------------------------------------------------------------------
-      IF self.path_description IS NOT NULL
+      IF  self.path_description IS NOT NULL
+      AND p_zap_override = 'FALSE'
       THEN
          clb_output := clb_output || dz_json_util.pretty(
              str_pad1 || dz_json_main.value2json(
                  'description'
                 ,self.path_description
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
          
@@ -164,9 +166,9 @@ AS
              str_pad1 || dz_json_main.value2json(
                  'consumes'
                 ,ary_consumes
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -201,9 +203,9 @@ AS
              str_pad1 || dz_json_main.value2json(
                  'produces'
                 ,ary_produces
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -221,7 +223,7 @@ AS
       ELSE
          str_pad2 := str_pad;
          
-         IF num_pretty_print IS NULL
+         IF int_pretty_print IS NULL
          THEN
             str_parms := dz_json_util.pretty('[',NULL);
             
@@ -234,17 +236,19 @@ AS
          LOOP
          
             IF self.method_path_parms(i).parm_undocumented = 'FALSE'
+            OR p_zap_override = 'TRUE'
             THEN
                IF self.method_path_parms(i).inline_parm = 'TRUE'
                THEN
                   str_temp := self.method_path_parms(i).toJSON(
-                     p_pretty_print => num_pretty_print + 2
+                      p_pretty_print => int_pretty_print + 2
+                     ,p_zap_override => p_zap_override
                   );
                   
                ELSE
                   str_pad3 := str_pad;
                   
-                  IF num_pretty_print IS NULL
+                  IF int_pretty_print IS NULL
                   THEN
                      str_temp := dz_json_util.pretty('{',NULL);
                      
@@ -257,22 +261,22 @@ AS
                      str_pad3 || dz_json_main.value2json(
                          '$ref'
                         ,'#/parameters/' || self.method_path_parms(i).parameter_ref_id
-                        ,num_pretty_print + 3
+                        ,int_pretty_print + 3
                      )
-                     ,num_pretty_print + 3
+                     ,int_pretty_print + 3
                   );
                   str_pad3 := ',';
                   
                   str_temp := str_temp || dz_json_util.pretty(
                       '}'
-                     ,num_pretty_print + 2,NULL,NULL
+                     ,int_pretty_print + 2,NULL,NULL
                   );
                
                END IF;
             
                str_parms := str_parms || dz_json_util.pretty(
                    str_pad2 || str_temp
-                  ,num_pretty_print + 2
+                  ,int_pretty_print + 2
                );
                str_pad2 := ',';
                
@@ -282,16 +286,16 @@ AS
          
          str_parms := str_parms || dz_json_util.pretty(
              ']'
-            ,num_pretty_print + 1,NULL,NULL
+            ,int_pretty_print + 1,NULL,NULL
          );
          
          clb_output := clb_output || dz_json_util.pretty(
              str_pad1 || dz_json_main.formatted2json(
                  'parameters'
                 ,str_parms
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
       
@@ -308,9 +312,9 @@ AS
              str_pad1 || dz_json_main.value2json(
                  'tags'
                 ,self.method_tags
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
          
@@ -329,8 +333,8 @@ AS
          str_pad2 := str_pad;
          
          clb_output := clb_output || dz_json_util.pretty(
-             str_pad1 || dz_json_main.fastname('responses',num_pretty_print) || '{'
-            ,num_pretty_print + 1
+             str_pad1 || dz_json_main.fastname('responses',int_pretty_print) || '{'
+            ,int_pretty_print + 1
          );
          
          FOR i IN 1 .. self.method_responses.COUNT
@@ -339,9 +343,10 @@ AS
                 str_pad2 || dz_json_main.json_format(
                   self.method_responses(i).swagger_response
                ) || ': ' || self.method_responses(i).toJSON(
-                  p_pretty_print => num_pretty_print + 1
+                   p_pretty_print => int_pretty_print + 1
+                  ,p_zap_override => p_zap_override
                )
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
             );
             str_pad2 := ',';
 
@@ -349,7 +354,7 @@ AS
 
          clb_output := clb_output || dz_json_util.pretty(
              '}'
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          str_pad1 := ',';
 
@@ -361,7 +366,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
       
       --------------------------------------------------------------------------
@@ -375,11 +380,12 @@ AS
    ----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
-      p_pretty_print      IN  NUMBER   DEFAULT 0
+       p_pretty_print        IN  INTEGER  DEFAULT 0
+      ,p_zap_override        IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
       clb_output        CLOB;
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       str_summary       VARCHAR2(32000 Char);
       
    BEGIN
@@ -404,8 +410,8 @@ AS
       END IF;
  
       clb_output := clb_output || dz_json_util.pretty_str(
-          'summary: ' || dz_swagger_util.yaml_text(str_summary,num_pretty_print)
-         ,num_pretty_print
+          'summary: ' || dz_swagger_util.yaml_text(str_summary,int_pretty_print)
+         ,int_pretty_print
          ,'  '
       );
 
@@ -413,11 +419,12 @@ AS
       -- Step 30
       -- Add the optional description attribute
       --------------------------------------------------------------------------
-      IF self.path_description IS NOT NULL
+      IF  self.path_description IS NOT NULL
+      AND p_zap_override = 'FALSE'
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
-             'description: ' || dz_swagger_util.yaml_text(self.path_description,num_pretty_print)
-            ,num_pretty_print
+             'description: ' || dz_swagger_util.yaml_text(self.path_description,int_pretty_print)
+            ,int_pretty_print
             ,'  '
          );
          
@@ -513,25 +520,27 @@ AS
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'parameters: '
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
          FOR i IN 1 .. self.method_path_parms.COUNT
          LOOP 
             IF self.method_path_parms(i).parm_undocumented = 'FALSE'
+            OR p_zap_override = 'TRUE'
             THEN            
                IF self.method_path_parms(i).inline_parm = 'TRUE'
                THEN
                   clb_output := clb_output || self.method_path_parms(i).toYAML(
-                      num_pretty_print + 1
-                     ,'TRUE'
+                      p_pretty_print => int_pretty_print + 1
+                     ,p_array_marker => 'TRUE'
+                     ,p_zap_override => p_zap_override
                   );
                   
                ELSE
                   clb_output := clb_output || dz_json_util.pretty(
                       '- "$ref": "#/parameters/' || self.method_path_parms(i).parameter_ref_id || '"'
-                     ,num_pretty_print + 1
+                     ,int_pretty_print + 1
                      ,'  '
                   );
                
@@ -552,15 +561,15 @@ AS
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'tags: '
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
          FOR i IN 1 .. self.method_tags.COUNT
          LOOP 
             clb_output := clb_output || dz_json_util.pretty(
-                '- ' || dz_swagger_util.yaml_text(self.method_tags(i),num_pretty_print)
-               ,num_pretty_print + 1
+                '- ' || dz_swagger_util.yaml_text(self.method_tags(i),int_pretty_print)
+               ,int_pretty_print + 1
                ,'  '
             );
          
@@ -577,7 +586,7 @@ AS
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'responses: '
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
@@ -585,10 +594,11 @@ AS
          LOOP 
             clb_output := clb_output || dz_json_util.pretty(
                 '''' || self.method_responses(i).swagger_response || ''': '
-               ,num_pretty_print + 1
+               ,int_pretty_print + 1
                ,'  '
             ) || self.method_responses(i).toYAML(
-               num_pretty_print + 2
+                p_pretty_print => int_pretty_print + 2
+               ,p_zap_override => p_zap_override
             );
          
          END LOOP;

@@ -30,13 +30,15 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,MEMBER FUNCTION toJSON(
-        p_pretty_print      IN  NUMBER   DEFAULT NULL
+       p_pretty_print         IN  INTEGER  DEFAULT NULL
+      ,p_zap_override         IN  VARCHAR2 DEFAULT 'FALSE'
     ) RETURN CLOB
 
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,MEMBER FUNCTION toYAML(
-      p_pretty_print      IN  NUMBER   DEFAULT 0
+       p_pretty_print         IN  INTEGER  DEFAULT 0
+      ,p_zap_override         IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
 
 );

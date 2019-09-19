@@ -24,9 +24,9 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,CONSTRUCTOR FUNCTION dz_swagger_typ(
-       p_header_id        IN  VARCHAR2
-      ,p_path_group_id    IN  VARCHAR2 DEFAULT NULL
-      ,p_versionid        IN  VARCHAR2 DEFAULT NULL
+       p_header_id           IN  VARCHAR2
+      ,p_path_group_id       IN  VARCHAR2 DEFAULT NULL
+      ,p_versionid           IN  VARCHAR2 DEFAULT NULL
    ) RETURN SELF AS RESULT
     
    -----------------------------------------------------------------------------
@@ -58,14 +58,16 @@ AS OBJECT (
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,MEMBER FUNCTION toJSON(
-       p_pretty_print      IN  NUMBER   DEFAULT NULL
-      ,p_host_override_val IN  VARCHAR2 DEFAULT NULL
+       p_pretty_print        IN  INTEGER  DEFAULT NULL
+      ,p_host_override_val   IN  VARCHAR2 DEFAULT NULL
+      ,p_zap_override        IN  VARCHAR2 DEFAULT 'FALSE'
     ) RETURN CLOB
     
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    ,MEMBER FUNCTION toYAML(
-      p_host_override_val IN  VARCHAR2 DEFAULT NULL
+       p_host_override_val   IN  VARCHAR2 DEFAULT NULL
+      ,p_zap_override        IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
 
 );

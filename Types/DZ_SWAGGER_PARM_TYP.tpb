@@ -90,10 +90,11 @@ AS
    -----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toJSON(
-       p_pretty_print     IN  NUMBER   DEFAULT NULL
+       p_pretty_print         IN  INTEGER  DEFAULT NULL
+      ,p_zap_override         IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
-      num_pretty_print NUMBER := p_pretty_print;
+      int_pretty_print PLS_INTEGER := p_pretty_print;
       clb_output       CLOB;
       str_pad          VARCHAR2(1 Char);
       str_enums        VARCHAR2(32000 Char);
@@ -110,7 +111,7 @@ AS
       -- Step 20
       -- Build the wrapper
       --------------------------------------------------------------------------
-      IF num_pretty_print IS NULL
+      IF int_pretty_print IS NULL
       THEN
          clb_output  := dz_json_util.pretty('{',NULL);
          
@@ -127,7 +128,7 @@ AS
           ' ' || dz_json_main.value2json(
              'name'
             ,self.swagger_parm
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
          ,p_pretty_print + 1
       );
@@ -140,7 +141,7 @@ AS
          ',' || dz_json_main.value2json(
               'in'
              ,self.parameter_in_type
-             ,num_pretty_print + 1
+             ,int_pretty_print + 1
           )
          ,p_pretty_print + 1
       );
@@ -149,15 +150,16 @@ AS
       -- Step 50
       -- Add optional description
       --------------------------------------------------------------------------     
-      IF self.parm_description IS NOT NULL
+      IF  self.parm_description IS NOT NULL 
+      AND p_zap_override = 'FALSE'
       THEN
          clb_output := clb_output || dz_json_util.pretty(
              ',' || dz_json_main.value2json(
                  'description'
                 ,self.parm_description
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
          
       END IF;
@@ -173,9 +175,9 @@ AS
              ',' || dz_json_main.value2json(
                  'enum'
                 ,self.parm_enums_string
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
       
       ELSIF self.parm_enums_number IS NOT NULL
@@ -185,9 +187,9 @@ AS
              ',' || dz_json_main.value2json(
                  'enum'
                 ,self.parm_enums_number
-                ,num_pretty_print + 1
+                ,int_pretty_print + 1
              )
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          );
       
       END IF;
@@ -196,27 +198,31 @@ AS
       -- Step 70
       -- Add optional default value
       --------------------------------------------------------------------------
-      IF self.parm_default_string IS NOT NULL
+      IF p_zap_override = 'FALSE'
       THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.value2json(
-                'default'
-               ,self.parm_default_string
-               ,num_pretty_print + 1
-            )
-            ,num_pretty_print + 1
-         );
-      
-      ELSIF self.parm_default_number IS NOT NULL
-      THEN
-         clb_output := clb_output || dz_json_util.pretty(
-             ',' || dz_json_main.value2json(
-                'default'
-               ,self.parm_default_number
-               ,num_pretty_print + 1
-            )
-            ,num_pretty_print + 1
-         );
+         IF self.parm_default_string IS NOT NULL
+         THEN
+            clb_output := clb_output || dz_json_util.pretty(
+                ',' || dz_json_main.value2json(
+                   'default'
+                  ,self.parm_default_string
+                  ,int_pretty_print + 1
+               )
+               ,int_pretty_print + 1
+            );
+         
+         ELSIF self.parm_default_number IS NOT NULL
+         THEN
+            clb_output := clb_output || dz_json_util.pretty(
+                ',' || dz_json_main.value2json(
+                   'default'
+                  ,self.parm_default_number
+                  ,int_pretty_print + 1
+               )
+               ,int_pretty_print + 1
+            );
+            
+         END IF;
          
       END IF;
       
@@ -228,9 +234,9 @@ AS
           ',' || dz_json_main.value2json(
              'type'
             ,self.parm_type
-            ,num_pretty_print + 1
+            ,int_pretty_print + 1
          )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
       
       --------------------------------------------------------------------------
@@ -250,9 +256,9 @@ AS
           ',' || dz_json_main.formatted2json(
               'required'
              ,str_temp
-             ,num_pretty_print + 1
+             ,int_pretty_print + 1
           )
-         ,num_pretty_print + 1
+         ,int_pretty_print + 1
       );
 
       --------------------------------------------------------------------------
@@ -261,7 +267,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty(
           '}'
-         ,num_pretty_print,NULL,NULL
+         ,int_pretty_print,NULL,NULL
       );
       
       --------------------------------------------------------------------------
@@ -275,12 +281,13 @@ AS
    ----------------------------------------------------------------------------
    -----------------------------------------------------------------------------
    MEMBER FUNCTION toYAML(
-       p_pretty_print     IN  NUMBER   DEFAULT 0
-      ,p_array_marker     IN  VARCHAR  DEFAULT 'FALSE'
+       p_pretty_print         IN  INTEGER  DEFAULT 0
+      ,p_array_marker         IN  VARCHAR  DEFAULT 'FALSE'
+      ,p_zap_override         IN  VARCHAR2 DEFAULT 'FALSE'
    ) RETURN CLOB
    AS
       clb_output        CLOB;
-      num_pretty_print  NUMBER := p_pretty_print;
+      int_pretty_print  PLS_INTEGER := p_pretty_print;
       str_pad           VARCHAR2(2 Char);
       
    BEGIN
@@ -292,7 +299,7 @@ AS
       IF p_array_marker = 'TRUE'
       THEN
          str_pad := '- ';
-         num_pretty_print := num_pretty_print + 1;
+         int_pretty_print := int_pretty_print + 1;
          
       ELSE
          str_pad := NULL;
@@ -304,7 +311,7 @@ AS
       -- Write the yaml name attribute
       --------------------------------------------------------------------------
       clb_output := dz_json_util.pretty_str(
-          str_pad || 'name: ' || dz_swagger_util.yaml_text(self.swagger_parm,num_pretty_print)
+          str_pad || 'name: ' || dz_swagger_util.yaml_text(self.swagger_parm,int_pretty_print)
          ,p_pretty_print
          ,'  '
       );
@@ -314,16 +321,17 @@ AS
       -- Write the yaml in attribute 
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty_str(
-          'in: ' || dz_swagger_util.yaml_text(self.parameter_in_type,num_pretty_print)
-         ,num_pretty_print
+          'in: ' || dz_swagger_util.yaml_text(self.parameter_in_type,int_pretty_print)
+         ,int_pretty_print
          ,'  '
       );
       
-      IF self.parm_description IS NOT NULL
+      IF  self.parm_description IS NOT NULL
+      AND p_zap_override = 'FALSE'
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
-             'description: ' || dz_swagger_util.yaml_text(self.parm_description,num_pretty_print)
-            ,num_pretty_print
+             'description: ' || dz_swagger_util.yaml_text(self.parm_description,int_pretty_print)
+            ,int_pretty_print
             ,'  '
          );
       
@@ -338,15 +346,15 @@ AS
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'enum: '
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
          FOR i IN 1 .. self.parm_enums_string.COUNT
          LOOP
             clb_output := clb_output || dz_json_util.pretty_str(
-                '- ' || dz_swagger_util.yaml_text(self.parm_enums_string(i),num_pretty_print)
-               ,num_pretty_print + 1
+                '- ' || dz_swagger_util.yaml_text(self.parm_enums_string(i),int_pretty_print)
+               ,int_pretty_print + 1
                ,'  '
             );
          
@@ -357,7 +365,7 @@ AS
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'enum: '
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
          
@@ -365,7 +373,7 @@ AS
          LOOP
             clb_output := clb_output || dz_json_util.pretty(
                 '- ' || dz_json_main.json_format(self.parm_enums_number(i))
-               ,num_pretty_print
+               ,int_pretty_print
                ,'  '
             );
          
@@ -377,21 +385,25 @@ AS
       -- Step 40
       -- Add optional default value
       --------------------------------------------------------------------------
-      IF self.parm_default_string IS NOT NULL
+      IF p_zap_override = 'FALSE'
       THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             'default: ' || dz_swagger_util.yaml_text(self.parm_default_string,num_pretty_print)
-            ,num_pretty_print
-            ,'  '
-         );
-      
-      ELSIF self.parm_default_number IS NOT NULL
-      THEN
-         clb_output := clb_output || dz_json_util.pretty_str(
-             'default: ' || dz_json_main.json_format(self.parm_default_number)
-            ,num_pretty_print
-            ,'  '
-         );
+         IF self.parm_default_string IS NOT NULL
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                'default: ' || dz_swagger_util.yaml_text(self.parm_default_string,int_pretty_print)
+               ,int_pretty_print
+               ,'  '
+            );
+         
+         ELSIF self.parm_default_number IS NOT NULL
+         THEN
+            clb_output := clb_output || dz_json_util.pretty_str(
+                'default: ' || dz_json_main.json_format(self.parm_default_number)
+               ,int_pretty_print
+               ,'  '
+            );
+            
+         END IF;
          
       END IF;
       
@@ -401,7 +413,7 @@ AS
       --------------------------------------------------------------------------
       clb_output := clb_output || dz_json_util.pretty_str(
           'type: ' || self.parm_type
-         ,num_pretty_print
+         ,int_pretty_print
          ,'  '
       );
          
@@ -410,14 +422,14 @@ AS
       THEN
          clb_output := clb_output || dz_json_util.pretty_str(
              'required: true'
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
       
       ELSE
          clb_output := clb_output || dz_json_util.pretty_str(
              'required: false'
-            ,num_pretty_print
+            ,int_pretty_print
             ,'  '
          );
       
